@@ -38,7 +38,7 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 			if ("".equals(table.value())) {
 				tblP = TableUtils.addTable(obj.getClass(), "1");
 			} else {
-				tblP = TableUtils.addTable(obj.getClass(), "2");
+				tblP = TableUtils.addTable(obj.getClass(), table.value());
 			}
 			Field[] fields = obj.getClass().getDeclaredFields();
 			for (Field field : fields) {

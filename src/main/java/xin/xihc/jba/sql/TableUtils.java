@@ -20,7 +20,8 @@ public class TableUtils {
 	public static TableProperties addTable(Class<?> clazz, String tblName) {
 		TableProperties pp = new TableProperties();
 		pp.setTableName(tblName);
-		return tbls.put(clazz, pp);
+		tbls.put(clazz, pp);
+		return pp;
 	}
 
 	public TableProperties getTable(Class<?> clazz) {
