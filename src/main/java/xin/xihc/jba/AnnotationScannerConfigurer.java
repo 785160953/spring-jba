@@ -3,9 +3,8 @@
  */
 package xin.xihc.jba;
 
+import java.lang.reflect.Field;
 import java.util.Map;
-
-import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -14,7 +13,10 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Table;
+import xin.xihc.jba.sql.TableProperties;
+import xin.xihc.jba.sql.TableUtils;
 
 /**
  * 
@@ -29,9 +31,22 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		 Map<String, Object> map = beanFactory.getBeansWithAnnotation(Table.class);
+		Map<String, Object> map = beanFactory.getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
-			
+			Table table = obj.getClass().getAnnotation(Table.class);
+			TableProperties tblP = null;
+			if ("".equals(table.value())) {
+				tblP = TableUtils.addTable(obj.getClass(), "1");
+			} else {
+				tblP = TableUtils.addTable(obj.getClass(), "2");
+			}
+			Field[] fields = obj.getClass().getDeclaredFields();
+			for (Field field : fields) {
+				Column column = field.getAnnotation(Column.class);
+				if (null == column) {
+					tblP.addColumn(field.getName(), "");
+				}
+			}
 		}
 		System.err.println("i'm back!");
 	}

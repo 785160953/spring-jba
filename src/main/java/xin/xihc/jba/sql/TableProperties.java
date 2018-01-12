@@ -27,11 +27,11 @@ public class TableProperties {
 	}
 
 	public String getColName(String key) {
-		String res = "";
 		if (columns.containsKey(key)) {
-			res = columns.get(key);
+			return columns.get(key);
+		} else {
+			throw new RuntimeException("【" + key + "】属性不存在");
 		}
-		return res;
 	}
 
 	public void addColumn(String key, String val) {
