@@ -33,7 +33,7 @@ public @interface Column {
 	 * 
 	 * @return
 	 */
-	public String value();
+	public String value() default "";
 
 	/**
 	 * 默认值

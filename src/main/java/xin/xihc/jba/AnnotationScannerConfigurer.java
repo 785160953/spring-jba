@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Table;
+import xin.xihc.jba.sql.ColumnProperties;
 import xin.xihc.jba.sql.TableProperties;
 import xin.xihc.jba.sql.TableUtils;
 
@@ -36,15 +37,33 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 			Table table = obj.getClass().getAnnotation(Table.class);
 			TableProperties tblP = null;
 			if ("".equals(table.value())) {
-				tblP = TableUtils.addTable(obj.getClass(), "1");
+				tblP = TableUtils.addTable(obj.getClass(), table.value());
 			} else {
 				tblP = TableUtils.addTable(obj.getClass(), table.value());
 			}
 			Field[] fields = obj.getClass().getDeclaredFields();
+			int keyCount = 0;
 			for (Field field : fields) {
 				Column column = field.getAnnotation(Column.class);
+				ColumnProperties colP = new ColumnProperties();
+				tblP.addColumn(field.getName(), colP);
+				colP.type(field.getType());
 				if (null == column) {
-					tblP.addColumn(field.getName(), "");
+					colP.colName(field.getName());
+				} else {
+					colP.colName(field.getName()).defaultValue(column.defaultValue()).notNull(column.notNull())
+							.unique(column.unique()).remark(column.remark());
+					if (column.length() > 0) {
+						colP.length(column.length());
+					}
+					if (column.primary()) {
+						keyCount++;
+						if (keyCount > 1) {
+							throw new RuntimeException("主键数量超过一个了.");
+						}
+						colP.primary(true);
+						colP.policy(column.policy());
+					}
 				}
 			}
 		}

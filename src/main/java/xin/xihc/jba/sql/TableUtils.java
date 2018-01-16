@@ -17,6 +17,10 @@ public class TableUtils {
 
 	private static LinkedHashMap<Class<?>, TableProperties> tbls = new LinkedHashMap<>(16);
 
+	public static LinkedHashMap<Class<?>, TableProperties> getTbls() {
+		return tbls;
+	}
+
 	public static TableProperties addTable(Class<?> clazz, String tblName) {
 		TableProperties pp = new TableProperties();
 		pp.setTableName(tblName);
@@ -24,7 +28,7 @@ public class TableUtils {
 		return pp;
 	}
 
-	public TableProperties getTable(Class<?> clazz) {
+	public static TableProperties getTable(Class<?> clazz) {
 		if (tbls.containsKey(clazz)) {
 			return tbls.get(clazz);
 		} else {
@@ -32,7 +36,7 @@ public class TableUtils {
 		}
 	}
 
-	public String getTableName(Class<?> clazz) {
+	public static String getTableName(Class<?> clazz) {
 		if (tbls.containsKey(clazz)) {
 			return tbls.get(clazz).getTableName();
 		} else {
