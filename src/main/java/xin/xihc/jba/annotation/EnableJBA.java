@@ -10,7 +10,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -28,7 +27,6 @@ import xin.xihc.jba.AnnotationScannerConfigurer;
 @Target(ElementType.TYPE)
 @EnableTransactionManagement
 @Component
-@Lazy
 @Import({ AnnotationScannerConfigurer.class })
 public @interface EnableJBA {
 

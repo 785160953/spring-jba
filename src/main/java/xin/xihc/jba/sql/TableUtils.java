@@ -5,6 +5,8 @@ package xin.xihc.jba.sql;
 
 import java.util.LinkedHashMap;
 
+import xin.xihc.jba.annotation.EnableJBA.DBType;
+
 /**
  * 数据库表工具类
  * 
@@ -16,9 +18,19 @@ import java.util.LinkedHashMap;
 public class TableUtils {
 
 	private static LinkedHashMap<Class<?>, TableProperties> tbls = new LinkedHashMap<>(16);
+	
+	private static DBType dbType;
 
 	public static LinkedHashMap<Class<?>, TableProperties> getTbls() {
 		return tbls;
+	}
+
+	public static DBType dbType() {
+		return dbType;
+	}
+
+	public static void dbType(DBType dbType) {
+		TableUtils.dbType = dbType;
 	}
 
 	public static TableProperties addTable(Class<?> clazz, String tblName) {
