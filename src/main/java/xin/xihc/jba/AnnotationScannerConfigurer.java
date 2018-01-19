@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.EnableJBA;
 import xin.xihc.jba.annotation.Table;
-import xin.xihc.jba.sql.ColumnProperties;
-import xin.xihc.jba.sql.TableProperties;
-import xin.xihc.jba.sql.TableUtils;
+import xin.xihc.jba.db.ColumnProperties;
+import xin.xihc.jba.db.TableProperties;
+import xin.xihc.jba.db.TableUtils;
 
 /**
  * 

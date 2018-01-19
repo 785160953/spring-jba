@@ -1,7 +1,7 @@
 /**
  * 
  */
-package xin.xihc.jba.sql;
+package xin.xihc.jba.db;
 
 import xin.xihc.jba.annotation.Column.PrimaryPolicy;
 
