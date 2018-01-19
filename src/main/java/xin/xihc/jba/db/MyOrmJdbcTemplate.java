@@ -27,15 +27,18 @@ import xin.xihc.utils.common.CommonUtil;
 @Component
 public class MyOrmJdbcTemplate {
 
-	private static MyOrmJdbcTemplate myJdbcTemplate = new MyOrmJdbcTemplate();
-
 	/**
-	 * 获取对象单例
 	 * 
-	 * @return
 	 */
-	public static MyOrmJdbcTemplate instance() {
-		return myJdbcTemplate;
+	public MyOrmJdbcTemplate() {
+		if (null != this.dataSource) {
+			String driverClassName = this.dataSource.getDriverClassName();
+			if (driverClassName.startsWith("jdbc:mysql://")) {
+				this.dbType = DBType.MySql;
+			} else if (driverClassName.startsWith("jdbc:oracle:")) {
+				this.dbType = DBType.Oracle;
+			}
+		}
 	}
 
 	/**
@@ -43,6 +46,8 @@ public class MyOrmJdbcTemplate {
 	 */
 	@Qualifier("dataSource")
 	private DruidDataSource dataSource = null;
+
+	private DBType dbType = DBType.MySql;
 
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
@@ -294,14 +299,14 @@ public class MyOrmJdbcTemplate {
 				}
 				sql_final = sql + " " + sOrder;
 				if (pageInfo != null) {
-					sql_final = getNamedPageSql(sql_final, model, pageInfo, DBType.Oracle);
+					sql_final = getNamedPageSql(sql_final, model, pageInfo);
 				}
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
 						new BeanPropertyRowMapper<>(clazz));
 			} else {
 				sql_final += " " + sOrder;
 				if (pageInfo != null) {
-					sql_final = getNamedPageSql(sql_final, model, pageInfo, DBType.Oracle);
+					sql_final = getNamedPageSql(sql_final, model, pageInfo);
 				}
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
 			}
@@ -327,7 +332,7 @@ public class MyOrmJdbcTemplate {
 		try {
 			String sql_final = sql;
 			if (pageInfo != null) {
-				sql_final = getNamedPageSql(sql, model, pageInfo, DBType.MySql);
+				sql_final = getNamedPageSql(sql, model, pageInfo);
 			}
 			if (model != null) {
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
@@ -453,7 +458,7 @@ public class MyOrmJdbcTemplate {
 		List<String> fieldLst = Arrays.asList(fieldNames);
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder where = new StringBuilder();
-		res = "DELETE " + tblName;
+		res = "DELETE FROM" + tblName;
 		for (Field field : model.getClass().getDeclaredFields()) {
 			field.setAccessible(true);
 			try {
@@ -485,6 +490,14 @@ public class MyOrmJdbcTemplate {
 	 * ======================================================================
 	 */
 
+	/**
+	 * 分页信息
+	 * 
+	 * @author 席恒昌
+	 * @date 2018年1月19日
+	 * @version
+	 * @since
+	 */
 	public static class PageInfo {
 
 		private Integer pageNo; // 当前页数
@@ -527,11 +540,19 @@ public class MyOrmJdbcTemplate {
 
 	}
 
+	/**
+	 * 数据库类型
+	 * 
+	 * @author 席恒昌
+	 * @date 2018年1月19日
+	 * @version
+	 * @since
+	 */
 	public enum DBType {
 		MySql, Oracle
 	}
 
-	public <T> String getNamedPageSql(String sql, T model, PageInfo pageInfo, DBType dbType) {
+	public <T> String getNamedPageSql(String sql, T model, PageInfo pageInfo) {
 		String pageSql = "";
 		// 先查询总数
 		String sql_Count = "SELECT COUNT(1) FROM (" + sql + ") t_temp";
@@ -550,7 +571,7 @@ public class MyOrmJdbcTemplate {
 		}
 		// 计算起始索引
 		Integer iBegin = 0;
-		switch (dbType) {
+		switch (this.dbType) {
 		case MySql:// 使用limit 0, 10分页 -- 索引从0开始
 			iBegin = (pageInfo.getPageNo() - 1) * pageInfo.getPageSize();
 			pageSql = sql + " LIMIT " + iBegin + "," + pageInfo.getPageSize();
