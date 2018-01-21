@@ -45,7 +45,7 @@ public class MyOrmJdbcTemplate {
 	 * 数据源
 	 */
 	@Qualifier("dataSource")
-	private DruidDataSource dataSource = null;
+	private DruidDataSource dataSource;
 
 	private DBType dbType = DBType.MySql;
 
@@ -73,6 +73,10 @@ public class MyOrmJdbcTemplate {
 		}
 		this.dataSource = dataSource;
 		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
+
+	public DBType getDbType() {
+		return dbType;
 	}
 
 	/*--------------------------------------------------------------------------------
@@ -125,6 +129,21 @@ public class MyOrmJdbcTemplate {
 			ret = true;
 		}
 		return ret;
+	}
+
+	/**
+	 * 执行sql语句
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public boolean executeSQL(String sql) {
+		boolean res = false;
+		int update = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(new Object()));
+		if (update > 0) {
+			res = true;
+		}
+		return res;
 	}
 
 	/**

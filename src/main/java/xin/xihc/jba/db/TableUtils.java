@@ -5,8 +5,6 @@ package xin.xihc.jba.db;
 
 import java.util.LinkedHashMap;
 
-import xin.xihc.jba.annotation.EnableJBA.DBType;
-
 /**
  * 数据库表工具类
  * 
@@ -17,34 +15,24 @@ import xin.xihc.jba.annotation.EnableJBA.DBType;
  */
 public class TableUtils {
 
-	private static LinkedHashMap<Class<?>, TableProperties> tbls = new LinkedHashMap<>(16);
-	
-	private static DBType dbType;
+	private static LinkedHashMap<String, TableProperties> tbls = new LinkedHashMap<>(16);
 
-	public static LinkedHashMap<Class<?>, TableProperties> getTbls() {
+	public static LinkedHashMap<String, TableProperties> getTbls() {
 		return tbls;
 	}
 
-	public static DBType dbType() {
-		return dbType;
-	}
-
-	public static void dbType(DBType dbType) {
-		TableUtils.dbType = dbType;
-	}
-
-	public static TableProperties addTable(Class<?> clazz, String tblName) {
+	public static TableProperties addTable(String name, String tblName) {
 		TableProperties pp = new TableProperties();
 		pp.setTableName(tblName);
-		tbls.put(clazz, pp);
+		tbls.put(name, pp);
 		return pp;
 	}
 
-	public static TableProperties getTable(Class<?> clazz) {
-		if (tbls.containsKey(clazz)) {
-			return tbls.get(clazz);
+	public static TableProperties getTable(String name) {
+		if (tbls.containsKey(name)) {
+			return tbls.get(name);
 		} else {
-			throw new RuntimeException(clazz.getName() + "不存在");
+			throw new RuntimeException(name + "不存在");
 		}
 	}
 

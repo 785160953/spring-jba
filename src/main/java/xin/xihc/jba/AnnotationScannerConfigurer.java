@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
-import xin.xihc.jba.annotation.EnableJBA;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.db.ColumnProperties;
+import xin.xihc.jba.db.TableManager;
 import xin.xihc.jba.db.TableProperties;
 import xin.xihc.jba.db.TableUtils;
 
@@ -33,21 +33,14 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		Map<String, Object> map = beanFactory.getBeansWithAnnotation(EnableJBA.class);
-		for (Object obj : map.values()) {
-			EnableJBA jba = obj.getClass().getAnnotation(EnableJBA.class);
-//			TableUtils.dbType(jba.type());
-			break;
-		}
-
-		map = beanFactory.getBeansWithAnnotation(Table.class);
+		Map<String, Object> map = beanFactory.getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);
 			TableProperties tblP = null;
 			if ("".equals(table.value())) {
-				tblP = TableUtils.addTable(obj.getClass(), table.value());
+				tblP = TableUtils.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
 			} else {
-				tblP = TableUtils.addTable(obj.getClass(), table.value());
+				tblP = TableUtils.addTable(obj.getClass().getSimpleName(), table.value());
 			}
 			Field[] fields = obj.getClass().getDeclaredFields();
 			int keyCount = 0;
@@ -61,6 +54,7 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 				} else {
 					colP.colName(field.getName()).defaultValue(column.defaultValue()).notNull(column.notNull())
 							.unique(column.unique()).remark(column.remark());
+					colP.length(0);
 					if (column.length() > 0) {
 						colP.length(column.length());
 					}
@@ -75,7 +69,10 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 				}
 			}
 		}
+		// 执行表创建、字段更新
 		System.err.println("i'm back!");
+		TableManager tableManager = new TableManager();
+		tableManager.init();
 	}
 
 	@Override

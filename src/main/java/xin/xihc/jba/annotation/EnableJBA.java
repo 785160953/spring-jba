@@ -9,6 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -27,13 +28,8 @@ import xin.xihc.jba.AnnotationScannerConfigurer;
 @Target(ElementType.TYPE)
 @EnableTransactionManagement
 @Component
+@ComponentScan(basePackages={"xin.xihc.jba"})
 @Import({ AnnotationScannerConfigurer.class })
 public @interface EnableJBA {
-
-	public enum DBType {
-		MYSQL, ORACLE, MSSQL;
-	}
-
-	DBType type();
 
 }

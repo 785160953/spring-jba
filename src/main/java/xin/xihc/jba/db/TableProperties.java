@@ -26,6 +26,10 @@ public class TableProperties {
 		this.tableName = tableName;
 	}
 
+	public LinkedHashMap<String, ColumnProperties> getColumns() {
+		return columns;
+	}
+
 	public ColumnProperties getColProperties(String key) {
 		if (columns.containsKey(key)) {
 			return columns.get(key);
