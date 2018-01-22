@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import xin.xihc.jba.AnnotationScannerConfigurer;
+import xin.xihc.jba.db.MyOrmJdbcTemplate;
+import xin.xihc.jba.db.TableManager;
 
 /**
  * 
@@ -28,7 +30,7 @@ import xin.xihc.jba.AnnotationScannerConfigurer;
 @Target(ElementType.TYPE)
 @EnableTransactionManagement
 @Component
-@ComponentScan(basePackages={"xin.xihc.jba"})
+@ComponentScan(basePackageClasses = { MyOrmJdbcTemplate.class, TableManager.class })
 @Import({ AnnotationScannerConfigurer.class })
 public @interface EnableJBA {
 

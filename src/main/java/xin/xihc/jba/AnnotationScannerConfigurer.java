@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -28,11 +29,19 @@ import xin.xihc.jba.db.TableUtils;
  * @since
  */
 @Component
-@Lazy(true)
+@Lazy(true) 
 public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostProcessor {
+
+	@Autowired
+	TableManager tableManager;
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		Object bean = beanFactory.getBean("datasource");
+		if (null != bean) {
+			bean.getClass();
+			System.err.println(bean.getClass());
+		}
 		Map<String, Object> map = beanFactory.getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);
@@ -64,6 +73,7 @@ public class AnnotationScannerConfigurer implements BeanDefinitionRegistryPostPr
 							throw new RuntimeException("主键数量超过一个了.");
 						}
 						colP.primary(true);
+						colP.notNull(true);
 						colP.policy(column.policy());
 					}
 				}

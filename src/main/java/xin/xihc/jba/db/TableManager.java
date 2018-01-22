@@ -1,5 +1,7 @@
 package xin.xihc.jba.db;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -9,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
  * @Date 2018年1月21日
  *
  */
+@Component
 public class TableManager {
 
-	MyOrmJdbcTemplate jdbcTemplate = new MyOrmJdbcTemplate();
+	@Autowired
+	MyOrmJdbcTemplate jdbcTemplate;
 
 	public boolean isTableExists(String tblName) {
 		boolean res = false;
