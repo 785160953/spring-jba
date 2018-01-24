@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Table;
+import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.properties.ColumnProperties;
-import xin.xihc.jba.properties.TableOperator;
-import xin.xihc.jba.properties.TableProperties;
 import xin.xihc.jba.properties.TableManager;
+import xin.xihc.jba.properties.TableProperties;
 
 /**
  * 
@@ -25,12 +25,12 @@ import xin.xihc.jba.properties.TableManager;
  * @since
  */
 @Component
-public class BeanDefineConfigue implements SmartLifecycle {
+public class AnnotationScan implements SmartLifecycle {
 
 	private boolean isRunning = false;
 
 	@Autowired
-	TableOperator tableManager;
+	TableOperator tableOperator;
 
 	/**
 	 * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
@@ -66,6 +66,9 @@ public class BeanDefineConfigue implements SmartLifecycle {
 					if (column.length() > 0) {
 						colP.length(column.length());
 					}
+					if (column.precision() > 0) {
+						colP.precision(column.precision());
+					}
 					if (column.primary()) {
 						keyCount++;
 						if (keyCount > 1) {
@@ -80,7 +83,7 @@ public class BeanDefineConfigue implements SmartLifecycle {
 		}
 		// 执行表创建、字段更新
 		System.err.println("i'm back!");
-		tableManager.init();
+		tableOperator.init();
 
 		// 执行完其他业务后，可以修改 isRunning = true
 		isRunning = true;

@@ -89,6 +89,6 @@ public @interface Column {
 	 * 
 	 * @return
 	 */
-	public int decimal() default 2;
+	public int precision() default 0;
 
 }

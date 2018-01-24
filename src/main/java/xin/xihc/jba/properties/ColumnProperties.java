@@ -23,14 +23,14 @@ public class ColumnProperties {
 	private Boolean unique = false;
 	private Integer length = 255;
 	private String remark;
-	private Integer decimal = 2;
+	private Integer precision = 0;
 
-	public Integer decimal() {
-		return decimal;
+	public Integer precision() {
+		return precision;
 	}
 
-	public void decimal(Integer decimal) {
-		this.decimal = decimal;
+	public void precision(Integer precision) {
+		this.precision = precision;
 	}
 
 	public Class<?> type() {

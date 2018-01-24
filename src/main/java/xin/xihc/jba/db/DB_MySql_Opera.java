@@ -3,6 +3,8 @@
  */
 package xin.xihc.jba.db;
 
+import java.math.BigDecimal;
+
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
@@ -38,25 +40,50 @@ public class DB_MySql_Opera implements I_TableOperation {
 				sql.append("int");
 			} else if (col.type().equals(String.class)) {
 				sql.append("varchar");
+				if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
+					sql.append("(" + col.length() + ")");
+				}
 			} else if (col.type().equals(Double.class) || equals(col.type().equals(double.class))) {
 				sql.append("double");
-			}
-			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
-				sql.append("(" + col.length() + ")");
+				if (col.length() > 0 || col.precision() > 0 && col.length() >= col.precision()) {
+					sql.append("(" + col.length() + "," + col.precision() + ")");
+				}
+			} else if (col.type().equals(BigDecimal.class)) {
+				sql.append("decimal");
+				if (col.length() < 65 && col.precision() >= 0 && col.length() >= col.precision()) {
+					sql.append("(" + col.length() + "," + col.precision() + ")");
+				}
 			}
 
-			if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
-				sql.append(" NOT NULL ");
-			}
 			if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {
 				sql.append(" PRIMARY KEY ");
-			}
-			if (CommonUtil.isNotNullEmpty(col.unique()) && col.unique()) {
-				sql.append(" UNIQUE ");
+				switch (col.policy()) {
+				case NONE:
+					break;
+				case AUTO:
+					sql.append(" AUTO_INCREMENT ");
+					break;
+				case GUID:
+
+					break;
+				case GUID_UP:
+
+					break;
+				default:
+					break;
+				}
+			} else {
+				if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
+					sql.append(" NOT NULL ");
+				}
+				if (CommonUtil.isNotNullEmpty(col.unique()) && col.unique()) {
+					sql.append(" UNIQUE ");
+				}
+
 			}
 			sql.append(",");
 		}
-		sql.deleteCharAt(sql.length() - 1).append(")");
+		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
 		jbaTemplate.executeSQL(sql.toString());
 	}
 

@@ -1,13 +1,11 @@
-package xin.xihc.jba.properties;
+package xin.xihc.jba.db;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import xin.xihc.jba.db.DB_MySql_Opera;
-import xin.xihc.jba.db.DB_Oracle_Opera;
-import xin.xihc.jba.db.I_TableOperation;
-import xin.xihc.jba.db.JbaTemplate;
+import xin.xihc.jba.properties.TableManager;
+import xin.xihc.jba.properties.TableProperties;
 
 /**
  * 表管理

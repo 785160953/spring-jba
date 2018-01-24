@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import xin.xihc.jba.BeanDefineConfigue;
+import xin.xihc.jba.AnnotationScan;
 import xin.xihc.jba.SpringContextUtil;
 import xin.xihc.jba.db.JbaTemplate;
-import xin.xihc.jba.properties.TableOperator;
+import xin.xihc.jba.db.TableOperator;
 
 /**
  * 
@@ -30,7 +30,7 @@ import xin.xihc.jba.properties.TableOperator;
 @Target(ElementType.TYPE)
 @EnableTransactionManagement
 @Component
-@Import({ BeanDefineConfigue.class, JbaTemplate.class, TableOperator.class, SpringContextUtil.class })
+@Import({ AnnotationScan.class, JbaTemplate.class, TableOperator.class, SpringContextUtil.class })
 public @interface EnableJBA {
 
 }
