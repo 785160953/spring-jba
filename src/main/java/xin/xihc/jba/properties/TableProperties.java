@@ -1,7 +1,7 @@
 /**
  * 
  */
-package xin.xihc.jba.db;
+package xin.xihc.jba.properties;
 
 import java.util.LinkedHashMap;
 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package xin.xihc.jba.db;
+package xin.xihc.jba.properties;
 
 import xin.xihc.jba.annotation.Column.PrimaryPolicy;
 
@@ -14,15 +14,24 @@ import xin.xihc.jba.annotation.Column.PrimaryPolicy;
  */
 public class ColumnProperties {
 
-	private Class<?> type;
+	private Class<?> type = String.class;
 	private String colName;
 	private String defaultValue;
-	private Boolean notNull;
-	private Boolean primary;
-	private PrimaryPolicy policy;
-	private Boolean unique;
-	private Integer length;
+	private Boolean notNull = false;
+	private Boolean primary = false;
+	private PrimaryPolicy policy = PrimaryPolicy.NONE;
+	private Boolean unique = false;
+	private Integer length = 255;
 	private String remark;
+	private Integer decimal = 2;
+
+	public Integer decimal() {
+		return decimal;
+	}
+
+	public void decimal(Integer decimal) {
+		this.decimal = decimal;
+	}
 
 	public Class<?> type() {
 		return type;

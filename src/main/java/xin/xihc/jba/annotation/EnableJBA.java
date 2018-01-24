@@ -9,14 +9,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import xin.xihc.jba.AnnotationScannerConfigurer;
-import xin.xihc.jba.db.MyOrmJdbcTemplate;
-import xin.xihc.jba.db.TableManager;
+import xin.xihc.jba.BeanDefineConfigue;
+import xin.xihc.jba.SpringContextUtil;
+import xin.xihc.jba.db.JbaTemplate;
+import xin.xihc.jba.properties.TableOperator;
 
 /**
  * 
@@ -30,8 +30,7 @@ import xin.xihc.jba.db.TableManager;
 @Target(ElementType.TYPE)
 @EnableTransactionManagement
 @Component
-@ComponentScan(basePackageClasses = { MyOrmJdbcTemplate.class, TableManager.class })
-@Import({ AnnotationScannerConfigurer.class })
+@Import({ BeanDefineConfigue.class, JbaTemplate.class, TableOperator.class, SpringContextUtil.class })
 public @interface EnableJBA {
 
 }

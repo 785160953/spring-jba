@@ -5,7 +5,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,31 +26,38 @@ import xin.xihc.utils.common.CommonUtil;
  * @Modified 2017年11月26日
  */
 @Component
-public class MyOrmJdbcTemplate {
+public class JbaTemplate {
+
+	@Value("${spring.datasource.url:null}")
+	String dbUrl;
 
 	/**
 	 * 
 	 */
-	public MyOrmJdbcTemplate() {
+	public JbaTemplate() {
+		String url = "";
 		if (null != this.dataSource) {
-			String driverClassName = this.dataSource.getDriverClassName();
-			if (driverClassName.startsWith("jdbc:mysql://")) {
-				this.dbType = DBType.MySql;
-			} else if (driverClassName.startsWith("jdbc:oracle:")) {
-				this.dbType = DBType.Oracle;
-			}
+			url = this.dataSource.getUrl();
+		} else if (null != dbUrl) {
+			url = dbUrl;
+		}
+		if (url.startsWith("jdbc:mysql://")) {
+			this.dbType = DBType.MySql;
+		} else if (url.startsWith("jdbc:oracle:")) {
+			this.dbType = DBType.Oracle;
 		}
 	}
 
 	/**
 	 * 数据源
 	 */
-	@Qualifier("dataSource")
+	@Autowired
 	private DruidDataSource dataSource;
 
 	private DBType dbType = DBType.MySql;
 
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	/**
 	 * 初始化dataSource,需要手动关闭之前的dataSource

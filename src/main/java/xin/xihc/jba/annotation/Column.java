@@ -75,7 +75,7 @@ public @interface Column {
 	 * 
 	 * @return
 	 */
-	public int length() default -1;
+	public int length() default 255;
 
 	/**
 	 * 备注
@@ -83,5 +83,12 @@ public @interface Column {
 	 * @return
 	 */
 	public String remark() default "";
+
+	/**
+	 * 精度
+	 * 
+	 * @return
+	 */
+	public int decimal() default 2;
 
 }

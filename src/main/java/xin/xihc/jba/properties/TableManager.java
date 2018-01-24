@@ -1,7 +1,7 @@
 /**
  * 
  */
-package xin.xihc.jba.db;
+package xin.xihc.jba.properties;
 
 import java.util.LinkedHashMap;
 
@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
  * @version
  * @since
  */
-public class TableUtils {
+public class TableManager {
 
 	private static LinkedHashMap<String, TableProperties> tbls = new LinkedHashMap<>(16);
 
