@@ -7,11 +7,13 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Table;
+import xin.xihc.jba.db.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableManager;
@@ -27,10 +29,16 @@ import xin.xihc.jba.properties.TableProperties;
 @Component
 public class AnnotationScan implements SmartLifecycle {
 
-	private boolean isRunning = false;
+	private static boolean isRunning = false;
 
 	@Autowired
 	TableOperator tableOperator;
+
+	@Autowired
+	JbaTemplate jbaTemplate;
+
+	@Value("${spring.datasource.url:null}")
+	String dbUrl;
 
 	/**
 	 * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
@@ -40,6 +48,8 @@ public class AnnotationScan implements SmartLifecycle {
 	 */
 	@Override
 	public void start() {
+		// 设置数据源地址，用于区别数据库类型
+		jbaTemplate.setDbType(dbUrl);
 		Map<String, Object> map = SpringContextUtil.getApplicationContext().getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);

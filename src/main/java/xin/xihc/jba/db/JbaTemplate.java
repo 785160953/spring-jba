@@ -1,19 +1,14 @@
 package xin.xihc.jba.db;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import com.alibaba.druid.pool.DruidDataSource;
 
 import xin.xihc.utils.common.CommonUtil;
 
@@ -29,63 +24,21 @@ import xin.xihc.utils.common.CommonUtil;
 @Component
 public class JbaTemplate {
 
-	@Value("${spring.datasource.url:null}")
-	String dbUrl;
-
-	/**
-	 * 
-	 */
-	public JbaTemplate() {
-		String url = "";
-		if (null != this.dataSource) {
-			url = this.dataSource.getUrl();
-		} else if (null != dbUrl) {
-			url = dbUrl;
-		}
-		if (url.startsWith("jdbc:mysql://")) {
-			this.dbType = DBType.MySql;
-		} else if (url.startsWith("jdbc:oracle:")) {
-			this.dbType = DBType.Oracle;
-		}
-	}
-
-	/**
-	 * 数据源
-	 */
-	@Qualifier("dataSource")
-	private DruidDataSource dataSource;
-
 	private DBType dbType = DBType.MySql;
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	/**
-	 * 初始化dataSource,需要手动关闭之前的dataSource
-	 * 
-	 * @param dataSource
-	 * @param isInited
-	 * @throws SQLException
-	 */
-	public void init(DruidDataSource dataSource, boolean isInited) throws Exception {
-		if (null != this.dataSource && this.dataSource.isInited()) {
-			this.dataSource.close();
-		}
-		if (isInited) {
-			try {
-				dataSource.init();
-			} catch (SQLException e) {
-				e.printStackTrace();
-				dataSource.close();
-				throw new Exception(e);
-			}
-		}
-		this.dataSource = dataSource;
-		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-	}
-
 	public DBType getDbType() {
 		return dbType;
+	}
+
+	public void setDbType(String dbUrl) {
+		if (dbUrl.startsWith("jdbc:mysql://")) {
+			this.dbType = DBType.MySql;
+		} else if (dbUrl.startsWith("jdbc:oracle:")) {
+			this.dbType = DBType.Oracle;
+		}
 	}
 
 	/*--------------------------------------------------------------------------------
