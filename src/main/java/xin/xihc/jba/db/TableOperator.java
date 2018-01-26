@@ -43,7 +43,6 @@ public class TableOperator {
 			} else {
 				tableOperation.createTable(tblObj, jbaTemplate);
 			}
-
 		}
 	}
 

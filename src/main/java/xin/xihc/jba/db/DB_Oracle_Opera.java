@@ -14,6 +14,8 @@ import xin.xihc.jba.properties.TableProperties;
  * @since
  */
 public class DB_Oracle_Opera implements I_TableOperation {
+	
+	public final static String log_name = "DB_Update_Oracle_Sql";
 
 	@Override
 	public boolean isTableExists(String tblName, JbaTemplate jbaTemplate) {
