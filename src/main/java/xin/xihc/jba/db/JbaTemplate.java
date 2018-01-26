@@ -1,6 +1,7 @@
 package xin.xihc.jba.db;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +42,24 @@ public class JbaTemplate {
 		}
 	}
 
+	/**
+	 * 获取该对象的所有字段(包含父类的)
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public List<Field> getAllFields(Class<?> clazz) {
+		List<Field> res = new ArrayList<>(10);
+		if (null == clazz) {
+			return res;
+		}
+		while (!clazz.equals(Object.class)) {
+			res.addAll(0, Arrays.asList(clazz.getDeclaredFields()));
+			clazz = clazz.getSuperclass();
+		}
+		return res;
+	}
+
 	/*--------------------------------------------------------------------------------
 	 * 
 	 * 以下为【NamedParameterJdbcTemplate】对数据库操作
@@ -59,10 +78,13 @@ public class JbaTemplate {
 	 *            对象模型
 	 * @return 是否成功
 	 */
-	public boolean insertModel(String tblName, Object model) {
+	public boolean insertModel(Object model) {
 		boolean ret = false;
+		if (null == model) {
+			return ret;
+		}
 		String sql = "";
-		sql = getNamedParmeterSql_Insert(tblName, model);
+		sql = getNamedParmeterSql_Insert(model.getClass().getSimpleName(), model);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
 		if (t > 0) {
 			ret = true;
@@ -82,10 +104,13 @@ public class JbaTemplate {
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
-	public boolean updateModel(String tblName, Object model, String... fieldNames) throws RuntimeException {
+	public boolean updateModel(Object model, String... fieldNames) throws RuntimeException {
 		boolean ret = false;
+		if (null == model) {
+			return ret;
+		}
 		String sql = "";
-		sql = getNamedParmeterSql_Update(tblName, model, fieldNames);
+		sql = getNamedParmeterSql_Update(model.getClass().getSimpleName(), model, fieldNames);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
 		if (t > 0) {
 			ret = true;
@@ -120,10 +145,10 @@ public class JbaTemplate {
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
-	public boolean deleteModel(String tblName, Object model, String... fieldNames) throws RuntimeException {
+	public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException {
 		boolean ret = false;
 		String sql = "";
-		sql = getNamedParmeterSql_Delete(tblName, model, fieldNames);
+		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model, fieldNames);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
 		if (t > 0) {
 			ret = true;
@@ -166,38 +191,13 @@ public class JbaTemplate {
 	 * @return 是否成功
 	 * 
 	 */
-	public <T> T queryModelOne(String tblName, Object model, Class<T> clazz) {
+	public <T> T queryModelOne(String tblName, Object model, Class<T> clazz, String... orderBy) {
 		T ret = null;
-		try {
-			String sql = "SELECT * FROM " + tblName;
-			List<T> list = null;
-			if (model != null) {
-				StringBuilder where = new StringBuilder();
-				for (Field field : model.getClass().getDeclaredFields()) {
-					field.setAccessible(true);
-					try {
-						if (field.get(model) != null) {
-							where.append(field.getName() + "=:" + field.getName() + " AND ");
-						}
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						e.printStackTrace();
-					}
-				}
-				if (where.length() > 0) {
-					sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
-				}
-				list = namedParameterJdbcTemplate.query(sql, new BeanPropertySqlParameterSource(model),
-						new BeanPropertyRowMapper<>(clazz));
-			} else {
-				list = namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(clazz));
-			}
-			if (list == null || list.size() < 1) {
-				ret = null;
-			}
-			ret = list.get(0);
-		} catch (Exception e) {
+		List<T> list = queryModelList(tblName, model, clazz, null, orderBy);
+		if (list == null || list.size() < 1) {
 			ret = null;
 		}
+		ret = list.get(0);
 		return ret;
 	}
 
@@ -265,7 +265,7 @@ public class JbaTemplate {
 			// 存在where子句
 			if (model != null) {
 				StringBuilder where = new StringBuilder();
-				for (Field field : model.getClass().getDeclaredFields()) {
+				for (Field field : getAllFields(model.getClass())) {
 					field.setAccessible(true);
 					try {
 						if (field.get(model) != null) {
@@ -335,7 +335,7 @@ public class JbaTemplate {
 	 * @param tblName
 	 * @return
 	 */
-	public <T> String getNamedParmeterSql_Insert(String tblName, T model) {
+	private <T> String getNamedParmeterSql_Insert(String tblName, T model) {
 		String res = "";
 		if (model == null) {
 			return res;
@@ -343,7 +343,7 @@ public class JbaTemplate {
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder valueList = new StringBuilder();
 		res = "INSERT INTO " + tblName + "(";
-		for (Field field : model.getClass().getDeclaredFields()) {
+		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
 			try {
 				if (field.get(model) != null) {
@@ -372,7 +372,7 @@ public class JbaTemplate {
 	 * @return
 	 * @throws Exception
 	 */
-	public <T> String getNamedParmeterSql_Update(String tblName, T model, String... fieldNames)
+	private <T> String getNamedParmeterSql_Update(String tblName, T model, String... fieldNames)
 			throws RuntimeException {
 		String res = "";
 		if (model == null) {
@@ -389,7 +389,7 @@ public class JbaTemplate {
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder where = new StringBuilder();
 		res = "UPDATE " + tblName + " SET ";
-		for (Field field : model.getClass().getDeclaredFields()) {
+		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
 			try {
 				if (field.get(model) != null) {
@@ -423,7 +423,7 @@ public class JbaTemplate {
 	 * @return
 	 * @throws Exception
 	 */
-	public <T> String getNamedParmeterSql_Delete(String tblName, T model, String... fieldNames)
+	private <T> String getNamedParmeterSql_Delete(String tblName, T model, String... fieldNames)
 			throws RuntimeException {
 		String res = "";
 		if (model == null) {
@@ -440,7 +440,7 @@ public class JbaTemplate {
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder where = new StringBuilder();
 		res = "DELETE FROM" + tblName;
-		for (Field field : model.getClass().getDeclaredFields()) {
+		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
 			try {
 				if (field.get(model) != null) {

@@ -5,6 +5,8 @@ package xin.xihc.jba.db;
 
 import java.math.BigDecimal;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
@@ -81,6 +83,9 @@ public class DB_MySql_Opera implements I_TableOperation {
 				}
 
 			}
+			if (CommonUtil.isNotNullEmpty(col.remark())) {
+				sql.append(" COMMENT '" + col.remark() + "'");
+			}
 			sql.append(",");
 		}
 		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
@@ -89,6 +94,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 
 	@Override
 	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
+		// 先获取表结构信息
+//		jbaTemplate.queryModelOne("", model, clazz);
 
 	}
 
