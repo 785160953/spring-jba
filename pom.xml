@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xin.xihc.jba</groupId>
 	<artifactId>spring-jba</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<name>java bean access</name>
 	<description>java对象访问</description>
 	<properties>

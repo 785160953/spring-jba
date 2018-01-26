@@ -70,11 +70,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 						if ("auto_increment".equals(item.getExtra())) {
 							String ss = "ALTER TABLE " + tbl.getTableName() +" MODIFY " + item.getColumn_name() + " int,DROP PRIMARY KEY";
 							jbaTemplate.executeSQL(ss);
-							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】语句：" + ss);
+							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键、自增：" + ss);
 						} else {
 							String ss = "ALTER TABLE " + tbl.getTableName() +" DROP PRIMARY KEY";
 							jbaTemplate.executeSQL(ss);
-							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】语句：" + ss);
+							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键：" + ss);
 						}
 					}
 					sqls.add("MODIFY " + columnPro(col));
