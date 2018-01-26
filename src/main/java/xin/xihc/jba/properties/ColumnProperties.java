@@ -20,7 +20,6 @@ public class ColumnProperties {
 	private Boolean notNull = false;
 	private Boolean primary = false;
 	private PrimaryPolicy policy = PrimaryPolicy.NONE;
-	private Boolean unique = false;
 	private Integer length = 255;
 	private String remark;
 	private Integer precision = 0;
@@ -84,15 +83,6 @@ public class ColumnProperties {
 
 	public ColumnProperties policy(PrimaryPolicy policy) {
 		this.policy = policy;
-		return this;
-	}
-
-	public Boolean unique() {
-		return unique;
-	}
-
-	public ColumnProperties unique(Boolean unique) {
-		this.unique = unique;
 		return this;
 	}
 

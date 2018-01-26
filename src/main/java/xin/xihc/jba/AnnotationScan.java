@@ -70,7 +70,7 @@ public class AnnotationScan implements SmartLifecycle {
 					colP.colName(field.getName());
 				} else {
 					colP.colName(field.getName()).defaultValue(column.defaultValue()).notNull(column.notNull())
-							.unique(column.unique()).remark(column.remark());
+							.remark(column.remark());
 					colP.length(0);
 					if (column.length() > 0) {
 						colP.length(column.length());

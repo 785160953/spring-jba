@@ -155,12 +155,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 			if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
 				temp.append(" NOT NULL ");
 			}
-			if (CommonUtil.isNotNullEmpty(col.unique()) && col.unique()) {
-				temp.append(" UNIQUE ");
-			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.remark())) {
 			temp.append(" COMMENT '" + col.remark() + "'");
+		}
+		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
+			temp.append(" DEFAULT '" + col.defaultValue() + "'");
 		}
 		return temp.toString();
 	}

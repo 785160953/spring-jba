@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.utils.common.CommonUtil;
+import xin.xihc.utils.logfile.LogFileUtil;
 
 /**
  * 对JDBTemplate进行封装
@@ -86,6 +87,8 @@ public class JbaTemplate {
 		String sql = "";
 		sql = getNamedParmeterSql_Insert(model.getClass().getSimpleName(), model);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		LogFileUtil.info(null, "执行sql：" + sql);
+		LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -112,6 +115,8 @@ public class JbaTemplate {
 		String sql = "";
 		sql = getNamedParmeterSql_Update(model.getClass().getSimpleName(), model, fieldNames);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		LogFileUtil.info(null, "执行sql：" + sql);
+		LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -127,6 +132,7 @@ public class JbaTemplate {
 	public boolean executeSQL(String sql) {
 		boolean res = false;
 		int update = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(new Object()));
+		LogFileUtil.info(null, "执行sql：" + sql);
 		if (update > 0) {
 			res = true;
 		}
@@ -150,6 +156,8 @@ public class JbaTemplate {
 		String sql = "";
 		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model, fieldNames);
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		LogFileUtil.info(null, "执行sql：" + sql);
+		LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -170,9 +178,12 @@ public class JbaTemplate {
 		try {
 			if (model != null) {
 				ret = namedParameterJdbcTemplate.queryForObject(sql, new BeanPropertySqlParameterSource(model), clazz);
+				LogFileUtil.info(null, "执行sql：" + sql);
+				LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 			} else {
 				ret = namedParameterJdbcTemplate.queryForObject(sql, new BeanPropertySqlParameterSource(new Object()),
 						clazz);
+				LogFileUtil.info(null, "执行sql：" + sql);
 			}
 		} catch (Exception e) {
 			ret = null;
@@ -220,8 +231,11 @@ public class JbaTemplate {
 			if (model != null) {
 				list = namedParameterJdbcTemplate.query(sql, new BeanPropertySqlParameterSource(model),
 						new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
+				LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 			} else {
 				list = namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
 			}
 			if (list == null || list.size() < 1) {
 				ret = null;
@@ -284,12 +298,15 @@ public class JbaTemplate {
 				}
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
 						new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
+				LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 			} else {
 				sql_final += " " + sOrder;
 				if (pageInfo != null) {
 					sql_final = getNamedPageSql(sql_final, model, pageInfo);
 				}
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
 			}
 		} catch (Exception e) {
 			ret = null;
@@ -318,8 +335,11 @@ public class JbaTemplate {
 			if (model != null) {
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
 						new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
+				LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 			} else {
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
+				LogFileUtil.info(null, "执行sql：" + sql);
 			}
 		} catch (Exception e) {
 			ret = null;
@@ -359,7 +379,6 @@ public class JbaTemplate {
 		}
 		res = res + fieldList.toString().substring(0, fieldList.toString().length() - 1) + ") VALUES ("
 				+ valueList.toString().substring(0, valueList.toString().length() - 1) + ")";
-		System.err.println(res);
 		return res;
 	}
 
@@ -410,7 +429,6 @@ public class JbaTemplate {
 		}
 		res = res + fieldList.toString().substring(0, fieldList.toString().trim().length() - 1) + " WHERE "
 				+ where.toString().substring(0, where.toString().lastIndexOf(" AND "));
-		System.err.println(res);
 		return res;
 	}
 
@@ -461,7 +479,6 @@ public class JbaTemplate {
 		}
 		res = res + fieldList.toString().substring(0, fieldList.toString().trim().length() - 1) + " WHERE "
 				+ where.toString().substring(0, where.toString().lastIndexOf(" AND "));
-		System.err.println(res);
 		return res;
 	}
 

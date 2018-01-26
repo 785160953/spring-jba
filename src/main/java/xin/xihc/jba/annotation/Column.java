@@ -66,13 +66,6 @@ public @interface Column {
 	public PrimaryPolicy policy() default PrimaryPolicy.AUTO;
 
 	/**
-	 * 是否唯一
-	 * 
-	 * @return
-	 */
-	public boolean unique() default false;
-
-	/**
 	 * 长度限制-1代表不限制
 	 * 
 	 * @return
