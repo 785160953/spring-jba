@@ -59,9 +59,8 @@ public class AnnotationScan implements SmartLifecycle {
 			} else {
 				tblP = TableManager.addTable(obj.getClass().getSimpleName(), table.value());
 			}
-			Field[] fields = obj.getClass().getDeclaredFields();
 			int keyCount = 0;
-			for (Field field : fields) {
+			for (Field field : jbaTemplate.getAllFields(obj.getClass())) {
 				field.setAccessible(true);
 				Column column = field.getAnnotation(Column.class);
 				ColumnProperties colP = new ColumnProperties();
