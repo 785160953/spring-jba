@@ -68,11 +68,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 					// 首先删除主键,若主键是自增的先去掉自增
 					if ("PRI".equals(item.getColumn_key())) {
 						if ("auto_increment".equals(item.getExtra())) {
-							String ss = "ALTER TABLE " + tbl.getTableName() +" MODIFY " + item.getColumn_name() + " int,DROP PRIMARY KEY";
+							String ss = "ALTER TABLE " + tbl.getTableName() + " MODIFY " + item.getColumn_name()
+									+ " int,DROP PRIMARY KEY";
 							jbaTemplate.executeSQL(ss);
 							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键、自增：" + ss);
 						} else {
-							String ss = "ALTER TABLE " + tbl.getTableName() +" DROP PRIMARY KEY";
+							String ss = "ALTER TABLE " + tbl.getTableName() + " DROP PRIMARY KEY";
 							jbaTemplate.executeSQL(ss);
 							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键：" + ss);
 						}
@@ -119,7 +120,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
 				temp.append("(" + col.length() + ")");
 			}
-		} else if (col.type().equals(Double.class) || equals(col.type().equals(double.class))) {
+		} else if (col.type().equals(Double.class) || col.type().equals(double.class) || col.type().equals(float.class)
+				|| col.type().equals(Float.class)) {
 			temp.append("double");
 			if (col.length() > 0 || col.precision() > 0 && col.length() >= col.precision()) {
 				temp.append("(" + col.length() + "," + col.precision() + ")");
