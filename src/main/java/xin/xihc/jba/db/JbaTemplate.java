@@ -98,9 +98,7 @@ public class JbaTemplate {
 	/**
 	 * 根据字段更新数据
 	 * 
-	 * @param tblName
-	 *            对象对应的表名
-	 * @param <T>
+	 * @param model
 	 *            对象模型
 	 * @param fieldNames
 	 *            where子句条件字段数组
@@ -142,9 +140,7 @@ public class JbaTemplate {
 	/**
 	 * 根据字段删除数据
 	 * 
-	 * @param tblName
-	 *            对象对应的表名
-	 * @param <T>
+	 * @param model
 	 *            对象模型
 	 * @param fieldNames
 	 *            where子句条件字段数组
@@ -171,7 +167,7 @@ public class JbaTemplate {
 	 *            对象对应的表名
 	 * @param <T>
 	 *            对象模型-创建查询条件
-	 * @return 是否成功
+	 * @return 单个列值
 	 */
 	public <T> T queryColumn(String sql, Object model, Class<T> clazz) {
 		T ret = null;
@@ -192,19 +188,75 @@ public class JbaTemplate {
 	}
 
 	/**
+	 * 查询数量
+	 * 
+	 * @param sql
+	 *            sql语句
+	 * @param model
+	 *            参数
+	 * @return
+	 */
+	public int queryCount(String sql, Object model) {
+		int ret = 0;
+		String temp = "SELECT　COUNT(1) FROM(" + sql + ")";
+		Integer count = queryColumn(temp, model, Integer.class);
+		if (null == count) {
+			ret = 0;
+		} else {
+			ret = count.intValue();
+		}
+		return ret;
+	}
+
+	/**
+	 * 查询单表的数量
+	 * 
+	 * @param model
+	 *            表对象
+	 * @return
+	 */
+	public int queryCount(Object model) {
+		int ret = 0;
+		String sql = "SELECT COUNT(1) FROM " + model.getClass().getSimpleName();
+		StringBuilder where = new StringBuilder();
+		for (Field field : getAllFields(model.getClass())) {
+			field.setAccessible(true);
+			try {
+				if (field.get(model) != null) {
+					where.append(field.getName() + "=:" + field.getName() + " AND ");
+				}
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		if (where.length() > 0) {
+			sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
+		}
+		Integer count = queryColumn(sql, model, Integer.class);
+		if (null == count) {
+			ret = 0;
+		} else {
+			ret = count.intValue();
+		}
+		return ret;
+	}
+
+	/**
 	 * 
 	 * 查询数据库 - 单个对象
 	 * 
 	 * @param tblName
 	 *            对象对应的表名
-	 * @param <T>
+	 * @param clazz
 	 *            对象模型-创建查询条件
-	 * @return 是否成功
+	 * @param orderBy
+	 *            排序字段
+	 * @return 单个对象
 	 * 
 	 */
-	public <T> T queryModelOne(String tblName, Object model, Class<T> clazz, String... orderBy) {
+	public <T> T queryModelOne(Object model, Class<T> clazz, String... orderBy) {
 		T ret = null;
-		List<T> list = queryModelList(tblName, model, clazz, null, orderBy);
+		List<T> list = queryModelList(model, clazz, null, orderBy);
 		if (list == null || list.size() < 1) {
 			ret = null;
 		}
@@ -216,12 +268,14 @@ public class JbaTemplate {
 	 * 
 	 * 查询数据库 - 单个混合对象
 	 * 
-	 * @param tblName
-	 *            对象对应的表名
+	 * @param sql
+	 *            sql语句
 	 * 
-	 * @param <T>
+	 * @param model
 	 *            对象模型-创建查询条件
-	 * @return 是否成功
+	 * @param clazz
+	 *            返回的类型
+	 * @return 单个对象
 	 * 
 	 */
 	public <T> T queryMixModelOne(String sql, Object model, Class<T> clazz) {
@@ -250,18 +304,23 @@ public class JbaTemplate {
 	/**
 	 * 查询单表--列表
 	 * 
-	 * @param <T>
-	 * @param tblName
+	 * @param model
 	 *            对象对应的表名
-	 * @param <T>
-	 *            对象模型-创建查询条件
-	 * @return 是否成功
+	 * @param clazz
+	 *            返回的类型
+	 * @param pageInfo
+	 *            分页信息
+	 * @param orderBy
+	 *            排序字段
+	 * @return 列表
 	 */
-	public <T> List<T> queryModelList(String tblName, Object model, Class<T> clazz, PageInfo pageInfo,
-			String... orderBy) {
+	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, String... orderBy) {
 		List<T> ret = null;
+		if (null == model) {
+			return ret;
+		}
 		try {
-			String sql = "SELECT * FROM " + tblName;
+			String sql = "SELECT * FROM " + model.getClass().getSimpleName();
 			String sql_final = sql;
 			String sOrder = "";
 			// 存在排序
@@ -277,37 +336,29 @@ public class JbaTemplate {
 				}
 			}
 			// 存在where子句
-			if (model != null) {
-				StringBuilder where = new StringBuilder();
-				for (Field field : getAllFields(model.getClass())) {
-					field.setAccessible(true);
-					try {
-						if (field.get(model) != null) {
-							where.append(field.getName() + "=:" + field.getName() + " AND ");
-						}
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						e.printStackTrace();
+
+			StringBuilder where = new StringBuilder();
+			for (Field field : getAllFields(model.getClass())) {
+				field.setAccessible(true);
+				try {
+					if (field.get(model) != null) {
+						where.append(field.getName() + "=:" + field.getName() + " AND ");
 					}
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
 				}
-				if (where.length() > 0) {
-					sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
-				}
-				sql_final = sql + " " + sOrder;
-				if (pageInfo != null) {
-					sql_final = getNamedPageSql(sql_final, model, pageInfo);
-				}
-				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
-						new BeanPropertyRowMapper<>(clazz));
-				LogFileUtil.info(null, "执行sql：" + sql);
-				LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
-			} else {
-				sql_final += " " + sOrder;
-				if (pageInfo != null) {
-					sql_final = getNamedPageSql(sql_final, model, pageInfo);
-				}
-				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
-				LogFileUtil.info(null, "执行sql：" + sql);
 			}
+			if (where.length() > 0) {
+				sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
+			}
+			sql_final = sql + " " + sOrder;
+			if (pageInfo != null) {
+				sql_final = getNamedPageSql(sql_final, model, pageInfo);
+			}
+			ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
+					new BeanPropertyRowMapper<>(clazz));
+			LogFileUtil.info(null, "执行sql：" + sql);
+			LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
 			ret = null;
 		}
@@ -317,13 +368,16 @@ public class JbaTemplate {
 	/**
 	 * 查询数据库--混合对象列表
 	 * 
-	 * @param <T>
+	 * @param sql
+	 *            sql语句
 	 * 
-	 * @param tblName
+	 * @param model
 	 *            对象对应的表名
-	 * @param <T>
-	 *            对象模型-创建查询条件
-	 * @return 是否成功
+	 * @param clazz
+	 *            返回的类型
+	 * @param pageInfo
+	 *            分页信息
+	 * @return 列表
 	 */
 	public <T> List<T> queryMixModelList(String sql, Object model, Class<T> clazz, PageInfo pageInfo) {
 		List<T> ret = null;
@@ -351,8 +405,10 @@ public class JbaTemplate {
 	/**
 	 * insert语句拼接
 	 * 
-	 * @param <T>
 	 * @param tblName
+	 *            表名
+	 * @param model
+	 *            对象参数
 	 * @return
 	 */
 	private <T> String getNamedParmeterSql_Insert(String tblName, T model) {
@@ -385,11 +441,14 @@ public class JbaTemplate {
 	/**
 	 * Update语句拼接
 	 * 
-	 * @param <T>
 	 * @param tblName
-	 * @param where
+	 *            表名
+	 * @param model
+	 *            参数对象
+	 * @param fieldNames
+	 *            根据的字段
 	 * @return
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private <T> String getNamedParmeterSql_Update(String tblName, T model, String... fieldNames)
 			throws RuntimeException {
@@ -435,11 +494,14 @@ public class JbaTemplate {
 	/**
 	 * Delete语句拼接
 	 * 
-	 * @param <T>
 	 * @param tblName
+	 *            表名
+	 * @param model
+	 *            参数对象
 	 * @param fieldNames
+	 *            根据的字段
 	 * @return
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private <T> String getNamedParmeterSql_Delete(String tblName, T model, String... fieldNames)
 			throws RuntimeException {
