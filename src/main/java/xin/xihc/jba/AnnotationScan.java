@@ -91,7 +91,6 @@ public class AnnotationScan implements SmartLifecycle {
 			}
 		}
 		// 执行表创建、字段更新
-		System.err.println("i'm back!");
 		tableOperator.init();
 
 		// 执行完其他业务后，可以修改 isRunning = true
