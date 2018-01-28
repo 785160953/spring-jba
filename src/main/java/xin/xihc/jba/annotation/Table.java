@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 
 /**
+ * 声明表对象
  * 
  * @author 席恒昌
  * @date 2018年1月12日

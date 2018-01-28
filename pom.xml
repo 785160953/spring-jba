@@ -44,11 +44,6 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-		<groupId>javax.persistence</groupId>
-		<artifactId>persistence-api</artifactId>
-		<version>1.0.2</version>
-	   </dependency>
-		<dependency>
 			<groupId>xin.xihc</groupId>
 			<artifactId>CommonUtils</artifactId>
 			<version>1.7</version>

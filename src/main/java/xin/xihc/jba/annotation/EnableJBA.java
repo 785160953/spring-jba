@@ -19,6 +19,7 @@ import xin.xihc.jba.db.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
 
 /**
+ * 启用jba功能
  * 
  * @author 席恒昌
  * @date 2018年1月16日

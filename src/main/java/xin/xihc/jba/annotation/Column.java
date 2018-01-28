@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Component;
 
 /**
+ * 列属性
  * 
  * @author 席恒昌
  * @date 2018年1月12日
@@ -66,7 +67,7 @@ public @interface Column {
 	public PrimaryPolicy policy() default PrimaryPolicy.AUTO;
 
 	/**
-	 * 长度限制-1代表不限制
+	 * 长度限制，小于1代表不限制
 	 * 
 	 * @return
 	 */
