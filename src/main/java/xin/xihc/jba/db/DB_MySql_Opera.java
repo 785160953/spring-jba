@@ -41,9 +41,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 	public void createTable(TableProperties tbl, JbaTemplate jbaTemplate) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
+		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			sql.append(columnPro(col));
+			sql.append(columnPro(col, after));
 			sql.append(",");
+			after = col.colName();
 		}
 		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
 		jbaTemplate.executeSQL(sql.toString());
@@ -59,6 +61,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		ArrayList<String> sqls = new ArrayList<>(10);
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
+		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
 			boolean is2Add = true;
 
@@ -78,7 +81,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键：" + ss);
 						}
 					}
-					sqls.add("MODIFY " + columnPro(col));
+					sqls.add("MODIFY " + columnPro(col, after));
+					after = col.colName();
 
 					list.remove(item);
 					break;
@@ -86,7 +90,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 是新增列
 			if (is2Add) {
-				sqls.add("ADD COLUMN " + columnPro(col));
+				sqls.add("ADD COLUMN " + columnPro(col, after));
+				after = col.colName();
 			}
 		}
 		// 最后list剩余的则是需要删除的列
@@ -110,7 +115,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 	 * @param col
 	 * @return
 	 */
-	private String columnPro(ColumnProperties col) {
+	private String columnPro(ColumnProperties col, String after) {
 		StringBuilder temp = new StringBuilder();
 		temp.append(col.colName() + " ");
 		if (col.type().equals(int.class) || col.type().equals(Integer.class)) {
@@ -163,6 +168,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 		}
 		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
 			temp.append(" DEFAULT '" + col.defaultValue() + "'");
+		}
+		if (CommonUtil.isNotNullEmpty(after)) {
+			temp.append(" AFTER " + after);
+		} else {
+			temp.append(" FIRST");
 		}
 		return temp.toString();
 	}
