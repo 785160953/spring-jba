@@ -1,5 +1,6 @@
 # spring-jba
 `JavaBeanAccess`java对象访问，基于JDK1.7+
+```目前仅支持MySql数据库  ```:grimacing:
 
 
 # 注解解释 #
@@ -29,24 +30,24 @@ JbaTemplate jbaTemplate;
 ```
 即可使用JbaTemplate的方法。。具体方法解析如下：
 
-`public boolean insertModel(Object model);` 插入对象INSERT INTO tblName (id,name) VALUES (:id,:name);
+`1、public boolean insertModel(Object model);` 插入对象INSERT INTO tblName (id,name) VALUES (:id,:name);
  
-`public boolean updateModel(Object model, String... fieldNames) throws RuntimeException;`  更新对象
+`2、public boolean updateModel(Object model, String... fieldNames) throws RuntimeException;`  更新对象
 
-`public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException;` 删除对象
+`3、public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException;` 删除对象
 
-`public <T> T queryColumn(String sql, Object model, Class<T> clazz);` 只能查询某列的值
+`4、public <T> T queryColumn(String sql, Object model, Class<T> clazz);` 只能查询某列的值
 
-`public int queryCount(String sql, Object model);` 查询数量
+`5、public int queryCount(String sql, Object model);` 查询数量
 
-`public int queryCount(Object model);` 查询某个对象的数量
+`6、public int queryCount(Object model);` 查询某个对象的数量
 
-`public <T> T queryModelOne(Object model, Class<T> clazz, String... orderBy);` 查询单个对象
+`7、public <T> T queryModelOne(Object model, Class<T> clazz, String... orderBy);` 查询单个对象
 
-`public <T> T queryMixModelOne(String sql, Object model, Class<T> clazz);` 查询单个混合(自定义)对象
+`8、public <T> T queryMixModelOne(String sql, Object model, Class<T> clazz);` 查询单个混合(自定义)对象
 
-`public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, String... orderBy);` 查询对象的列表
+`9、public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, String... orderBy);` 查询对象的列表
  
-`public <T> List<T> queryMixModelList(String sql, Object model, Class<T> clazz, PageInfo pageInfo);` 查询混合对象的列表
+`10、public <T> List<T> queryMixModelList(String sql, Object model, Class<T> clazz, PageInfo pageInfo);` 查询混合对象的列表
 
 
