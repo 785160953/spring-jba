@@ -50,4 +50,8 @@ JbaTemplate jbaTemplate;
  
 `10、public <T> List<T> queryMixModelList(String sql, Object model, Class<T> clazz, PageInfo pageInfo);` 查询混合对象的列表
 
+# 联系&交流
+QQ群号：340654726
+<a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
+`更新时间：2018-01-28`
