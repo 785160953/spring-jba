@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Table;
+import xin.xihc.jba.db.InitTableDataIntf;
 import xin.xihc.jba.db.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.properties.ColumnProperties;
@@ -58,6 +59,14 @@ public class AnnotationScan implements SmartLifecycle {
 				tblP = TableManager.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
 			} else {
 				tblP = TableManager.addTable(obj.getClass().getSimpleName(), table.value());
+			}
+			Class<?>[] interfaces = obj.getClass().getInterfaces();
+			for (Class<?> class1 : interfaces) {
+				if (InitTableDataIntf.class.equals(class1)) {
+					Object[] initModel = ((InitTableDataIntf<?>) obj).initModel();
+					tblP.initData(initModel);
+					break;
+				}
 			}
 			int keyCount = 0;
 			for (Field field : jbaTemplate.getAllFields(obj.getClass())) {

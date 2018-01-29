@@ -43,13 +43,20 @@ public class DB_MySql_Opera implements I_TableOperation {
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
 		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			sql.append(columnPro(col, after));
+			sql.append(columnPro(col, after, true));
 			sql.append(",");
 			after = col.colName();
 		}
 		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
 		jbaTemplate.executeSQL(sql.toString());
 		LogFileUtil.info(log_name, "创建表【" + tbl.getTableName() + "】语句：" + sql.toString());
+		// 初始化数据
+		Object[] initData = tbl.initData();
+		if (null != initData) {
+			for (Object obj : initData) {
+				jbaTemplate.insertModel(obj);
+			}
+		}
 	}
 
 	@Override
@@ -81,7 +88,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键：" + ss);
 						}
 					}
-					sqls.add("MODIFY " + columnPro(col, after));
+					sqls.add("MODIFY " + columnPro(col, after, false));
 					after = col.colName();
 
 					list.remove(item);
@@ -90,7 +97,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 是新增列
 			if (is2Add) {
-				sqls.add("ADD COLUMN " + columnPro(col, after));
+				sqls.add("ADD COLUMN " + columnPro(col, after, false));
 				after = col.colName();
 			}
 		}
@@ -115,7 +122,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 	 * @param col
 	 * @return
 	 */
-	private String columnPro(ColumnProperties col, String after) {
+	private String columnPro(ColumnProperties col, String after, boolean isCreate) {
 		StringBuilder temp = new StringBuilder();
 		temp.append(col.colName() + " ");
 		if (col.type().equals(int.class) || col.type().equals(Integer.class)) {
@@ -169,10 +176,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
 			temp.append(" DEFAULT '" + col.defaultValue() + "'");
 		}
-		if (CommonUtil.isNotNullEmpty(after)) {
-			temp.append(" AFTER " + after);
-		} else {
-			temp.append(" FIRST");
+		if (!isCreate) {
+			if (CommonUtil.isNotNullEmpty(after)) {
+				temp.append(" AFTER " + after);
+			} else {
+				temp.append(" FIRST");
+			}
 		}
 		return temp.toString();
 	}
