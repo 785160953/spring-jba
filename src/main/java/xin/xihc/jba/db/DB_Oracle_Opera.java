@@ -90,7 +90,7 @@ public class DB_Oracle_Opera implements I_TableOperation {
 			}
 			// 是新增列
 			if (is2Add) {
-				sqls.add("ADD COLUMN " + columnPro(col, after));
+				sqls.add("ADD COLUMN_NAME " + columnPro(col, after));
 				after = col.colName();
 			}
 		}

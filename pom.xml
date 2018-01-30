@@ -9,17 +9,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 		<java.version>1.7</java.version>
 		<spring.version>4.3.8.RELEASE</spring.version>
 	</properties>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/resources</directory>
-				<targetPath>${project.build.outputDirectory}/META-INF/resources</targetPath>
-			</resource>
-		</resources>
 		<!-- 指定编译的jdk版本 -->
 		<plugins>
 			<plugin>
@@ -49,4 +44,48 @@
 			<version>1.7</version>
 		</dependency>
 	</dependencies>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>actable</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>xihengzi</name>
+			<email>785160953@qq.com</email>
+			<organization>xic.xihc</organization>
+			<url></url>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@gitee.com:sunchenbin/mybatis-enhance.git</connection>
+		<developerConnection>scm:git:git@gitee.com:sunchenbin/mybatis-enhance.git</developerConnection>
+		<url>https://gitee.com/sunchenbin/mybatis-enhance</url>
+		<tag>1.0</tag>
+	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<!-- 这个id需要在setting.xml中设置 -->
+			<id>oss</id>
+			<name>OSS Snapshots Repository</name>
+			<!-- 这里的url就是Issue中回复的snapshots 的repo地址 -->
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>oss</id>
+			<name>OSS Staging Repository</name>
+			<!-- 这里的url就是Issue中回复的staging 的repo地址 -->
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 </project>
