@@ -6,6 +6,7 @@
 	<version>1.0.2</version>
 	<name>java bean access</name>
 	<description>java对象访问</description>
+	<url>https://gitee.com/XiHengZi/spring-jba</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -139,5 +140,4 @@
 		</dependency>
 	</dependencies>
 
-	<url>https://gitee.com/XiHengZi/spring-jba</url>
 </project>
