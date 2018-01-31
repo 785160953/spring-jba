@@ -2,6 +2,14 @@
 `JavaBeanAccess`java对象访问，基于JDK1.7+
 ```目前仅支持MySql数据库  ```:grimacing:
 
+# maven依赖
+```
+<dependency>
+    <groupId>xin.xihc</groupId>
+    <artifactId>spring-jba</artifactId>
+    <version>1.0.2</version>
+</dependency>
+```
 
 # 注解解释 #
 1. `@EnableJBA` 开启spring-jba创建表功能
