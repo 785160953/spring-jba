@@ -29,9 +29,21 @@
 # 使用教程
 本项目为简易ORM，是基于spring-JdbcTemplate实现，故不支持其他复杂操作，所以目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
 
+## 新增初始化数据接口`InitTableDataIntf<T>`
+需要表对象类实现该接口并返回初始化对象即可在表创建时初始化数据
+```
+@Override
+public User[] initModel() {
+    User[] data = new User[1];
+    data[0] = new User();
+    data[0].age = 18;
+    return data;
+}
+```
+
 ## 表对象的`增删改查`操作
 实际使用：
-直接
+直接添加
 ```
 @Autowired
 JbaTemplate jbaTemplate;
