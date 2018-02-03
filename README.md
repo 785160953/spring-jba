@@ -30,7 +30,10 @@
 | `Java`类型 | `Mysql`类型 | `Oracle`类型 |
 |---| --- | -- |
 |`String`             | `varchar`/length>2000的为`text` | `-` |
+|`byte`/`Byte`        | `tinyint` | `-` |
+|`short`/`Short`      | `smallint` | `-` |
 |`int`/`Integer`      | `int` | `-` |
+|`long`/`Long`        | `bigint` | `-` |
 |`double`/`Double`    | `double` | `-` |
 |`float`/`Float`      | `double` | `-` |
 |`BigDecimal`         | `decimal` | `-` |
