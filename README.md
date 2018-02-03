@@ -26,6 +26,17 @@
 8. precision       精度
 ```
 ----------
+# 类型转换对应表
+| `Java`类型 | `Mysql`类型 | `Oracle`类型 |
+|---| --- | -- |
+|`String`             | `varchar`/length>2000的为`text` | `-` |
+|`int`/`Integer`      | `int` | `-` |
+|`double`/`Double`    | `double` | `-` |
+|`float`/`Float`      | `double` | `-` |
+|`BigDecimal`         | `decimal` | `-` |
+|`Date`               | `datetime` | `-` |
+|`其他`               | `varchar(255)` | `-` |
+
 # 使用教程
 本项目为简易ORM，是基于spring-JdbcTemplate实现，故不支持其他复杂操作，所以目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
 
