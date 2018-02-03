@@ -40,6 +40,14 @@
 # 使用教程
 本项目为简易ORM，是基于spring-JdbcTemplate实现，故不支持其他复杂操作，所以目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
 
+## 数据源连接池配置-配置文件中，数据库类型根据spring.datasource.url的值判断（`必须要配置哦`）
+```
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/test
+spring.datasource.username=root
+spring.datasource.password=*****
+```
+
 ## 新增初始化数据接口`InitTableDataIntf<T>`
 需要表对象类实现该接口并返回初始化对象即可在表创建时初始化数据
 ```
@@ -85,4 +93,4 @@ JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-01-28`
+`更新时间：2018-02-03`
