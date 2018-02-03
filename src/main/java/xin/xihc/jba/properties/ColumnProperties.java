@@ -22,7 +22,7 @@ public class ColumnProperties {
 	private PrimaryPolicy policy = PrimaryPolicy.NONE;
 	private Integer length = 255;
 	private String remark;
-	private Integer precision = 0;
+	private Integer precision = 4;
 
 	public Integer precision() {
 		return precision;

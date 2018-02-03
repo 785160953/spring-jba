@@ -127,15 +127,25 @@ public class DB_MySql_Opera implements I_TableOperation {
 		temp.append(col.colName() + " ");
 		if (col.type().equals(int.class) || col.type().equals(Integer.class)) {
 			temp.append("int");
+		} else if (col.type().equals(byte.class) || col.type().equals(Byte.class)) {
+			temp.append("tinyint");
+		} else if (col.type().equals(short.class) || col.type().equals(Short.class)) {
+			temp.append("smallint");
+		} else if (col.type().equals(long.class) || col.type().equals(Long.class)) {
+			temp.append("bigint");
 		} else if (col.type().equals(String.class)) {
-			temp.append("varchar");
-			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
-				temp.append("(" + col.length() + ")");
+			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 2000) {
+				temp.append("text");
+			} else {
+				temp.append("varchar");
+				if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
+					temp.append("(" + col.length() + ")");
+				}
 			}
 		} else if (col.type().equals(Double.class) || col.type().equals(double.class) || col.type().equals(float.class)
 				|| col.type().equals(Float.class)) {
 			temp.append("double");
-			if (col.length() > 0 || col.precision() > 0 && col.length() >= col.precision()) {
+			if (col.length() > 0 || col.precision() >= 0 && col.length() >= col.precision()) {
 				temp.append("(" + col.length() + "," + col.precision() + ")");
 			}
 		} else if (col.type().equals(BigDecimal.class)) {

@@ -32,7 +32,7 @@ public class TableOperator {
 			break;
 		case Oracle:
 			tableOperation = new DB_Oracle_Opera();
-//			break;
+			break;
 		default:
 			throw new RuntimeException("【" + jbaTemplate.getDbType().name() + "】该数据库类型暂时不支持");
 		}
