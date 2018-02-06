@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xin.xihc</groupId>
 	<artifactId>spring-jba</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<name>java bean access</name>
 	<description>java对象访问</description>
 	<url>https://gitee.com/XiHengZi/spring-jba</url>
@@ -54,24 +54,13 @@
 		</repository>
 	</distributionManagement>
 
-	<profiles>
-		<profile>
-			<id>disable-javadoc-doclint</id>
-			<activation>
-				<jdk>[1.7,)</jdk>
-			</activation>
-			<properties>
-				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties>
-		</profile>
-	</profiles>
-
 	<build>
 		<!-- 指定编译的jdk版本 -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
@@ -81,6 +70,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -94,7 +84,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
+				<version>2.10.2</version>
 				<configuration>
 					<aggregate>true</aggregate>
 				</configuration>
@@ -110,7 +100,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<phase>verify</phase>
