@@ -147,10 +147,16 @@ public class JbaTemplate {
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
-	public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException {
+	public boolean deleteModel(Object model) throws RuntimeException {
 		boolean ret = false;
 		String sql = "";
-		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model, fieldNames);
+		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model);
+		if (sql.toLowerCase().indexOf("where") < 1) {
+			LogFileUtil.info(null, "执行sql：" + sql);
+			LogFileUtil.info(null, "不允许清空表数据,请使用sql清空");
+			return false;
+//			throw new RuntimeException("model对象为空对象");
+		}
 		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
 		LogFileUtil.info(null, "执行sql：" + sql);
 		LogFileUtil.info(null, "参数为：" + CommonUtil.objToMap(model));
@@ -498,49 +504,30 @@ public class JbaTemplate {
 	 *            表名
 	 * @param model
 	 *            参数对象
-	 * @param fieldNames
-	 *            根据的字段
 	 * @return
 	 * @throws RuntimeException
 	 */
-	private <T> String getNamedParmeterSql_Delete(String tblName, T model, String... fieldNames)
-			throws RuntimeException {
+	private <T> String getNamedParmeterSql_Delete(String tblName, T model) throws RuntimeException {
 		String res = "";
 		if (model == null) {
 			return res;
 		}
-		if (fieldNames.length < 1) {
-			return res;
-		}
-		// 转小写
-		for (int i = 0; i < fieldNames.length; i++) {
-			fieldNames[i] = fieldNames[i].toLowerCase();
-		}
-		List<String> fieldLst = Arrays.asList(fieldNames);
-		StringBuilder fieldList = new StringBuilder();
 		StringBuilder where = new StringBuilder();
-		res = "DELETE FROM" + tblName;
+		res = "DELETE FROM " + tblName;
 		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
 			try {
 				if (field.get(model) != null) {
-					if (!fieldLst.contains(field.getName().toLowerCase())) {
-						fieldList.append(field.getName() + "=:" + field.getName() + ",");
-					} else {
-						where.append(field.getName() + "=:" + field.getName() + " AND ");
-					}
-				} else if (fieldLst.contains(field.getName().toLowerCase())) {
-					throw new RuntimeException("WHERE子句中存在字段【" + field.getName() + "】值为空");
+					where.append(field.getName() + "=:" + field.getName() + " AND ");
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
 		}
-		if (fieldList.length() < 1) {
+		if (where.length() < 1) {
 			return res;
 		}
-		res = res + fieldList.toString().substring(0, fieldList.toString().trim().length() - 1) + " WHERE "
-				+ where.toString().substring(0, where.toString().lastIndexOf(" AND "));
+		res = res + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
 		return res;
 	}
 
