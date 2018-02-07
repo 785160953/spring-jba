@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ JbaTemplate jbaTemplate;
  
 `2、public boolean updateModel(Object model, String... fieldNames) throws RuntimeException;`  更新对象
 
-`3、public boolean deleteModel(Object model) throws RuntimeException;` 删除对象
+`3、public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException;` 删除对象
 
 `4、public <T> T queryColumn(String sql, Object model, Class<T> clazz);` 只能查询某列的值
 
