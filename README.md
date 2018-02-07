@@ -11,6 +11,7 @@
 </dependency>
 ```
 
+
 # 注解解释 #
 1. `@EnableJBA` 开启spring-jba创建表功能
 2. `@Table` 该注解是声明对象为表对象
