@@ -37,88 +37,86 @@
 		<developerConnection>scm:git:git@gitee.com:XiHengZi/spring-jba.git</developerConnection>
 		<tag>master</tag>
 	</scm>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<!-- 这个id需要在setting.xml中设置 -->
-			<id>sonatype-nexus-snapshots</id>
-			<name>OSS Snapshots Repository</name>
-			<!-- 这里的url就是Issue中回复的snapshots 的repo地址 -->
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>OSS Staging Repository</name>
-			<!-- 这里的url就是Issue中回复的staging 的repo地址 -->
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-
 	<profiles>
 		<profile>
-			<id>disable-javadoc-doclint</id>
-			<activation>
-				<jdk>[1.7,)</jdk>
-			</activation>
-			<properties>
-				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties>
+			<id>release</id>
+			<distributionManagement>
+				<snapshotRepository>
+					<!-- 这个id需要在setting.xml中设置 -->
+					<id>sonatype-nexus-snapshots</id>
+					<name>OSS Snapshots Repository</name>
+					<!-- 这里的url就是Issue中回复的snapshots 的repo地址 -->
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>sonatype-nexus-staging</id>
+					<name>OSS Staging Repository</name>
+					<!-- 这里的url就是Issue中回复的staging 的repo地址 -->
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+				</repository>
+			</distributionManagement>
+
+			<build>
+				<plugins>
+					<!--生成源码jar包 -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- 生成javadoc文档 -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.2</version>
+						<configuration>
+							<aggregate>true</aggregate>
+						</configuration>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
-
 	<build>
-		<!-- 指定编译的jdk版本 -->
 		<plugins>
+			<!-- 指定编译的jdk版本 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
-			</plugin>
-			<!--生成源码jar包 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- 生成javadoc文档 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<aggregate>true</aggregate>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
