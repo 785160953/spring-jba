@@ -1,6 +1,6 @@
 # spring-jba
 `JavaBeanAccess`java对象访问，基于JDK1.7+
-```目前仅支持MySql、Oracle数据库  ```:grimacing:
+```目前仅支持MySql数据库  ```:grimacing:
 
 # maven依赖
 ```
@@ -30,16 +30,16 @@
 # 类型转换对应表
 | `Java`类型 | `Mysql`类型 | `Oracle`类型 |
 |---| --- | -- |
-|`String`             | `varchar`/length>2000的为`text` | `varchar2` |
-|`byte`/`Byte`        | `tinyint` | `number(4)` |
-|`short`/`Short`      | `smallint` | `number(6)` |
-|`int`/`Integer`      | `int` | `integer` |
-|`long`/`Long`        | `bigint` | `number(20)` |
-|`double`/`Double`    | `double` | `number` |
-|`float`/`Float`      | `double` | `number` |
-|`BigDecimal`         | `decimal` | `number` |
-|`Date`               | `datetime` | `date` |
-|`其他`               | `varchar(255)` | `varchar2(255)` |
+|`String`             | `varchar`/length>2000的为`text` | `-` |
+|`byte`/`Byte`        | `tinyint` | `-` |
+|`short`/`Short`      | `smallint` | `-` |
+|`int`/`Integer`      | `int` | `-` |
+|`long`/`Long`        | `bigint` | `-` |
+|`double`/`Double`    | `double` | `-` |
+|`float`/`Float`      | `double` | `-` |
+|`BigDecimal`         | `decimal` | `-` |
+|`Date`               | `datetime` | `-` |
+|`其他`               | `varchar(255)` | `-` |
 
 # 使用教程
 本项目为简易ORM，是基于spring-JdbcTemplate实现，故不支持其他复杂操作，所以目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
@@ -97,4 +97,4 @@ JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-02-03`
+`更新时间：2018-02-07`
