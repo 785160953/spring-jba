@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
@@ -76,7 +76,7 @@ JbaTemplate jbaTemplate;
  
 `2、public boolean updateModel(Object model, String... fieldNames) throws RuntimeException;`  更新对象
 
-`3、public boolean deleteModel(Object model, String... fieldNames) throws RuntimeException;` 删除对象
+`3、public boolean deleteModel(Object model) throws RuntimeException;` 删除对象
 
 `4、public <T> T queryColumn(String sql, Object model, Class<T> clazz);` 只能查询某列的值
 
@@ -96,4 +96,4 @@ JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-02-03`
+`更新时间：2018-02-07`
