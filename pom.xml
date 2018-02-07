@@ -4,7 +4,7 @@
 	<groupId>xin.xihc</groupId>
 	<artifactId>spring-jba</artifactId>
 	<version>1.0.4</version>
-	<name>java bean access</name>
+	<name>spring-jba</name>
 	<description>java对象访问</description>
 	<url>https://gitee.com/XiHengZi/spring-jba</url>
 	<properties>
