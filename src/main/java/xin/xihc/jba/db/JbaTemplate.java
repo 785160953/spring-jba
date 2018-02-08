@@ -27,7 +27,7 @@ import xin.xihc.utils.logfile.LogFileUtil;
 public class JbaTemplate {
 
 	private DBType dbType = DBType.MySql;
-
+	
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 

@@ -26,6 +26,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 
 	public final static String log_name = "DB_Update_MySql_Sql";
 
+	public String table_schema = "";
+
 	@Override
 	public boolean isTableExists(String tblName, JbaTemplate jbaTemplate) {
 		boolean res = false;
@@ -61,10 +63,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 
 	@Override
 	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
+		// 先获取当前数据库名
+		String tableSchema = jbaTemplate.queryColumn("select database()", null, String.class);
 		// 先获取表结构信息
-		List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
-				"select * from information_schema.columns where table_name = '" + tbl.getTableName() + "'", null,
-				MysqlColumnInfo.class, null);
+		List<MysqlColumnInfo> list = jbaTemplate
+				.queryMixModelList("select * from information_schema.columns where table_name = '" + tbl.getTableName()
+						+ "' AND table_schema='" + tableSchema + "'", null, MysqlColumnInfo.class, null);
 		ArrayList<String> sqls = new ArrayList<>(10);
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
