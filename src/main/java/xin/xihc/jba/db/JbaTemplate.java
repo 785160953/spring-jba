@@ -258,7 +258,7 @@ public class JbaTemplate {
 		T ret = null;
 		List<T> list = queryModelList(model, clazz, null, orderBy);
 		if (list == null || list.size() < 1) {
-			ret = null;
+			return null;
 		}
 		ret = list.get(0);
 		return ret;
@@ -292,7 +292,7 @@ public class JbaTemplate {
 				LogFileUtil.info(null, "执行sql：" + sql);
 			}
 			if (list == null || list.size() < 1) {
-				ret = null;
+				return null;
 			}
 			ret = list.get(0);
 		} catch (Exception e) {
