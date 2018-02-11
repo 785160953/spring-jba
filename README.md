@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.7</version>
 </dependency>
 ```
 
@@ -27,7 +27,7 @@
 ```
 ----------
 # 类型转换对应表
-| `Java`类型 | `Mysql`类型 | `Oracle`类型 |
+| `Java`类型(建议使用包装类) | `Mysql`类型 | `Oracle`类型 |
 |---| --- | -- |
 |`String`             | `varchar`/length>2000的为`text` | `varchar2` |
 |`byte`/`Byte`        | `tinyint` | `number(4)` |
@@ -96,4 +96,4 @@ JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-02-03`
+`更新时间：2018-02-11`
