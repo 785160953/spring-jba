@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.properties.ColumnProperties;
@@ -40,7 +42,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 	}
 
 	@Override
-	public void createTable(TableProperties tbl, JbaTemplate jbaTemplate) {
+	public void createTable(TableProperties tbl, final JbaTemplate jbaTemplate) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
 		String after = "";
@@ -52,11 +54,24 @@ public class DB_MySql_Opera implements I_TableOperation {
 		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
 		jbaTemplate.executeSQL(sql.toString());
 		LogFileUtil.info(log_name, "创建表【" + tbl.getTableName() + "】语句：" + sql.toString());
+		final Object[] initData = tbl.initData();
 		// 初始化数据
-		Object[] initData = tbl.initData();
 		if (null != initData) {
-			for (Object obj : initData) {
-				jbaTemplate.insertModel(obj);
+			if (initData.length > 20) {
+				final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+				singleThreadExecutor.submit(new Runnable() {
+					@Override
+					public void run() {
+						for (Object obj : initData) {
+							jbaTemplate.insertModel(obj);
+						}
+						singleThreadExecutor.shutdown();
+					}
+				});
+			} else {
+				for (Object obj : initData) {
+					jbaTemplate.insertModel(obj);
+				}
 			}
 		}
 	}
