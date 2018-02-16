@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xin.xihc</groupId>
 	<artifactId>spring-jba</artifactId>
-	<version>1.0.8</version>
+	<version>1.0.9-beta</version>
 	<name>spring-jba</name>
 	<description>java对象访问</description>
 	<url>https://gitee.com/XiHengZi/spring-jba</url>
@@ -40,6 +40,12 @@
 	<profiles>
 		<profile>
 			<id>release</id>
+			<activation>
+				<jdk>[1.7,)</jdk>
+			</activation>
+			<properties>
+				<additionalparam>-Xdoclint:none</additionalparam>
+			</properties>
 			<distributionManagement>
 				<snapshotRepository>
 					<!-- 这个id需要在setting.xml中设置 -->

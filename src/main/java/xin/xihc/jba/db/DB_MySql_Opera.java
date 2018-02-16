@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.properties.ColumnProperties;
@@ -58,16 +56,27 @@ public class DB_MySql_Opera implements I_TableOperation {
 		// 初始化数据
 		if (null != initData) {
 			if (initData.length > 20) {
-				final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-				singleThreadExecutor.submit(new Runnable() {
+				Thread thread = new Thread(new Runnable() {
 					@Override
 					public void run() {
 						for (Object obj : initData) {
 							jbaTemplate.insertModel(obj);
 						}
-						singleThreadExecutor.shutdown();
 					}
 				});
+				thread.setDaemon(true);
+				thread.setName("InitTableData");
+				thread.start();
+//				final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+//				singleThreadExecutor.submit(new Runnable() {
+//					@Override
+//					public void run() {
+//						for (Object obj : initData) {
+//							jbaTemplate.insertModel(obj);
+//						}
+//						singleThreadExecutor.shutdown();
+//					}
+//				});
 			} else {
 				for (Object obj : initData) {
 					jbaTemplate.insertModel(obj);
