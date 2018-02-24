@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import xin.xihc.jba.db.bean.OracleColumnInfo;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableProperties;
@@ -37,8 +39,9 @@ public class DB_Oracle_Opera implements I_TableOperation {
 		return false;
 	}
 
+	@Transactional
 	@Override
-	public void createTable(TableProperties tbl, JbaTemplate jbaTemplate) {
+	public void createTable(TableProperties tbl, final JbaTemplate jbaTemplate) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
 		String after = "";
@@ -60,14 +63,30 @@ public class DB_Oracle_Opera implements I_TableOperation {
 			LogFileUtil.info(log_name, "添加表【" + tbl.getTableName() + "】字段备注：" + addComment);
 		}
 		// 初始化数据
-		Object[] initData = tbl.initData();
+		final Object[] initData = tbl.initData();
+		// 初始化数据
 		if (null != initData) {
-			for (Object obj : initData) {
-				jbaTemplate.insertModel(obj);
+			if (initData.length > 20) {
+				Thread thread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						for (Object obj : initData) {
+							jbaTemplate.insertModel(obj);
+						}
+					}
+				});
+				thread.setDaemon(true);
+				thread.setName("InitTableData");
+				thread.start();
+			} else {
+				for (Object obj : initData) {
+					jbaTemplate.insertModel(obj);
+				}
 			}
 		}
 	}
 
+	@Transactional
 	@Override
 	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
 		// 先获取表结构信息

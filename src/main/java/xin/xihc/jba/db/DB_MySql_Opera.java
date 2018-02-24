@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableProperties;
@@ -39,6 +41,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return res;
 	}
 
+	@Transactional
 	@Override
 	public void createTable(TableProperties tbl, final JbaTemplate jbaTemplate) {
 		StringBuilder sql = new StringBuilder();
@@ -85,6 +88,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		}
 	}
 
+	@Transactional
 	@Override
 	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
 		// 先获取当前数据库名
