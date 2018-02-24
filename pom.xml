@@ -40,12 +40,12 @@
 	<profiles>
 		<profile>
 			<id>release</id>
-			<activation>
+			<!-- <activation>
 				<jdk>[1.7,)</jdk>
 			</activation>
 			<properties>
 				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties>
+			</properties> -->
 			<distributionManagement>
 				<snapshotRepository>
 					<!-- 这个id需要在setting.xml中设置 -->
