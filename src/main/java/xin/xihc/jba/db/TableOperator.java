@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import xin.xihc.jba.annotation.JbaConfig.DealMode;
 import xin.xihc.jba.properties.TableManager;
 import xin.xihc.jba.properties.TableProperties;
+import xin.xihc.utils.logfile.LogFileUtil;
 
 /**
  * 表管理
@@ -37,11 +39,17 @@ public class TableOperator {
 			throw new RuntimeException("【" + jbaTemplate.getDbType().name() + "】该数据库类型暂时不支持");
 		}
 		
+		// 是否打印到控制台
+		LogFileUtil.setDebugger(TableManager.debugger);
 		for (TableProperties tblObj : TableManager.getTbls().values()) {
 			if (tableOperation.isTableExists(tblObj.getTableName(), jbaTemplate)) {
-				tableOperation.updateTable(tblObj, jbaTemplate);
+				if (TableManager.mode == DealMode.ALL || TableManager.mode == DealMode.UPDATE) {
+					tableOperation.updateTable(tblObj, jbaTemplate);
+				}
 			} else {
-				tableOperation.createTable(tblObj, jbaTemplate);
+				if (TableManager.mode == DealMode.ALL || TableManager.mode == DealMode.CREATE) {
+					tableOperation.createTable(tblObj, jbaTemplate);
+				}
 			}
 		}
 	}

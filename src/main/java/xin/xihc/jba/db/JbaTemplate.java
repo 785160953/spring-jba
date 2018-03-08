@@ -607,8 +607,9 @@ public class JbaTemplate {
 		// 先查询总数
 		String sql_Count = "SELECT COUNT(1) FROM (" + sql + ") t_temp";
 		Integer totalCount = queryColumn(sql_Count, model, Integer.class);
-		if (null == totalCount) {
+		if (null == totalCount || totalCount < 1) {
 			totalCount = 0;
+			pageInfo.setTotalCount(0);
 			pageInfo.setPageNo(1);
 			return sql;
 		}

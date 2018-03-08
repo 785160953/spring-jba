@@ -70,16 +70,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 				thread.setDaemon(true);
 				thread.setName("InitTableData");
 				thread.start();
-//				final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-//				singleThreadExecutor.submit(new Runnable() {
-//					@Override
-//					public void run() {
-//						for (Object obj : initData) {
-//							jbaTemplate.insertModel(obj);
-//						}
-//						singleThreadExecutor.shutdown();
-//					}
-//				});
 			} else {
 				for (Object obj : initData) {
 					jbaTemplate.insertModel(obj);

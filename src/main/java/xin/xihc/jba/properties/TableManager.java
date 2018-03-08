@@ -5,6 +5,9 @@ package xin.xihc.jba.properties;
 
 import java.util.LinkedHashMap;
 
+import xin.xihc.jba.annotation.JbaConfig.DealMode;
+
+
 /**
  * 数据库表工具类
  * 
@@ -14,6 +17,10 @@ import java.util.LinkedHashMap;
  * @since
  */
 public class TableManager {
+
+	public static DealMode mode = DealMode.ALL;
+
+	public static boolean debugger = true;
 
 	private static LinkedHashMap<String, TableProperties> tbls = new LinkedHashMap<>(16);
 

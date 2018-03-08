@@ -12,6 +12,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
+import xin.xihc.jba.annotation.JbaConfig;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.db.InitTableDataIntf;
 import xin.xihc.jba.db.JbaTemplate;
@@ -51,6 +52,13 @@ public class AnnotationScan implements SmartLifecycle {
 	public void start() {
 		// 设置数据源地址，用于区别数据库类型
 		jbaTemplate.setDbType(dbUrl);
+		Map<String, Object> jbaConfig = SpringContextUtil.getApplicationContext()
+				.getBeansWithAnnotation(JbaConfig.class);
+		for (Object obj : jbaConfig.values()) {
+			JbaConfig item = obj.getClass().getAnnotation(JbaConfig.class);
+			TableManager.debugger = item.debugger();
+			TableManager.mode = item.mode();
+		}
 		Map<String, Object> map = SpringContextUtil.getApplicationContext().getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);
