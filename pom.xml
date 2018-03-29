@@ -140,7 +140,7 @@
 		<dependency>
 			<groupId>xin.xihc</groupId>
 			<artifactId>CommonUtils</artifactId>
-			<version>1.7</version>
+			<version>1.11</version>
 		</dependency>
 	</dependencies>
 
