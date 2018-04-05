@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import xin.xihc.utils.common.CommonUtil;
 import xin.xihc.utils.logfile.LogFileUtil;
@@ -24,6 +25,7 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * @Modified 2017年11月26日
  */
 @Component
+@EnableTransactionManagement
 public class JbaTemplate {
 
 	private static final String jabLogName = "JbaExecSqls";
@@ -168,11 +170,13 @@ public class JbaTemplate {
 	/**
 	 * 查询数据库 - 单个列值
 	 * 
-	 * @param tblName
-	 *            对象对应的表名
-	 * @param <T>
-	 *            对象模型-创建查询条件
-	 * @return 单个列值
+	 * @param sql
+	 *            需要查询的sql
+	 * @param model
+	 *            sql中参数值
+	 * @param clazz
+	 *            需要返回的类型
+	 * @return 返回查询某个单列的值
 	 */
 	public <T> T queryColumn(String sql, Object model, Class<T> clazz) {
 		T ret = null;

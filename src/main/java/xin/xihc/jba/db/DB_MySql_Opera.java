@@ -158,10 +158,16 @@ public class DB_MySql_Opera implements I_TableOperation {
 		} else if (col.type().equals(String.class)) {
 			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 2000) {
 				temp.append("text");
+				if (isCreate) {
+					temp.append(" BINARY");
+				}
 			} else {
 				temp.append("varchar");
 				if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
 					temp.append("(" + col.length() + ")");
+				}
+				if (isCreate) {
+					temp.append(" BINARY");
 				}
 			}
 		} else if (col.type().equals(Double.class) || col.type().equals(double.class) || col.type().equals(float.class)
@@ -179,6 +185,9 @@ public class DB_MySql_Opera implements I_TableOperation {
 			temp.append("datetime");
 		} else {
 			temp.append("varchar(255)");
+			if (isCreate) {
+				temp.append(" BINARY");
+			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {
 			temp.append(" PRIMARY KEY ");
