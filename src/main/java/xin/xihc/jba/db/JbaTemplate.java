@@ -144,8 +144,6 @@ public class JbaTemplate {
 	 * 
 	 * @param model
 	 *            对象模型
-	 * @param fieldNames
-	 *            where子句条件字段数组
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
