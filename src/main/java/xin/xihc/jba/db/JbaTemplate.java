@@ -442,8 +442,38 @@ public class JbaTemplate {
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder valueList = new StringBuilder();
 		res = "INSERT INTO " + tblName + "(";
+		// 找到是否存在guid主键
+		String primaryKey = null;
+		String keyValue = null;
+		LinkedHashMap<String, ColumnProperties> columns = TableManager.getTable(tblName).getColumns();
+		for (ColumnProperties columnProperties : columns.values()) {
+			if (!columnProperties.primary()) {
+				continue;
+			}
+			PrimaryPolicy policy = columnProperties.policy();
+			if (policy == PrimaryPolicy.GUID) {
+				primaryKey = columnProperties.colName();
+				keyValue = CommonUtil.newGuid(false);
+				// fieldList.append(columnProperties.colName() + ",");
+				// valueList.append("'" + CommonUtil.newGuid(false) + "',");
+			} else if (policy == PrimaryPolicy.GUID_UP) {
+				primaryKey = columnProperties.colName();
+				keyValue = CommonUtil.newGuid(true);
+				// fieldList.append(columnProperties.colName() + ",");
+				// valueList.append("'" + CommonUtil.newGuid(true) + "',");
+			}
+			break;
+		}
 		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
+			if (null != primaryKey && field.getName().equals(primaryKey)) {
+				try {
+					field.set(model, keyValue);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					LogFileUtil.exception(jabLogName, e);
+					e.printStackTrace();
+				}
+			}
 			try {
 				if (field.get(model) != null) {
 					fieldList.append(field.getName() + ",");
@@ -456,19 +486,6 @@ public class JbaTemplate {
 		}
 		if (fieldList.length() < 1) {
 			throw new RuntimeException("属性都为空,请确认");
-		}
-		// 找到是否存在guid主键
-		LinkedHashMap<String, ColumnProperties> columns = TableManager.getTable(tblName).getColumns();
-		for (ColumnProperties columnProperties : columns.values()) {
-			PrimaryPolicy policy = columnProperties.policy();
-			if (policy == PrimaryPolicy.GUID) {
-				fieldList.append(columnProperties.colName() + ",");
-				valueList.append(CommonUtil.newGuid(false) + ",");
-			}
-			if (policy == PrimaryPolicy.GUID_UP) {
-				fieldList.append(columnProperties.colName() + ",");
-				valueList.append(CommonUtil.newGuid(true) + ",");
-			}
 		}
 		res = res + fieldList.toString().substring(0, fieldList.toString().length() - 1) + ") VALUES ("
 				+ valueList.toString().substring(0, valueList.toString().length() - 1) + ")";
