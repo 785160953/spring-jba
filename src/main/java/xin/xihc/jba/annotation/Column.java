@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Inherited
 public @interface Column {
 
-	public enum PrimaryPolicy {
+	public enum Policy {
 		NONE, AUTO, GUID/* 小写 */, GUID_UP/* 大写 */, SEQ;
 	}
 
@@ -64,7 +64,7 @@ public @interface Column {
 	 * 
 	 * @return
 	 */
-	public PrimaryPolicy policy() default PrimaryPolicy.NONE;
+	public Policy policy() default Policy.NONE;
 
 	/**
 	 * 长度限制，小于1代表不限制

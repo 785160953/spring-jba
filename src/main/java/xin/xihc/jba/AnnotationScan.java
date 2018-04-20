@@ -12,7 +12,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
-import xin.xihc.jba.annotation.Column.PrimaryPolicy;
+import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.annotation.JbaConfig;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.db.InitTableDataIntf;
@@ -105,11 +105,11 @@ public class AnnotationScan implements SmartLifecycle {
 						}
 						colP.primary(true);
 						colP.notNull(true);
-						colP.policy(column.policy());
-						/** 如果是guid为主键长度默认为32 */
-						if (colP.policy() == PrimaryPolicy.GUID || colP.policy() == PrimaryPolicy.GUID_UP) {
-							colP.length(32);
-						}
+					}
+					colP.policy(column.policy());
+					/** 如果是guid为主键长度默认为32 */
+					if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
+						colP.length(32);
 					}
 				}
 			}

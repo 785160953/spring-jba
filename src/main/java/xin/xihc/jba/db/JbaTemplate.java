@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import xin.xihc.jba.annotation.Column.PrimaryPolicy;
+import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableManager;
 import xin.xihc.utils.common.CommonUtil;
@@ -443,38 +443,29 @@ public class JbaTemplate {
 		StringBuilder valueList = new StringBuilder();
 		res = "INSERT INTO " + tblName + "(";
 		// 找到是否存在guid主键
-		String primaryKey = null;
-		String keyValue = null;
+		LinkedHashMap<String, String> guidKeys = new LinkedHashMap<String, String>(3);
 		LinkedHashMap<String, ColumnProperties> columns = TableManager.getTable(tblName).getColumns();
 		for (ColumnProperties columnProperties : columns.values()) {
-			if (!columnProperties.primary()) {
-				continue;
+			Policy policy = columnProperties.policy();
+			if (policy == Policy.GUID) {
+				guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(false));
+			} else if (policy == Policy.GUID_UP) {
+				guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(true));
 			}
-			PrimaryPolicy policy = columnProperties.policy();
-			if (policy == PrimaryPolicy.GUID) {
-				primaryKey = columnProperties.colName();
-				keyValue = CommonUtil.newGuid(false);
-				// fieldList.append(columnProperties.colName() + ",");
-				// valueList.append("'" + CommonUtil.newGuid(false) + "',");
-			} else if (policy == PrimaryPolicy.GUID_UP) {
-				primaryKey = columnProperties.colName();
-				keyValue = CommonUtil.newGuid(true);
-				// fieldList.append(columnProperties.colName() + ",");
-				// valueList.append("'" + CommonUtil.newGuid(true) + "',");
-			}
-			break;
 		}
 		for (Field field : getAllFields(model.getClass())) {
 			field.setAccessible(true);
-			if (null != primaryKey && field.getName().equals(primaryKey)) {
-				try {
-					field.set(model, keyValue);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					LogFileUtil.exception(jabLogName, e);
-					e.printStackTrace();
-				}
-			}
 			try {
+				if (field.get(model) == null) {
+					if (guidKeys.containsKey(field.getName())) {
+						try {
+							field.set(model, guidKeys.get(field.getName()));
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							LogFileUtil.exception(jabLogName, e);
+							e.printStackTrace();
+						}
+					}
+				}
 				if (field.get(model) != null) {
 					fieldList.append(field.getName() + ",");
 					valueList.append(":" + field.getName() + ",");

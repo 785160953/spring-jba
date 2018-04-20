@@ -3,7 +3,7 @@
  */
 package xin.xihc.jba.properties;
 
-import xin.xihc.jba.annotation.Column.PrimaryPolicy;
+import xin.xihc.jba.annotation.Column.Policy;
 
 /**
  * 
@@ -19,7 +19,7 @@ public class ColumnProperties {
 	private String defaultValue;
 	private Boolean notNull = false;
 	private Boolean primary = false;
-	private PrimaryPolicy policy = PrimaryPolicy.NONE;
+	private Policy policy = Policy.NONE;
 	private Integer length = 255;
 	private String remark;
 	private Integer precision = 4;
@@ -77,11 +77,11 @@ public class ColumnProperties {
 		return this;
 	}
 
-	public PrimaryPolicy policy() {
+	public Policy policy() {
 		return policy;
 	}
 
-	public ColumnProperties policy(PrimaryPolicy policy) {
+	public ColumnProperties policy(Policy policy) {
 		this.policy = policy;
 		return this;
 	}
