@@ -52,7 +52,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			sql.append(",");
 			after = col.colName();
 		}
-		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8;");
+		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
 		jbaTemplate.executeSQL(sql.toString());
 		LogFileUtil.info(log_name, "创建表【" + tbl.getTableName() + "】语句：" + sql.toString());
 		final Object[] initData = tbl.initData();
@@ -128,12 +128,9 @@ public class DB_MySql_Opera implements I_TableOperation {
 			sqls.add("DROP COLUMN " + item.getColumn_name());
 		}
 		for (int i = 0; i < sqls.size(); i++) {
-			if (i == sqls.size() - 1) {
-				sql.append(sqls.get(i));
-			} else {
-				sql.append(sqls.get(i) + ",");
-			}
+			sql.append(sqls.get(i) + ",");
 		}
+		sql.append(" COMMENT = '" + tbl.getRemark() + "'");
 		jbaTemplate.executeSQL(sql.toString());
 		LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】语句：" + sql.toString());
 	}

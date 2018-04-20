@@ -12,6 +12,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
+import xin.xihc.jba.annotation.Column.PrimaryPolicy;
 import xin.xihc.jba.annotation.JbaConfig;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.db.InitTableDataIntf;
@@ -68,6 +69,8 @@ public class AnnotationScan implements SmartLifecycle {
 			} else {
 				tblP = TableManager.addTable(obj.getClass().getSimpleName(), table.value());
 			}
+			// 获取表注释
+			tblP.setRemark(table.remark());
 			Class<?>[] interfaces = obj.getClass().getInterfaces();
 			for (Class<?> class1 : interfaces) {
 				if (InitTableDataIntf.class.equals(class1)) {
@@ -103,6 +106,10 @@ public class AnnotationScan implements SmartLifecycle {
 						colP.primary(true);
 						colP.notNull(true);
 						colP.policy(column.policy());
+						/** 如果是guid为主键长度默认为32 */
+						if (colP.policy() == PrimaryPolicy.GUID || colP.policy() == PrimaryPolicy.GUID_UP) {
+							colP.length(32);
+						}
 					}
 				}
 			}

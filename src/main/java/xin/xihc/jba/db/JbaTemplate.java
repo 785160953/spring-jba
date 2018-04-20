@@ -1,8 +1,10 @@
 package xin.xihc.jba.db;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import xin.xihc.jba.annotation.Column.PrimaryPolicy;
+import xin.xihc.jba.properties.ColumnProperties;
+import xin.xihc.jba.properties.TableManager;
 import xin.xihc.utils.common.CommonUtil;
 import xin.xihc.utils.logfile.LogFileUtil;
 
@@ -58,8 +63,20 @@ public class JbaTemplate {
 		if (null == clazz) {
 			return res;
 		}
+		ArrayList<Field> temp = null;
 		while (!clazz.equals(Object.class)) {
-			res.addAll(0, Arrays.asList(clazz.getDeclaredFields()));
+			temp = new ArrayList<>(10);
+			for (Field field : clazz.getDeclaredFields()) {
+				field.setAccessible(true);
+				if (Modifier.isStatic(field.getModifiers())) {
+					continue;
+				}
+				if (Modifier.isFinal(field.getModifiers())) {
+					continue;
+				}
+				temp.add(field);
+			}
+			res.addAll(0, temp);
 			clazz = clazz.getSuperclass();
 		}
 		return res;
@@ -438,7 +455,20 @@ public class JbaTemplate {
 			}
 		}
 		if (fieldList.length() < 1) {
-			return res;
+			throw new RuntimeException("属性都为空,请确认");
+		}
+		// 找到是否存在guid主键
+		LinkedHashMap<String, ColumnProperties> columns = TableManager.getTable(tblName).getColumns();
+		for (ColumnProperties columnProperties : columns.values()) {
+			PrimaryPolicy policy = columnProperties.policy();
+			if (policy == PrimaryPolicy.GUID) {
+				fieldList.append(columnProperties.colName() + ",");
+				valueList.append(CommonUtil.newGuid(false) + ",");
+			}
+			if (policy == PrimaryPolicy.GUID_UP) {
+				fieldList.append(columnProperties.colName() + ",");
+				valueList.append(CommonUtil.newGuid(true) + ",");
+			}
 		}
 		res = res + fieldList.toString().substring(0, fieldList.toString().length() - 1) + ") VALUES ("
 				+ valueList.toString().substring(0, valueList.toString().length() - 1) + ")";

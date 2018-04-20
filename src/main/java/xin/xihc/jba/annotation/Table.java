@@ -27,6 +27,14 @@ import org.springframework.stereotype.Component;
 @Inherited
 public @interface Table {
 
+	/**
+	 * 表名
+	 */
 	String value() default "";
+
+	/**
+	 * 备注
+	 */
+	public String remark() default "";
 
 }

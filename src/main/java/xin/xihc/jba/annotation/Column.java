@@ -64,7 +64,7 @@ public @interface Column {
 	 * 
 	 * @return
 	 */
-	public PrimaryPolicy policy() default PrimaryPolicy.AUTO;
+	public PrimaryPolicy policy() default PrimaryPolicy.NONE;
 
 	/**
 	 * 长度限制，小于1代表不限制

@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 public class TableProperties {
 
 	private String tableName;
+	private String remark;
 	private Object[] initData;
 	private LinkedHashMap<String, ColumnProperties> columns = new LinkedHashMap<>(16);
 
@@ -34,6 +35,14 @@ public class TableProperties {
 
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 
 	public LinkedHashMap<String, ColumnProperties> getColumns() {
