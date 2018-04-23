@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import xin.xihc.jba.annotation.JbaConfig.DealMode;
 import xin.xihc.jba.properties.TableManager;
+import xin.xihc.jba.properties.TableManager.Mode;
 import xin.xihc.jba.properties.TableProperties;
 import xin.xihc.utils.logfile.LogFileUtil;
 
@@ -43,11 +43,11 @@ public class TableOperator {
 		LogFileUtil.setDebugger(TableManager.debugger);
 		for (TableProperties tblObj : TableManager.getTbls().values()) {
 			if (tableOperation.isTableExists(tblObj.getTableName(), jbaTemplate)) {
-				if (TableManager.mode == DealMode.ALL || TableManager.mode == DealMode.UPDATE) {
+				if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
 					tableOperation.updateTable(tblObj, jbaTemplate);
 				}
 			} else {
-				if (TableManager.mode == DealMode.ALL || TableManager.mode == DealMode.CREATE) {
+				if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE) {
 					tableOperation.createTable(tblObj, jbaTemplate);
 				}
 			}

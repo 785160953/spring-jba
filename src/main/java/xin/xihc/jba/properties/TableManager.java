@@ -5,8 +5,6 @@ package xin.xihc.jba.properties;
 
 import java.util.LinkedHashMap;
 
-import xin.xihc.jba.annotation.JbaConfig.DealMode;
-
 
 /**
  * 数据库表工具类
@@ -17,8 +15,19 @@ import xin.xihc.jba.annotation.JbaConfig.DealMode;
  * @since
  */
 public class TableManager {
+	
+	/**
+	 * 不操作、只创建、只更新、即创建也更新
+	 * 
+	 * @author 席恒昌
+	 * @Date 2018年3月8日
+	 *
+	 */
+	public static enum Mode {
+		NONE, CREATE, UPDATE, ALL;
+	};
 
-	public static DealMode mode = DealMode.ALL;
+	public static Mode mode = Mode.ALL;
 
 	public static boolean debugger = true;
 

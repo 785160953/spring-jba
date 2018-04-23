@@ -181,7 +181,10 @@ public class DB_MySql_Opera implements I_TableOperation {
 		} else if (col.type().equals(Date.class)) {
 			temp.append("datetime");
 		} else {
-			temp.append("varchar(255)");
+			temp.append("varchar");
+			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
+				temp.append("(" + col.length() + ")");
+			}
 			if (isCreate) {
 				temp.append(" BINARY");
 			}

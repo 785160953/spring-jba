@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Column.Policy;
-import xin.xihc.jba.annotation.JbaConfig;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.db.InitTableDataIntf;
 import xin.xihc.jba.db.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableManager;
+import xin.xihc.jba.properties.TableManager.Mode;
 import xin.xihc.jba.properties.TableProperties;
 
 /**
@@ -41,7 +41,12 @@ public class AnnotationScan implements SmartLifecycle {
 	JbaTemplate jbaTemplate;
 
 	@Value("${spring.datasource.url:null}")
-	String dbUrl;
+	private String dbUrl;
+
+	@Value("${spring.jba.debugger:true}")
+	private boolean debugger;
+	@Value("${spring.jba.mode:ALL}")
+	private String mode;
 
 	/**
 	 * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
@@ -53,13 +58,8 @@ public class AnnotationScan implements SmartLifecycle {
 	public void start() {
 		// 设置数据源地址，用于区别数据库类型
 		jbaTemplate.setDbType(dbUrl);
-		Map<String, Object> jbaConfig = SpringContextUtil.getApplicationContext()
-				.getBeansWithAnnotation(JbaConfig.class);
-		for (Object obj : jbaConfig.values()) {
-			JbaConfig item = obj.getClass().getAnnotation(JbaConfig.class);
-			TableManager.debugger = item.debugger();
-			TableManager.mode = item.mode();
-		}
+		TableManager.debugger = debugger;
+		TableManager.mode = Mode.valueOf(mode);
 		Map<String, Object> map = SpringContextUtil.getApplicationContext().getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);
