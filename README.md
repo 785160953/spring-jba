@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.0.7</version>
+    <version>1.1.2-beta</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@
 |`其他`               | `varchar(255)` | `varchar2(255)` |
 
 # 使用教程
-本项目为简易ORM，是基于spring-JdbcTemplate实现，故不支持其他复杂操作，所以目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
+本项目为简易ORM，是基于spring-JdbcTemplate实现，支持事务管理，复杂操作则需要自己写SQL。目前表结构对象不支持自定义名称，即`对象名为表名、对象字段名为表结构中的列名。`请知悉。。
 
 ## 数据源连接池配置-配置文件中，数据库类型根据spring.datasource.url的值判断（`必须要配置哦`）
 ```
@@ -49,6 +49,13 @@ spring.datasource.driver-class-name=com.mysql.jdbc.Driver
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/test
 spring.datasource.username=root
 spring.datasource.password=*****
+
+#jba相关配置
+#是否开启日志打印到控制台
+spring.jba.debugger=false
+#jba表结构更新模式NONE-不操作，CREATE-只创建表，UPDATE-只更新表结构，ALL-所有
+spring.jba.mode=NONE/ALL/CREATE/UPDATE
+
 ```
 
 ## 新增初始化数据接口`InitTableDataIntf<T>`
@@ -96,4 +103,4 @@ JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-02-11`
+`更新时间：2018-04-24`
