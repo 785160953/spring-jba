@@ -45,10 +45,13 @@
 
 ## 数据源连接池配置-配置文件中，数据库类型根据spring.datasource.url的值判断（`必须要配置哦`）
 ```
+#数据源配置
 spring.datasource.driver-class-name=com.mysql.jdbc.Driver
 spring.datasource.url=jdbc:mysql://127.0.0.1:3306/test
 spring.datasource.username=root
 spring.datasource.password=*****
+#使用阿里巴巴druid数据库连接池
+spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
 
 #jba相关配置
 #是否开启日志打印到控制台
