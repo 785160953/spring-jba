@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -107,7 +106,7 @@ public class JbaTemplate {
 		}
 		String sql = "";
 		sql = getNamedParmeterSql_Insert(model.getClass().getSimpleName(), model);
-		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
 		LogFileUtil.info(jabLogName, "插入数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
@@ -132,7 +131,7 @@ public class JbaTemplate {
 		}
 		String sql = "";
 		sql = getNamedParmeterSql_Update(model.getClass().getSimpleName(), model, fieldNames);
-		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
 		LogFileUtil.info(jabLogName, "更新数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
@@ -148,7 +147,7 @@ public class JbaTemplate {
 	 */
 	public boolean executeSQL(String sql) {
 		boolean res = false;
-		int update = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(new Object()));
+		int update = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(new Object()));
 		LogFileUtil.info(jabLogName, "执行sql：" + sql);
 		if (update > 0) {
 			res = true;
@@ -174,7 +173,7 @@ public class JbaTemplate {
 			return false;
 			// throw new RuntimeException("model对象为空对象");
 		}
-		int t = namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(model));
+		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
 		LogFileUtil.info(jabLogName, "删除数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
@@ -197,9 +196,9 @@ public class JbaTemplate {
 		T ret = null;
 		try {
 			if (model != null) {
-				ret = namedParameterJdbcTemplate.queryForObject(sql, new BeanPropertySqlParameterSource(model), clazz);
+				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(model), clazz);
 			} else {
-				ret = namedParameterJdbcTemplate.queryForObject(sql, new BeanPropertySqlParameterSource(new Object()),
+				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(new Object()),
 						clazz);
 			}
 			LogFileUtil.info(jabLogName, "查询某列sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
@@ -307,7 +306,7 @@ public class JbaTemplate {
 		try {
 			List<T> list = null;
 			if (model != null) {
-				list = namedParameterJdbcTemplate.query(sql, new BeanPropertySqlParameterSource(model),
+				list = namedParameterJdbcTemplate.query(sql, new JbaBeanProperty(model),
 						new BeanPropertyRowMapper<>(clazz));
 			} else {
 				list = namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(clazz));
@@ -379,7 +378,7 @@ public class JbaTemplate {
 			if (pageInfo != null) {
 				sql_final = getNamedPageSql(sql_final, model, pageInfo);
 			}
-			ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
+			ret = namedParameterJdbcTemplate.query(sql_final, new JbaBeanProperty(model),
 					new BeanPropertyRowMapper<>(clazz));
 			LogFileUtil.info(jabLogName, "查询列表sql：" + sql_final + "\r\n参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
@@ -411,7 +410,7 @@ public class JbaTemplate {
 				sql_final = getNamedPageSql(sql, model, pageInfo);
 			}
 			if (model != null) {
-				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertySqlParameterSource(model),
+				ret = namedParameterJdbcTemplate.query(sql_final, new JbaBeanProperty(model),
 						new BeanPropertyRowMapper<>(clazz));
 			} else {
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));

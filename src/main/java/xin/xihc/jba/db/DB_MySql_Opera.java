@@ -22,7 +22,7 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * @author 席恒昌
  * @date 2018年1月24日
  * @version
- * @since
+ * @since 1.1.3
  */
 public class DB_MySql_Opera implements I_TableOperation {
 
@@ -180,6 +180,8 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 		} else if (col.type().equals(Date.class)) {
 			temp.append("datetime");
+		} else if (col.type().equals(Boolean.class) || col.type().equals(boolean.class)) {//支持boolean类型
+			temp.append("tinyint");
 		} else {
 			temp.append("varchar");
 			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
