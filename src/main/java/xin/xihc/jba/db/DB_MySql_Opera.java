@@ -23,19 +23,30 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * @author 席恒昌
  * @date 2018年1月24日
  * @version
- * @since 1.1.3
+ * @since 1.1.4
  */
 @Component
 public final class DB_MySql_Opera implements I_TableOperation {
 
 	public final static String log_name = "DB_Update_MySql_Sql";
 
-	public String table_schema = "";
+	private String table_schema = "";
+
+	/**
+	 * 先获取当前数据库名
+	 * 
+	 * @return
+	 */
+	private String getSchema(JbaTemplate jbaTemplate) {
+		return jbaTemplate.queryColumn("select database()", null, String.class);
+	}
 
 	@Override
 	public boolean isTableExists(final String tblName, JbaTemplate jbaTemplate) {
 		boolean res = false;
-		String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName + "'";
+		this.table_schema = getSchema(jbaTemplate);
+		String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName
+				+ "' AND table_schema='" + this.table_schema + "'";
 		Integer count = jbaTemplate.queryColumn(sql, null, Integer.class);
 		if (count > 0) {
 			res = true;
@@ -83,12 +94,10 @@ public final class DB_MySql_Opera implements I_TableOperation {
 	@Transactional
 	@Override
 	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
-		// 先获取当前数据库名
-		String tableSchema = jbaTemplate.queryColumn("select database()", null, String.class);
 		// 先获取表结构信息
 		List<MysqlColumnInfo> list = jbaTemplate
 				.queryMixModelList("select * from information_schema.columns where table_name = '" + tbl.getTableName()
-						+ "' AND table_schema='" + tableSchema + "'", null, MysqlColumnInfo.class, null);
+						+ "' AND table_schema='" + this.table_schema + "'", null, MysqlColumnInfo.class, null);
 		ArrayList<String> sqls = new ArrayList<>(10);
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
@@ -182,7 +191,7 @@ public final class DB_MySql_Opera implements I_TableOperation {
 			}
 		} else if (col.type().equals(Date.class)) {
 			temp.append("datetime");
-		} else if (col.type().equals(Boolean.class) || col.type().equals(boolean.class)) {//支持boolean类型
+		} else if (col.type().equals(Boolean.class) || col.type().equals(boolean.class)) {// 支持boolean类型
 			temp.append("tinyint");
 		} else {
 			temp.append("varchar");

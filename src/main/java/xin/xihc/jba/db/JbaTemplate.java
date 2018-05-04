@@ -13,6 +13,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.alibaba.druid.pool.DruidDataSource;
+
 import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableManager;
@@ -35,6 +37,22 @@ public class JbaTemplate {
 	private static final String jabLogName = "JbaExecSqls";
 
 	private DBType dbType = DBType.MySql;
+
+	public JbaTemplate() {
+		super();
+	}
+
+	/**
+	 * 开放出去,可以自己new实例
+	 * 
+	 * @param dataSource
+	 *            阿里Druid数据源
+	 */
+	public JbaTemplate(DruidDataSource dataSource) {
+		super();
+		this.setDbType(dataSource.getUrl());
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -198,8 +216,7 @@ public class JbaTemplate {
 			if (model != null) {
 				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(model), clazz);
 			} else {
-				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(new Object()),
-						clazz);
+				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(new Object()), clazz);
 			}
 			LogFileUtil.info(jabLogName, "查询某列sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
