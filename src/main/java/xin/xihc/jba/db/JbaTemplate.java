@@ -124,7 +124,7 @@ public class JbaTemplate {
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
-	public boolean updateModel(Object model, String... fieldNames) throws RuntimeException {
+	public boolean updateModel(Object model, final String... fieldNames) throws RuntimeException {
 		boolean ret = false;
 		if (null == model) {
 			return ret;
@@ -145,7 +145,7 @@ public class JbaTemplate {
 	 * @param sql
 	 * @return
 	 */
-	public boolean executeSQL(String sql) {
+	public boolean executeSQL(final String sql) {
 		boolean res = false;
 		int update = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(new Object()));
 		LogFileUtil.info(jabLogName, "执行sql：" + sql);
@@ -192,7 +192,7 @@ public class JbaTemplate {
 	 *            需要返回的类型
 	 * @return 返回查询某个单列的值
 	 */
-	public <T> T queryColumn(String sql, Object model, Class<T> clazz) {
+	public <T> T queryColumn(final String sql, Object model, Class<T> clazz) {
 		T ret = null;
 		try {
 			if (model != null) {
@@ -218,7 +218,7 @@ public class JbaTemplate {
 	 *            参数
 	 * @return
 	 */
-	public int queryCount(String sql, Object model) {
+	public int queryCount(final String sql, Object model) {
 		int ret = 0;
 		String temp = "SELECT　COUNT(1) FROM(" + sql + ")";
 		Integer count = queryColumn(temp, model, Integer.class);
@@ -277,7 +277,7 @@ public class JbaTemplate {
 	 * @return 单个对象
 	 * 
 	 */
-	public <T> T queryModelOne(Object model, Class<T> clazz, String... orderBy) {
+	public <T> T queryModelOne(Object model, Class<T> clazz, final String... orderBy) {
 		T ret = null;
 		List<T> list = queryModelList(model, clazz, null, orderBy);
 		if (list == null || list.size() < 1) {
@@ -301,7 +301,7 @@ public class JbaTemplate {
 	 * @return 单个对象
 	 * 
 	 */
-	public <T> T queryMixModelOne(String sql, Object model, Class<T> clazz) {
+	public <T> T queryMixModelOne(final String sql, Object model, Class<T> clazz) {
 		T ret = null;
 		try {
 			List<T> list = null;
@@ -336,7 +336,7 @@ public class JbaTemplate {
 	 *            排序字段
 	 * @return 列表
 	 */
-	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, String... orderBy) {
+	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final String... orderBy) {
 		List<T> ret = null;
 		if (null == model) {
 			return ret;
@@ -402,7 +402,7 @@ public class JbaTemplate {
 	 *            分页信息
 	 * @return 列表
 	 */
-	public <T> List<T> queryMixModelList(String sql, Object model, Class<T> clazz, PageInfo pageInfo) {
+	public <T> List<T> queryMixModelList(final String sql, Object model, Class<T> clazz, PageInfo pageInfo) {
 		List<T> ret = null;
 		try {
 			String sql_final = sql;
@@ -433,7 +433,7 @@ public class JbaTemplate {
 	 *            对象参数
 	 * @return
 	 */
-	private <T> String getNamedParmeterSql_Insert(String tblName, T model) {
+	private <T> String getNamedParmeterSql_Insert(final String tblName, T model) {
 		String res = "";
 		if (model == null) {
 			return res;
@@ -494,7 +494,7 @@ public class JbaTemplate {
 	 * @return
 	 * @throws RuntimeException
 	 */
-	private <T> String getNamedParmeterSql_Update(String tblName, T model, String... fieldNames)
+	private <T> String getNamedParmeterSql_Update(final String tblName, T model, final String... fieldNames)
 			throws RuntimeException {
 		String res = "";
 		if (model == null) {
@@ -548,7 +548,7 @@ public class JbaTemplate {
 	 * @return
 	 * @throws RuntimeException
 	 */
-	private <T> String getNamedParmeterSql_Delete(String tblName, T model) throws RuntimeException {
+	private <T> String getNamedParmeterSql_Delete(final String tblName, T model) throws RuntimeException {
 		String res = "";
 		if (model == null) {
 			return res;
@@ -647,7 +647,7 @@ public class JbaTemplate {
 		MySql, Oracle
 	}
 
-	public <T> String getNamedPageSql(String sql, T model, PageInfo pageInfo) {
+	public <T> String getNamedPageSql(final String sql, T model, PageInfo pageInfo) {
 		String pageSql = "";
 		// 先查询总数
 		String sql_Count = "SELECT COUNT(1) FROM (" + sql + ") t_temp";

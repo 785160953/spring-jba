@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
@@ -24,14 +25,15 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * @version
  * @since 1.1.3
  */
-public class DB_MySql_Opera implements I_TableOperation {
+@Component
+public final class DB_MySql_Opera implements I_TableOperation {
 
 	public final static String log_name = "DB_Update_MySql_Sql";
 
 	public String table_schema = "";
 
 	@Override
-	public boolean isTableExists(String tblName, JbaTemplate jbaTemplate) {
+	public boolean isTableExists(final String tblName, JbaTemplate jbaTemplate) {
 		boolean res = false;
 		String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName + "'";
 		Integer count = jbaTemplate.queryColumn(sql, null, Integer.class);
