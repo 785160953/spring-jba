@@ -591,8 +591,7 @@ public class JbaTemplate {
 	}
 
 	/*
-	 * ======================================================================
-	 * 分页信息
+	 * ====================================================================== 分页信息
 	 * ======================================================================
 	 */
 
@@ -616,6 +615,9 @@ public class JbaTemplate {
 		}
 
 		public void setTotalCount(Integer totalCount) {
+			if (this.pageSize < 1) {
+				this.pageSize = 10;
+			}
 			totalPage = totalCount % pageSize == 0 ? totalCount / pageSize : totalCount / pageSize + 1;
 			this.totalCount = totalCount;
 		}

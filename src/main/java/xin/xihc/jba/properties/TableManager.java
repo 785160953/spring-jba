@@ -5,7 +5,6 @@ package xin.xihc.jba.properties;
 
 import java.util.LinkedHashMap;
 
-
 /**
  * 数据库表工具类
  * 
@@ -15,7 +14,7 @@ import java.util.LinkedHashMap;
  * @since
  */
 public class TableManager {
-	
+
 	/**
 	 * 不操作、只创建、只更新、即创建也更新
 	 * 
@@ -53,10 +52,10 @@ public class TableManager {
 	}
 
 	public static String getTableName(Class<?> clazz) {
-		if (tbls.containsKey(clazz)) {
-			return tbls.get(clazz).getTableName();
+		if (tbls.containsKey(clazz.getSimpleName())) {
+			return tbls.get(clazz.getSimpleName()).getTableName();
 		} else {
-			throw new RuntimeException(clazz.getName() + "不存在");
+			throw new RuntimeException(clazz.getSimpleName() + "不存在");
 		}
 	}
 
