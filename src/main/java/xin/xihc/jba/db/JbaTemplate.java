@@ -85,10 +85,10 @@ public class JbaTemplate {
 			temp = new ArrayList<>(10);
 			for (Field field : clazz.getDeclaredFields()) {
 				field.setAccessible(true);
-				if (Modifier.isStatic(field.getModifiers())) {
+				if (Modifier.isStatic(field.getModifiers())) {// 过滤掉static字段
 					continue;
 				}
-				if (Modifier.isFinal(field.getModifiers())) {
+				if (Modifier.isFinal(field.getModifiers())) {// 过滤掉final字段
 					continue;
 				}
 				temp.add(field);
@@ -120,6 +120,7 @@ public class JbaTemplate {
 	public boolean insertModel(Object model) {
 		boolean ret = false;
 		if (null == model) {
+			LogFileUtil.info(jabLogName, "插入数据时model为空");
 			return ret;
 		}
 		String sql = "";
@@ -145,6 +146,7 @@ public class JbaTemplate {
 	public boolean updateModel(Object model, final String... fieldNames) throws RuntimeException {
 		boolean ret = false;
 		if (null == model) {
+			LogFileUtil.info(jabLogName, "更新数据时model为空");
 			return ret;
 		}
 		String sql = "";
@@ -174,6 +176,28 @@ public class JbaTemplate {
 	}
 
 	/**
+	 * 执行sql语句
+	 * 
+	 * @param sql
+	 *            sql带有参数
+	 * @param model
+	 *            参数对象
+	 * @return
+	 */
+	public boolean executeSQL(final String sql, Object model) {
+		boolean res = false;
+		if (null == model) {
+			model = new Object();
+		}
+		int update = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
+		LogFileUtil.info(jabLogName, "执行sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		if (update > 0) {
+			res = true;
+		}
+		return res;
+	}
+
+	/**
 	 * 根据字段删除数据
 	 * 
 	 * @param model
@@ -183,6 +207,10 @@ public class JbaTemplate {
 	 */
 	public boolean deleteModel(Object model) throws RuntimeException {
 		boolean ret = false;
+		if (null == model) {
+			LogFileUtil.info(jabLogName, "删除数据时model为空");
+			return ret;
+		}
 		String sql = "";
 		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model);
 		// 不允许通过这里清空表
@@ -256,6 +284,10 @@ public class JbaTemplate {
 	 */
 	public int queryCount(Object model) {
 		int ret = 0;
+		if (null == model) {
+			LogFileUtil.info(jabLogName, "查询数量时model为空");
+			return ret;
+		}
 		String sql = "SELECT COUNT(1) FROM " + model.getClass().getSimpleName();
 		StringBuilder where = new StringBuilder();
 		for (Field field : getAllFields(model.getClass())) {
@@ -296,7 +328,10 @@ public class JbaTemplate {
 	 */
 	public <T> T queryModelOne(Object model, Class<T> clazz, final String... orderBy) {
 		T ret = null;
-		List<T> list = queryModelList(model, clazz, null, orderBy);
+		PageInfo pageInfo = new PageInfo();
+		pageInfo.setPageNo(1);
+		pageInfo.setPageSize(1);
+		List<T> list = queryModelList(model, clazz, pageInfo, orderBy);
 		if (list == null || list.size() < 1) {
 			return null;
 		}
@@ -356,6 +391,7 @@ public class JbaTemplate {
 	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final String... orderBy) {
 		List<T> ret = null;
 		if (null == model) {
+			LogFileUtil.info(jabLogName, "查询列表时model为空");
 			return ret;
 		}
 		try {
@@ -375,7 +411,6 @@ public class JbaTemplate {
 				}
 			}
 			// 存在where子句
-
 			StringBuilder where = new StringBuilder();
 			for (Field field : getAllFields(model.getClass())) {
 				field.setAccessible(true);
@@ -591,8 +626,7 @@ public class JbaTemplate {
 	}
 
 	/*
-	 * ====================================================================== 分页信息
-	 * ======================================================================
+	 * ================================= 分页信息 =====================================
 	 */
 
 	/**

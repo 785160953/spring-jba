@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>xin.xihc</groupId>
@@ -40,12 +41,12 @@
 	<profiles>
 		<profile>
 			<id>release</id>
-			<!-- <activation>
-				<jdk>[1.7,)</jdk>
+			<activation>
+				<jdk>[1.8,)</jdk>
 			</activation>
 			<properties>
 				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties> -->
+			</properties>
 			<distributionManagement>
 				<snapshotRepository>
 					<!-- 这个id需要在setting.xml中设置 -->
