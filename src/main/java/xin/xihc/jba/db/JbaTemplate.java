@@ -34,7 +34,7 @@ import xin.xihc.utils.logfile.LogFileUtil;
 @EnableTransactionManagement
 public class JbaTemplate {
 
-	private static final String jabLogName = "JbaExecSqls";
+	public static final String jbaLogName = "JbaExecSqls";
 
 	private DBType dbType = DBType.MySql;
 
@@ -120,13 +120,13 @@ public class JbaTemplate {
 	public boolean insertModel(Object model) {
 		boolean ret = false;
 		if (null == model) {
-			LogFileUtil.info(jabLogName, "插入数据时model为空");
+			LogFileUtil.info(jbaLogName, "插入数据时model为空");
 			return ret;
 		}
 		String sql = "";
 		sql = getNamedParmeterSql_Insert(model.getClass().getSimpleName(), model);
 		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
-		LogFileUtil.info(jabLogName, "插入数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		LogFileUtil.info(jbaLogName, "插入数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -146,13 +146,13 @@ public class JbaTemplate {
 	public boolean updateModel(Object model, final String... fieldNames) throws RuntimeException {
 		boolean ret = false;
 		if (null == model) {
-			LogFileUtil.info(jabLogName, "更新数据时model为空");
+			LogFileUtil.info(jbaLogName, "更新数据时model为空");
 			return ret;
 		}
 		String sql = "";
 		sql = getNamedParmeterSql_Update(model.getClass().getSimpleName(), model, fieldNames);
 		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
-		LogFileUtil.info(jabLogName, "更新数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		LogFileUtil.info(jbaLogName, "更新数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -168,7 +168,7 @@ public class JbaTemplate {
 	public boolean executeSQL(final String sql) {
 		boolean res = false;
 		int update = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(new Object()));
-		LogFileUtil.info(jabLogName, "执行sql：" + sql);
+		LogFileUtil.info(jbaLogName, "执行sql：" + sql);
 		if (update > 0) {
 			res = true;
 		}
@@ -190,7 +190,7 @@ public class JbaTemplate {
 			model = new Object();
 		}
 		int update = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
-		LogFileUtil.info(jabLogName, "执行sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		LogFileUtil.info(jbaLogName, "执行sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (update > 0) {
 			res = true;
 		}
@@ -208,19 +208,19 @@ public class JbaTemplate {
 	public boolean deleteModel(Object model) throws RuntimeException {
 		boolean ret = false;
 		if (null == model) {
-			LogFileUtil.info(jabLogName, "删除数据时model为空");
+			LogFileUtil.info(jbaLogName, "删除数据时model为空");
 			return ret;
 		}
 		String sql = "";
 		sql = getNamedParmeterSql_Delete(model.getClass().getSimpleName(), model);
 		// 不允许通过这里清空表
 		if (sql.toLowerCase().indexOf("where") < 1) {
-			LogFileUtil.info(jabLogName, "删除数据sql：" + sql + "\r\n不允许清空表数据,请使用sql清空");
+			LogFileUtil.info(jbaLogName, "删除数据sql：" + sql + "\r\n不允许清空表数据,请使用sql清空");
 			return false;
 			// throw new RuntimeException("model对象为空对象");
 		}
 		int t = namedParameterJdbcTemplate.update(sql, new JbaBeanProperty(model));
-		LogFileUtil.info(jabLogName, "删除数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		LogFileUtil.info(jbaLogName, "删除数据sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		if (t > 0) {
 			ret = true;
 		}
@@ -246,9 +246,9 @@ public class JbaTemplate {
 			} else {
 				ret = namedParameterJdbcTemplate.queryForObject(sql, new JbaBeanProperty(new Object()), clazz);
 			}
-			LogFileUtil.info(jabLogName, "查询某列sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+			LogFileUtil.info(jbaLogName, "查询某列sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
-			LogFileUtil.exception(jabLogName, e);
+			LogFileUtil.exception(jbaLogName, e);
 			ret = null;
 		}
 		return ret;
@@ -285,7 +285,7 @@ public class JbaTemplate {
 	public int queryCount(Object model) {
 		int ret = 0;
 		if (null == model) {
-			LogFileUtil.info(jabLogName, "查询数量时model为空");
+			LogFileUtil.info(jbaLogName, "查询数量时model为空");
 			return ret;
 		}
 		String sql = "SELECT COUNT(1) FROM " + model.getClass().getSimpleName();
@@ -297,7 +297,7 @@ public class JbaTemplate {
 					where.append(field.getName() + "=:" + field.getName() + " AND ");
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(jabLogName, e);
+				LogFileUtil.exception(jbaLogName, e);
 				e.printStackTrace();
 			}
 		}
@@ -363,13 +363,13 @@ public class JbaTemplate {
 			} else {
 				list = namedParameterJdbcTemplate.query(sql, new BeanPropertyRowMapper<>(clazz));
 			}
-			LogFileUtil.info(jabLogName, "查询单个混合对象sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+			LogFileUtil.info(jbaLogName, "查询单个混合对象sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 			if (list == null || list.size() < 1) {
 				return null;
 			}
 			ret = list.get(0);
 		} catch (Exception e) {
-			LogFileUtil.exception(jabLogName, e);
+			LogFileUtil.exception(jbaLogName, e);
 			ret = null;
 		}
 		return ret;
@@ -391,7 +391,7 @@ public class JbaTemplate {
 	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final String... orderBy) {
 		List<T> ret = null;
 		if (null == model) {
-			LogFileUtil.info(jabLogName, "查询列表时model为空");
+			LogFileUtil.info(jbaLogName, "查询列表时model为空");
 			return ret;
 		}
 		try {
@@ -419,7 +419,7 @@ public class JbaTemplate {
 						where.append(field.getName() + "=:" + field.getName() + " AND ");
 					}
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					LogFileUtil.exception(jabLogName, e);
+					LogFileUtil.exception(jbaLogName, e);
 					e.printStackTrace();
 				}
 			}
@@ -432,9 +432,9 @@ public class JbaTemplate {
 			}
 			ret = namedParameterJdbcTemplate.query(sql_final, new JbaBeanProperty(model),
 					new BeanPropertyRowMapper<>(clazz));
-			LogFileUtil.info(jabLogName, "查询列表sql：" + sql_final + "\r\n参数为：" + CommonUtil.objToMap(model));
+			LogFileUtil.info(jbaLogName, "查询列表sql：" + sql_final + "\r\n参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
-			LogFileUtil.exception(jabLogName, e);
+			LogFileUtil.exception(jbaLogName, e);
 			ret = null;
 		}
 		return ret;
@@ -467,9 +467,9 @@ public class JbaTemplate {
 			} else {
 				ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
 			}
-			LogFileUtil.info(jabLogName, "查询混合对象列表sql：" + sql_final + "\r\n参数为：" + CommonUtil.objToMap(model));
+			LogFileUtil.info(jbaLogName, "查询混合对象列表sql：" + sql_final + "\r\n参数为：" + CommonUtil.objToMap(model));
 		} catch (Exception e) {
-			LogFileUtil.exception(jabLogName, e);
+			LogFileUtil.exception(jbaLogName, e);
 			ret = null;
 		}
 		return ret;
@@ -512,7 +512,7 @@ public class JbaTemplate {
 						try {
 							field.set(model, guidKeys.get(field.getName()));
 						} catch (IllegalArgumentException | IllegalAccessException e) {
-							LogFileUtil.exception(jabLogName, e);
+							LogFileUtil.exception(jbaLogName, e);
 							e.printStackTrace();
 						}
 					}
@@ -522,7 +522,7 @@ public class JbaTemplate {
 					valueList.append(":" + field.getName() + ",");
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(jabLogName, e);
+				LogFileUtil.exception(jbaLogName, e);
 				e.printStackTrace();
 			}
 		}
@@ -576,7 +576,7 @@ public class JbaTemplate {
 					throw new RuntimeException("WHERE子句中存在字段【" + field.getName() + "】值为空");
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(jabLogName, e);
+				LogFileUtil.exception(jbaLogName, e);
 				e.printStackTrace();
 			}
 		}
@@ -614,7 +614,7 @@ public class JbaTemplate {
 					where.append(field.getName() + "=:" + field.getName() + " AND ");
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(jabLogName, e);
+				LogFileUtil.exception(jbaLogName, e);
 				e.printStackTrace();
 			}
 		}

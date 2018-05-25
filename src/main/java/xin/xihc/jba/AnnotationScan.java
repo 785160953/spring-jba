@@ -23,6 +23,7 @@ import xin.xihc.jba.properties.TableManager.Mode;
 import xin.xihc.jba.properties.TableProperties;
 
 /**
+ * 启动时加载
  * 
  * @author 席恒昌
  * @date 2018年1月24日
@@ -31,6 +32,16 @@ import xin.xihc.jba.properties.TableProperties;
  */
 @Component
 public class AnnotationScan implements SmartLifecycle {
+
+	public static final String BANNE_JBA = "_________________________________________________________________\n"
+			+ "                                                                 \n"
+			+ "                       ,                            ,   /        \n"
+			+ "---__------__---)__--------__----__--------------------/__----__-\n"
+			+ "  (_ `   /   ) /   ) /   /   ) /   )     ===      /   /   ) /   )\n"
+			+ "_(__)___/___/_/_____/___/___/_(___/______________/___(___/_(___(_\n"
+			+ "       /                         /              /                \n"
+			+ "      /                      (_ /           (_ /                 \n" + "\n"
+			+ "========================:: spring-jba ::=========================";
 
 	private static boolean isRunning = false;
 
@@ -56,6 +67,8 @@ public class AnnotationScan implements SmartLifecycle {
 	 */
 	@Override
 	public void start() {
+		// 打印banner
+		System.out.println(BANNE_JBA);
 		// 设置数据源地址，用于区别数据库类型
 		jbaTemplate.setDbType(dbUrl);
 		TableManager.debugger = debugger;
