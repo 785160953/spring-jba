@@ -40,8 +40,7 @@ public class AnnotationScan implements SmartLifecycle {
 			+ "  (_ `   /   ) /   ) /   /   ) /   )     ===      /   /   ) /   )\n"
 			+ "_(__)___/___/_/_____/___/___/_(___/______________/___(___/_(___(_\n"
 			+ "       /                         /              /                \n"
-			+ "      /                      (_ /           (_ /                 \n" + "\n"
-			+ "========================:: spring-jba ::=========================";
+			+ "      /                      (_ /           (_ /                 \n";
 
 	private static boolean isRunning = false;
 
@@ -68,7 +67,7 @@ public class AnnotationScan implements SmartLifecycle {
 	@Override
 	public void start() {
 		// 打印banner
-		System.out.println(BANNE_JBA);
+		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
 		// 设置数据源地址，用于区别数据库类型
 		jbaTemplate.setDbType(dbUrl);
 		TableManager.debugger = debugger;
@@ -170,7 +169,8 @@ public class AnnotationScan implements SmartLifecycle {
 	 */
 	@Override
 	public void stop(Runnable callback) {
-		System.out.println("stop(Runnable)");
+		// 打印banner
+		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Stoped ::====================\n");
 
 		// 如果你让isRunning返回true，需要执行stop这个方法，那么就不要忘记调用callback.run()。
 		// 否则在你程序退出时，Spring的DefaultLifecycleProcessor会认为你这个TestSmartLifecycle没有stop完成，程序会一直卡着结束不了，等待一定时间（默认超时时间30秒）后才会自动结束。
