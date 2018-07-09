@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -18,6 +19,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.properties.ColumnProperties;
 import xin.xihc.jba.properties.TableManager;
+import xin.xihc.jba.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 import xin.xihc.utils.logfile.LogFileUtil;
 
@@ -27,7 +29,7 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * @author 席恒昌
  * @Date 2017年7月16日
  * @Description 对NamedParameterJdbcTemplate和JdbcTemplate进行封装
- * @Version 2.1
+ * @Version 1.1.7
  * @Modified 2017年11月26日
  */
 @Component
@@ -43,7 +45,7 @@ public class JbaTemplate {
 	}
 
 	/**
-	 * 开放出去,可以自己new实例
+	 * 开放出去,可以自己new实例,同时管理多个数据源
 	 * 
 	 * @param dataSource
 	 *            阿里Druid数据源
@@ -62,11 +64,24 @@ public class JbaTemplate {
 	}
 
 	public void setDbType(String dbUrl) {
+		if (null == dbUrl) {
+			return;
+		}
 		if (dbUrl.startsWith("jdbc:mysql://")) {
 			this.dbType = DBType.MySql;
 		} else if (dbUrl.startsWith("jdbc:oracle:")) {
 			this.dbType = DBType.Oracle;
 		}
+	}
+
+	/**
+	 * 
+	 * @param dbType
+	 *            数据库类型
+	 * @since 1.1.7
+	 */
+	public void setDbType(DBType dbType) {
+		this.dbType = dbType;
 	}
 
 	/**
@@ -97,6 +112,16 @@ public class JbaTemplate {
 			clazz = clazz.getSuperclass();
 		}
 		return res;
+	}
+
+	/**
+	 * 获取当前的JDBCTemplate
+	 * 
+	 * @return JdbcOperations
+	 * @since 1.1.7
+	 */
+	public JdbcOperations getJdbcOperations() {
+		return this.namedParameterJdbcTemplate.getJdbcOperations();
 	}
 
 	/*--------------------------------------------------------------------------------
@@ -304,7 +329,7 @@ public class JbaTemplate {
 		if (where.length() > 0) {
 			sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
 		}
-		LogFileUtil.info(jbaLogName, "准备查询数量sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+//		LogFileUtil.info(jbaLogName, "准备查询数量sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
 		Integer count = queryColumn(sql, model, Integer.class);
 		if (null == count) {
 			ret = 0;
@@ -494,15 +519,18 @@ public class JbaTemplate {
 		StringBuilder fieldList = new StringBuilder();
 		StringBuilder valueList = new StringBuilder();
 		res = "INSERT INTO " + tblName + "(";
-		// 找到是否存在guid主键
+		// 找到是否存在guid生成键
 		LinkedHashMap<String, String> guidKeys = new LinkedHashMap<String, String>(3);
-		LinkedHashMap<String, ColumnProperties> columns = TableManager.getTable(tblName).getColumns();
-		for (ColumnProperties columnProperties : columns.values()) {
-			Policy policy = columnProperties.policy();
-			if (policy == Policy.GUID) {
-				guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(false));
-			} else if (policy == Policy.GUID_UP) {
-				guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(true));
+		TableProperties tableProperties = TableManager.getTable(tblName);
+		if (null != tableProperties) {
+			LinkedHashMap<String, ColumnProperties> columns = tableProperties.getColumns();
+			for (ColumnProperties columnProperties : columns.values()) {
+				Policy policy = columnProperties.policy();
+				if (policy == Policy.GUID) {
+					guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(false));
+				} else if (policy == Policy.GUID_UP) {
+					guidKeys.put(columnProperties.colName(), CommonUtil.newGuid(true));
+				}
 			}
 		}
 		for (Field field : getAllFields(model.getClass())) {

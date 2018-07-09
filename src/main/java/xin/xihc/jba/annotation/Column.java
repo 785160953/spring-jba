@@ -28,7 +28,16 @@ import org.springframework.stereotype.Component;
 public @interface Column {
 
 	public enum Policy {
-		NONE, AUTO, GUID/* 小写 */, GUID_UP/* 大写 */, SEQ;
+		/** 默认值 */
+		NONE,
+		/** 自增主键 */
+		AUTO,
+		/** guid小写 */
+		GUID,
+		/** guid大写 */
+		GUID_UP,
+		/** 序列，暂时没有实现 */
+		SEQ;
 	}
 
 	/**

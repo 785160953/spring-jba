@@ -23,7 +23,14 @@ public class TableManager {
 	 *
 	 */
 	public static enum Mode {
-		NONE, CREATE, UPDATE, ALL;
+		/** 不操作 */
+		NONE,
+		/** 只创建 */
+		CREATE,
+		/** 只更新 */
+		UPDATE,
+		/** 即创建也更新 */
+		ALL;
 	};
 
 	public static Mode mode = Mode.ALL;
@@ -44,18 +51,15 @@ public class TableManager {
 	}
 
 	public static TableProperties getTable(String name) {
-		if (tbls.containsKey(name)) {
-			return tbls.get(name);
-		} else {
-			throw new RuntimeException(name + "不存在");
-		}
+		return tbls.get(name);
 	}
 
 	public static String getTableName(Class<?> clazz) {
 		if (tbls.containsKey(clazz.getSimpleName())) {
 			return tbls.get(clazz.getSimpleName()).getTableName();
 		} else {
-			throw new RuntimeException(clazz.getSimpleName() + "不存在");
+			return null;
+			// throw new RuntimeException(clazz.getSimpleName() + "不存在");
 		}
 	}
 
