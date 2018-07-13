@@ -1,13 +1,14 @@
 # spring-jba
 `JavaBeanAccess`java对象访问，基于JDK1.8+
-```目前仅支持MySql、Oracle数据库  ```:grimacing:
+```目前仅支持MySql  ```:grimacing:
+- Oracle数据库没有维护了。。
 
 # maven依赖
 ```
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.8</version>
 </dependency>
 ```
 
@@ -106,4 +107,4 @@ private JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-07-09`
+`更新时间：2018-07-13`

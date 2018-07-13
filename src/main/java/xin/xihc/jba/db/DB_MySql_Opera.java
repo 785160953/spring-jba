@@ -4,6 +4,8 @@
 package xin.xihc.jba.db;
 
 import java.math.BigDecimal;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,8 +24,9 @@ import xin.xihc.utils.logfile.LogFileUtil;
  * 
  * @author 席恒昌
  * @date 2018年1月24日
- * @version
+ * @version 1.1.8
  * @since 1.1.4
+ * @desc 增加:对java.sql.Date,Time,Timestamp字段的支持
  */
 @Component
 public final class DB_MySql_Opera implements I_TableOperation {
@@ -189,8 +192,12 @@ public final class DB_MySql_Opera implements I_TableOperation {
 			if (col.length() < 65 && col.precision() >= 0 && col.length() >= col.precision()) {
 				temp.append("(" + col.length() + "," + col.precision() + ")");
 			}
-		} else if (col.type().equals(Date.class)) {
+		} else if (col.type().equals(Date.class) || col.type().equals(java.sql.Date.class)) {
 			temp.append("datetime");
+		} else if (col.type().equals(Timestamp.class)) {
+			temp.append("timestamp");
+		} else if (col.type().equals(Time.class)) {
+			temp.append("time");
 		} else if (col.type().equals(Boolean.class) || col.type().equals(boolean.class)) {// 支持boolean类型
 			temp.append("tinyint");
 		} else {
