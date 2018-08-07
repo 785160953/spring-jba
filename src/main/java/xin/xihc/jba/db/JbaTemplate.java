@@ -290,8 +290,8 @@ public class JbaTemplate {
 	 */
 	public int queryCount(final String sql, Object model) {
 		int ret = 0;
-		String temp = "SELECT　COUNT(1) FROM(" + sql + ")";
-		Integer count = queryColumn(temp, model, Integer.class);
+//		String temp = "SELECT　COUNT(1) FROM(" + sql + ") t_temp_t";
+		Integer count = queryColumn(sql, model, Integer.class);
 		if (null == count) {
 			ret = 0;
 		} else {
@@ -732,8 +732,7 @@ public class JbaTemplate {
 	public <T> String getNamedPageSql(final String sql, T model, PageInfo pageInfo) {
 		String pageSql = "";
 		// 先查询总数
-		String sql_Count = "SELECT COUNT(1) FROM (" + sql + ") t_temp";
-		Integer totalCount = queryColumn(sql_Count, model, Integer.class);
+		Integer totalCount = queryCount(sql, model);
 		if (null == totalCount || totalCount < 1) {
 			totalCount = 0;
 			pageInfo.setTotalCount(0);

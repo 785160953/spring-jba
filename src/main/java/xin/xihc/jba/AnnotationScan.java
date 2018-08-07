@@ -79,7 +79,7 @@ public class AnnotationScan implements SmartLifecycle {
 			if ("".equals(table.value())) {
 				tblP = TableManager.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
 			} else {
-				tblP = TableManager.addTable(obj.getClass().getSimpleName(), table.value());
+				tblP = TableManager.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
 			}
 			// 获取表注释
 			tblP.setRemark(table.remark());
