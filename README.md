@@ -8,7 +8,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9</version>
 </dependency>
 ```
 
@@ -38,9 +38,10 @@
 |`double`/`Double`    | `double` | `number` |
 |`float`/`Float`      | `double` | `number` |
 |`BigDecimal`         | `decimal` | `number` |
-|`Date`               | `datetime` | `date` |
-|`Timestamp`    | `Timestamp` | `无` |
-|`Time`    | `Time` | `无` |
+|`Boolean`/`boolean`    | `tinyint` | `无` |
+|`java.util.Date`               | `datetime` | `date` |
+|`java.sql.Timestamp`    | `Timestamp` | `无` |
+|`java.sql.Time`    | `Time` | `无` |
 |`其他`               | `varchar(255)` | `varchar2(255)` |
 
 # 使用教程
