@@ -280,7 +280,7 @@ public class JbaTemplate {
 	}
 
 	/**
-	 * 查询数量
+	 * 查询数量(会自动拼接select count(1)),查询混合对象时用
 	 * 
 	 * @param sql
 	 *            sql语句
@@ -290,8 +290,8 @@ public class JbaTemplate {
 	 */
 	public int queryCount(final String sql, Object model) {
 		int ret = 0;
-//		String temp = "SELECT　COUNT(1) FROM(" + sql + ") t_temp_t";
-		Integer count = queryColumn(sql, model, Integer.class);
+		String temp = "SELECT count(1) FROM(" + sql + ") t_temp_t";
+		Integer count = queryColumn(temp, model, Integer.class);
 		if (null == count) {
 			ret = 0;
 		} else {
@@ -329,7 +329,8 @@ public class JbaTemplate {
 		if (where.length() > 0) {
 			sql = sql + " WHERE " + where.toString().substring(0, where.toString().lastIndexOf(" AND "));
 		}
-//		LogFileUtil.info(jbaLogName, "准备查询数量sql：" + sql + "\r\n参数为：" + CommonUtil.objToMap(model));
+		// LogFileUtil.info(jbaLogName, "准备查询数量sql：" + sql + "\r\n参数为：" +
+		// CommonUtil.objToMap(model));
 		Integer count = queryColumn(sql, model, Integer.class);
 		if (null == count) {
 			ret = 0;
