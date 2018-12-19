@@ -1,55 +1,63 @@
 package xin.xihc.jba.db;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import xin.xihc.jba.properties.TableManager;
-import xin.xihc.jba.properties.TableManager.Mode;
-import xin.xihc.jba.properties.TableProperties;
-import xin.xihc.utils.logfile.LogFileUtil;
+import xin.xihc.jba.core.JbaTemplate;
+import xin.xihc.jba.tables.Mode;
+import xin.xihc.jba.tables.TableManager;
+import xin.xihc.jba.tables.properties.TableProperties;
 
 /**
- * 表管理
- * 
- * @author 席恒昌
- * @Date 2018年1月21日
+ * 表创建者、更新者
  *
+ * @author Leo.Xi
+ * @date 2018年1月21日
  */
-@Component
 public class TableOperator {
 
-	@Autowired
-	JbaTemplate jbaTemplate;
+	I_TableOperation tableOperation = null;
+
+	public TableOperator(JbaTemplate jbaTemplate) {
+		tableOperation = new DB_MySql_Opera(jbaTemplate);
+	}
+
 
 	/**
 	 * 初始化
 	 */
 	@Transactional
 	public void init() {
-		I_TableOperation tableOperation = null;
-		switch (jbaTemplate.getDbType()) {
-		case MySql:
-			tableOperation = new DB_MySql_Opera();
-			break;
-		case Oracle:
-			tableOperation = new DB_Oracle_Opera();
-			break;
-		default:
-			throw new RuntimeException("【" + jbaTemplate.getDbType().name() + "】该数据库类型暂时不支持");
+		synchronized (TableOperator.class) {
+			// 创建类型不是NONE
+			if (TableManager.mode != Mode.NONE) {
+				for (TableProperties tblObj : TableManager.getTables()) {
+					if (tblObj.isIgnore()) {// 忽略的,不处理
+						continue;
+					}
+					if (tableOperation.isTableExists(tblObj.getTableName())) {
+						if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
+							tableOperation.updateTable(tblObj);
+						}
+					} else {
+						if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE || TableManager.mode == Mode.CREATE_DROP) {
+							tableOperation.createTable(tblObj);
+						}
+					}
+				}
+			}
 		}
-		
-		// 是否打印到控制台
-		LogFileUtil.setDebugger(TableManager.debugger);
-		for (TableProperties tblObj : TableManager.getTbls().values()) {
-			if (tableOperation.isTableExists(tblObj.getTableName(), jbaTemplate)) {
-				if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
-					tableOperation.updateTable(tblObj, jbaTemplate);
+	}
+
+	@Transactional
+	public void drop() {
+		if (TableManager.mode != Mode.CREATE_DROP) {
+			return;
+		}
+		synchronized (TableOperator.class) {
+			for (TableProperties tblObj : TableManager.getTables()) {
+				if (tblObj.isIgnore()) {// 忽略的,不处理
+					continue;
 				}
-			} else {
-				if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE) {
-					tableOperation.createTable(tblObj, jbaTemplate);
-				}
+				tableOperation.dropTable(tblObj);
 			}
 		}
 	}

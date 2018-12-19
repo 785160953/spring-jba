@@ -1,13 +1,13 @@
 /**
- * 
+ *
  */
 package xin.xihc.jba.db.bean;
 
 /**
- * 
- * @author 席恒昌
+ * Mysql数据库列信息
+ *
+ * @author Leo.Xi
  * @date 2018年1月26日
- * @version
  * @since
  */
 public class MysqlColumnInfo {
@@ -41,20 +41,23 @@ public class MysqlColumnInfo {
 	 * 字段类型
 	 */
 	private String data_type;
-	private String character_maximum_length;
-	private String character_octet_length;
 	/**
-	 * 长度
+	 * 最大长度
 	 */
-	private String numeric_precision;
+	private Integer character_maximum_length;
+	private Integer character_octet_length;
+	/**
+	 * 数字长度
+	 */
+	private Integer numeric_precision;
 	/**
 	 * 小数点数
 	 */
-	private String numeric_scale;
+	private Integer numeric_scale;
 	/**
 	 * 日期时间格式
 	 */
-	private String datetime_precision;
+	private Integer datetime_precision;
 	private String character_set_name;
 	private String collation_name;
 	/**
@@ -136,43 +139,43 @@ public class MysqlColumnInfo {
 		this.data_type = data_type;
 	}
 
-	public String getCharacter_maximum_length() {
+	public Integer getCharacter_maximum_length() {
 		return character_maximum_length;
 	}
 
-	public void setCharacter_maximum_length(String character_maximum_length) {
+	public void setCharacter_maximum_length(Integer character_maximum_length) {
 		this.character_maximum_length = character_maximum_length;
 	}
 
-	public String getCharacter_octet_length() {
+	public Integer getCharacter_octet_length() {
 		return character_octet_length;
 	}
 
-	public void setCharacter_octet_length(String character_octet_length) {
+	public void setCharacter_octet_length(Integer character_octet_length) {
 		this.character_octet_length = character_octet_length;
 	}
 
-	public String getNumeric_precision() {
+	public Integer getNumeric_precision() {
 		return numeric_precision;
 	}
 
-	public void setNumeric_precision(String numeric_precision) {
+	public void setNumeric_precision(Integer numeric_precision) {
 		this.numeric_precision = numeric_precision;
 	}
 
-	public String getNumeric_scale() {
+	public Integer getNumeric_scale() {
 		return numeric_scale;
 	}
 
-	public void setNumeric_scale(String numeric_scale) {
+	public void setNumeric_scale(Integer numeric_scale) {
 		this.numeric_scale = numeric_scale;
 	}
 
-	public String getDatetime_precision() {
+	public Integer getDatetime_precision() {
 		return datetime_precision;
 	}
 
-	public void setDatetime_precision(String datetime_precision) {
+	public void setDatetime_precision(Integer datetime_precision) {
 		this.datetime_precision = datetime_precision;
 	}
 

@@ -1,33 +1,28 @@
-/**
- * 
- */
 package xin.xihc.jba;
-
-import java.lang.reflect.Field;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
-
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.annotation.Table;
-import xin.xihc.jba.db.InitTableDataIntf;
-import xin.xihc.jba.db.JbaTemplate;
+import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
-import xin.xihc.jba.properties.ColumnProperties;
-import xin.xihc.jba.properties.TableManager;
-import xin.xihc.jba.properties.TableManager.Mode;
-import xin.xihc.jba.properties.TableProperties;
+import xin.xihc.jba.tables.Mode;
+import xin.xihc.jba.tables.TableManager;
+import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.utils.common.CommonUtil;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * 启动时加载
- * 
- * @author 席恒昌
+ *
+ * @author Leo.Xi
  * @date 2018年1月24日
- * @version
  * @since
  */
 @Component
@@ -45,18 +40,13 @@ public class AnnotationScan implements SmartLifecycle {
 	private static boolean isRunning = false;
 
 	@Autowired
-	TableOperator tableOperator;
+	private JbaTemplate jbaTemplate;
 
-	@Autowired
-	JbaTemplate jbaTemplate;
-
-	@Value("${spring.datasource.url:null}")
-	private String dbUrl;
-
-	@Value("${spring.jba.debugger:true}")
-	private boolean debugger;
 	@Value("${spring.jba.mode:ALL}")
 	private String mode;
+
+	@Value("${spring.jba.useSlf4jLog:true}")
+	private boolean useSlf4jLog;
 
 	/**
 	 * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
@@ -68,31 +58,26 @@ public class AnnotationScan implements SmartLifecycle {
 	public void start() {
 		// 打印banner
 		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
-		// 设置数据源地址，用于区别数据库类型
-		jbaTemplate.setDbType(dbUrl);
-		TableManager.debugger = debugger;
+
+		jbaTemplate.setUseSlf4jLog(useSlf4jLog);
 		TableManager.mode = Mode.valueOf(mode);
-		Map<String, Object> map = SpringContextUtil.getApplicationContext().getBeansWithAnnotation(Table.class);
+		Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
 			Table table = obj.getClass().getAnnotation(Table.class);
 			TableProperties tblP = null;
-			if ("".equals(table.value())) {
-				tblP = TableManager.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
+			if (table.value().matches("^_?[a-zA-Z]+\\w+")) { // 是字母或下划线开头的，为有效的表名
+				tblP = TableManager.addTable(obj.getClass(), table.value());
 			} else {
-				tblP = TableManager.addTable(obj.getClass().getSimpleName(), obj.getClass().getSimpleName());
+				tblP = TableManager.addTable(obj.getClass(), obj.getClass().getSimpleName());
 			}
 			// 获取表注释
 			tblP.setRemark(table.remark());
-			Class<?>[] interfaces = obj.getClass().getInterfaces();
-			for (Class<?> class1 : interfaces) {
-				if (InitTableDataIntf.class.equals(class1)) {
-					Object[] initModel = ((InitTableDataIntf<?>) obj).initModel();
-					tblP.initData(initModel);
-					break;
-				}
-			}
+			tblP.setTableBean(obj);
+			tblP.setIgnore(table.ignore());
+			tblP.setOrder(table.order());
+
 			int keyCount = 0;
-			for (Field field : jbaTemplate.getAllFields(obj.getClass())) {
+			for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
 				field.setAccessible(true);
 				Column column = field.getAnnotation(Column.class);
 				ColumnProperties colP = new ColumnProperties();
@@ -100,9 +85,19 @@ public class AnnotationScan implements SmartLifecycle {
 				colP.type(field.getType());
 				if (null == column) {
 					colP.colName(field.getName());
+					// 没有的给默认值
+					colP.length(0)
+					    .precision(0)
+					    .policy(Policy.NONE)
+					    .primary(false)
+					    .notNull(false)
+					    .defaultValue("")
+					    .remark("");
 				} else {
-					colP.colName(field.getName()).defaultValue(column.defaultValue()).notNull(column.notNull())
-							.remark(column.remark());
+					colP.colName(field.getName())
+					    .defaultValue(column.defaultValue())
+					    .notNull(column.notNull())
+					    .remark(column.remark());
 					colP.length(0);
 					if (column.length() > 0) {
 						colP.length(column.length());
@@ -127,6 +122,7 @@ public class AnnotationScan implements SmartLifecycle {
 			}
 		}
 		// 执行表创建、字段更新
+		TableOperator tableOperator = new TableOperator(jbaTemplate);
 		tableOperator.init();
 
 		// 执行完其他业务后，可以修改 isRunning = true
@@ -169,6 +165,10 @@ public class AnnotationScan implements SmartLifecycle {
 	 */
 	@Override
 	public void stop(Runnable callback) {
+		// 删除表结构
+		TableOperator tableOperator = new TableOperator(jbaTemplate);
+		tableOperator.drop();
+
 		// 打印banner
 		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Stoped ::====================\n");
 

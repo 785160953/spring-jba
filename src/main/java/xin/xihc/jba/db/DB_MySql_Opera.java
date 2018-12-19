@@ -1,55 +1,79 @@
 /**
- * 
+ *
  */
 package xin.xihc.jba.db;
 
-import java.math.BigDecimal;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
+import xin.xihc.jba.annotation.Column;
+import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
-import xin.xihc.jba.properties.ColumnProperties;
-import xin.xihc.jba.properties.TableProperties;
+import xin.xihc.jba.tables.InitDataInterface;
+import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
-import xin.xihc.utils.logfile.LogFileUtil;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * mysql数据库操作
- * 
- * @author 席恒昌
+ *
+ * @author Leo.Xi
+ * @version 1.3.0 不再支持java基本数据类型
  * @date 2018年1月24日
- * @version 1.1.8
- * @since 1.1.4
  * @desc 增加:对java.sql.Date,Time,Timestamp字段的支持
+ * @since 1.1.4
  */
-@Component
-public final class DB_MySql_Opera implements I_TableOperation {
+public class DB_MySql_Opera implements I_TableOperation {
 
-	public final static String log_name = "DB_Update_MySql_Sql";
+	private String table_schema; // 数据库schema
 
-	private String table_schema = "";
+	private JbaTemplate jbaTemplate;
+
+	private static Map<Class, String> javaClassToMysqlFieldName = new HashMap<>();
+
+	static {
+		//		javaClassToMysqlFieldName.put(byte.class, "tinyint");
+		javaClassToMysqlFieldName.put(Byte.class, "tinyint");
+		//		javaClassToMysqlFieldName.put(short.class, "smallint");
+		javaClassToMysqlFieldName.put(Short.class, "smallint");
+		//		javaClassToMysqlFieldName.put(int.class, "int");
+		javaClassToMysqlFieldName.put(Integer.class, "int");
+		//		javaClassToMysqlFieldName.put(long.class, "bigint");
+		javaClassToMysqlFieldName.put(Long.class, "bigint");
+		//		javaClassToMysqlFieldName.put(String.class, "varchar"); // String为默认，不需要加上
+		//		javaClassToMysqlFieldName.put(double.class, "double");
+		javaClassToMysqlFieldName.put(Double.class, "double");
+		//		javaClassToMysqlFieldName.put(float.class, "double");
+		javaClassToMysqlFieldName.put(Float.class, "double");
+		javaClassToMysqlFieldName.put(BigDecimal.class, "decimal");
+		javaClassToMysqlFieldName.put(java.util.Date.class, "datetime");
+		javaClassToMysqlFieldName.put(java.sql.Timestamp.class, "timestamp");
+		javaClassToMysqlFieldName.put(java.sql.Date.class, "date");
+		javaClassToMysqlFieldName.put(java.sql.Time.class, "time");
+		//		javaClassToMysqlFieldName.put(boolean.class, "tinyint");
+		javaClassToMysqlFieldName.put(Boolean.class, "tinyint");
+	}
+
+	public DB_MySql_Opera(JbaTemplate jbaTemplate) {
+		this.jbaTemplate = jbaTemplate;
+		table_schema = getSchema();
+	}
 
 	/**
 	 * 先获取当前数据库名
-	 * 
+	 *
 	 * @return
 	 */
-	private String getSchema(JbaTemplate jbaTemplate) {
+	private String getSchema() {
 		return jbaTemplate.queryColumn("select database()", null, String.class);
 	}
 
 	@Override
-	public boolean isTableExists(final String tblName, JbaTemplate jbaTemplate) {
+	public boolean isTableExists(final String tblName) {
 		boolean res = false;
-		this.table_schema = getSchema(jbaTemplate);
-		String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName
-				+ "' AND table_schema='" + this.table_schema + "'";
+		String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName + "' AND table_schema='" + this.table_schema + "'";
 		Integer count = jbaTemplate.queryColumn(sql, null, Integer.class);
 		if (count > 0) {
 			res = true;
@@ -59,7 +83,7 @@ public final class DB_MySql_Opera implements I_TableOperation {
 
 	@Transactional
 	@Override
-	public void createTable(TableProperties tbl, final JbaTemplate jbaTemplate) {
+	public void createTable(TableProperties tbl) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
 		String after = "";
@@ -68,66 +92,112 @@ public final class DB_MySql_Opera implements I_TableOperation {
 			sql.append(",");
 			after = col.colName();
 		}
-		sql.deleteCharAt(sql.length() - 1).append(")DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
+		sql.deleteCharAt(sql.length() - 1)
+		   .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
 		jbaTemplate.executeSQL(sql.toString());
-		LogFileUtil.info(log_name, "创建表【" + tbl.getTableName() + "】语句：" + sql.toString());
-		final Object[] initData = tbl.initData();
 		// 初始化数据
-		if (null != initData) {
-			if (initData.length > 20) {
-				Thread thread = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						for (Object obj : initData) {
-							jbaTemplate.insertModel(obj);
-						}
-					}
-				});
-				thread.setDaemon(true);
-				thread.setName("InitTableData");
-				thread.start();
-			} else {
-				for (Object obj : initData) {
-					jbaTemplate.insertModel(obj);
-				}
+		if (tbl.getTableBean() instanceof InitDataInterface) {
+			Thread thread = new Thread(() -> ((InitDataInterface) tbl.getTableBean()).doInit(jbaTemplate));
+			thread.setName("initDataThread-" + tbl.getTableName());
+			thread.start();
+		}
+	}
+
+	/**
+	 * 根据数据库列类型返回java数据类型
+	 *
+	 * @param dataType 列类型
+	 * @return
+	 */
+	private Class getClassByColumnDataType(String dataType) {
+		Set<Class> keySet = javaClassToMysqlFieldName.keySet();
+		for (Class key : keySet) {
+			if (javaClassToMysqlFieldName.get(key).equals(dataType)) {
+				return key;
 			}
 		}
+		return String.class;
+	}
+
+	/**
+	 * 获取数据库中的表结构信息
+	 *
+	 * @param tableName 表名
+	 * @return
+	 */
+	private List<ColumnProperties> getColumnsInfo(final String tableName) {
+		List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
+				"select * from information_schema.columns where table_name = '" + tableName + "' AND table_schema='" + this.table_schema + "'",
+				null, MysqlColumnInfo.class, null);
+		if (list.size() < 1) {
+			return new ArrayList<>(0);
+		}
+		List<ColumnProperties> result = new ArrayList(list.size());
+		ColumnProperties prop;
+		for (MysqlColumnInfo item : list) {
+			prop = new ColumnProperties();
+			prop.colName(item.getColumn_name());
+			prop.type(getClassByColumnDataType(item.getData_type()));
+			prop.defaultValue(CommonUtil.isNullEmpty(item.getColumn_default()) ? "" : item.getColumn_default());
+			prop.remark(CommonUtil.isNullEmpty(item.getColumn_comment()) ? "" : item.getColumn_comment());
+			prop.notNull("NO".equals(item.getIs_nullable()));
+			if ("PRI".equals(item.getColumn_key())) { // 是主键
+				prop.primary(true);
+				if ("auto_increment".equals(item.getExtra())) { // 自增主键
+					prop.policy(Column.Policy.AUTO);
+					prop.length(item.getNumeric_precision());
+					prop.precision(item.getNumeric_scale());
+				} else if (("varchar".equals(item.getData_type()) || "char".equals(item.getData_type())) && item
+						.getCharacter_maximum_length() == 32) {
+					prop.policy(Column.Policy.GUID);
+					prop.length(item.getCharacter_maximum_length());
+				}
+			}
+			if ("varchar".equals(item.getData_type()) || "char".equals(item.getData_type())) {
+				prop.length(item.getCharacter_maximum_length());
+			} else if ("text".equals(item.getData_type())) {// text字段长度为65535
+				prop.length(65535);
+			} else if (Number.class.isAssignableFrom(prop.type())) { // 如果是数值的
+				prop.length(item.getNumeric_precision());
+				prop.precision(item.getNumeric_scale());
+			}
+			result.add(prop);
+		}
+		return result;
 	}
 
 	@Transactional
 	@Override
-	public void updateTable(TableProperties tbl, JbaTemplate jbaTemplate) {
+	public void updateTable(TableProperties tbl) {
 		// 先获取表结构信息
-		List<MysqlColumnInfo> list = jbaTemplate
-				.queryMixModelList("select * from information_schema.columns where table_name = '" + tbl.getTableName()
-						+ "' AND table_schema='" + this.table_schema + "'", null, MysqlColumnInfo.class, null);
-		ArrayList<String> sqls = new ArrayList<>(10);
+		List<ColumnProperties> dbColumnPropsList = getColumnsInfo(tbl.getTableName());
+
+		ArrayList<String> sqls = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
 		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
 			boolean is2Add = true;
 
-			for (MysqlColumnInfo item : list) {
-				if (col.colName().toLowerCase().equals(item.getColumn_name().toLowerCase())) {
+			for (ColumnProperties item : dbColumnPropsList) {
+				if (col.colName().toLowerCase().equals(item.colName().toLowerCase())) { // 相同列
 					is2Add = false;
-					// 首先删除主键,若主键是自增的先去掉自增
-					if ("PRI".equals(item.getColumn_key())) {
-						if ("auto_increment".equals(item.getExtra())) {
-							String ss = "ALTER TABLE " + tbl.getTableName() + " MODIFY " + item.getColumn_name()
-									+ " int,DROP PRIMARY KEY";
-							jbaTemplate.executeSQL(ss);
-							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键、自增：" + ss);
-						} else {
-							String ss = "ALTER TABLE " + tbl.getTableName() + " DROP PRIMARY KEY";
-							jbaTemplate.executeSQL(ss);
-							LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】先删除主键：" + ss);
+					if (!Objects.equals(javaClassToMysqlFieldName.get(col.type()),
+							javaClassToMysqlFieldName.get(item.type())) || !item.equals(col)) {// 如果对应的数据库字段类型不一样
+						if (col.primary()) { // 同一列，主键设置的不一致
+							if (item.policy() == Column.Policy.AUTO) {
+								String ss = "ALTER TABLE " + tbl.getTableName() + " MODIFY " + item
+										.colName() + " int," + "DROP PRIMARY KEY";
+								jbaTemplate.executeSQL(ss);
+							} else {
+								String ss = "ALTER TABLE " + tbl.getTableName() + " DROP PRIMARY KEY";
+								jbaTemplate.executeSQL(ss);
+							}
 						}
+						sqls.add("MODIFY " + columnPro(col, after, false));
 					}
-					sqls.add("MODIFY " + columnPro(col, after, false));
 					after = col.colName();
-
-					list.remove(item);
+					dbColumnPropsList.remove(item);
 					break;
 				}
 			}
@@ -138,36 +208,49 @@ public final class DB_MySql_Opera implements I_TableOperation {
 			}
 		}
 		// 最后list剩余的则是需要删除的列
-		for (MysqlColumnInfo item : list) {
-			sqls.add("DROP COLUMN " + item.getColumn_name());
+		for (ColumnProperties item : dbColumnPropsList) {
+			sqls.add("DROP COLUMN " + item.colName());
 		}
 		for (int i = 0; i < sqls.size(); i++) {
 			sql.append(sqls.get(i) + ",");
 		}
 		sql.append(" COMMENT = '" + tbl.getRemark() + "'");
 		jbaTemplate.executeSQL(sql.toString());
-		LogFileUtil.info(log_name, "更新表【" + tbl.getTableName() + "】语句：" + sql.toString());
+	}
+
+	/**
+	 * 需要设置精度
+	 *
+	 * @param clazz
+	 * @return
+	 */
+	private boolean needPrecision(Class clazz) {
+		if (clazz.equals(Double.class) || clazz.equals(double.class) || clazz.equals(float.class) || clazz
+				.equals(Float.class)) {
+			return true;
+		}
+		if (clazz.equals(BigDecimal.class)) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
 	 * 得到字段名+属性拼接
-	 * 
+	 *
 	 * @param col
 	 * @return
 	 */
 	private String columnPro(ColumnProperties col, String after, boolean isCreate) {
 		StringBuilder temp = new StringBuilder();
 		temp.append(col.colName() + " ");
-		if (col.type().equals(int.class) || col.type().equals(Integer.class)) {
-			temp.append("int");
-		} else if (col.type().equals(byte.class) || col.type().equals(Byte.class)) {
-			temp.append("tinyint");
-		} else if (col.type().equals(short.class) || col.type().equals(Short.class)) {
-			temp.append("smallint");
-		} else if (col.type().equals(long.class) || col.type().equals(Long.class)) {
-			temp.append("bigint");
-		} else if (col.type().equals(String.class)) {
-			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 2000) {
+		if (javaClassToMysqlFieldName.containsKey(col.type())) {
+			temp.append(javaClassToMysqlFieldName.get(col.type()));
+			if (needPrecision(col.type())) { // 需要精度的
+				temp.append("(" + col.length() + "," + col.precision() + ")");
+			}
+		} else {
+			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 20000) {
 				temp.append("text");
 				if (isCreate) {
 					temp.append(" BINARY");
@@ -181,61 +264,38 @@ public final class DB_MySql_Opera implements I_TableOperation {
 					temp.append(" BINARY");
 				}
 			}
-		} else if (col.type().equals(Double.class) || col.type().equals(double.class) || col.type().equals(float.class)
-				|| col.type().equals(Float.class)) {
-			temp.append("double");
-			if (col.length() > 0 || col.precision() >= 0 && col.length() >= col.precision()) {
-				temp.append("(" + col.length() + "," + col.precision() + ")");
-			}
-		} else if (col.type().equals(BigDecimal.class)) {
-			temp.append("decimal");
-			if (col.length() < 65 && col.precision() >= 0 && col.length() >= col.precision()) {
-				temp.append("(" + col.length() + "," + col.precision() + ")");
-			}
-		} else if (col.type().equals(Date.class) || col.type().equals(java.sql.Date.class)) {
-			temp.append("datetime");
-		} else if (col.type().equals(Timestamp.class)) {
-			temp.append("timestamp");
-		} else if (col.type().equals(Time.class)) {
-			temp.append("time");
-		} else if (col.type().equals(Boolean.class) || col.type().equals(boolean.class)) {// 支持boolean类型
-			temp.append("tinyint");
-		} else {
-			temp.append("varchar");
-			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
-				temp.append("(" + col.length() + ")");
-			}
-			if (isCreate) {
-				temp.append(" BINARY");
-			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {
 			temp.append(" PRIMARY KEY ");
 			switch (col.policy()) {
-			case NONE:
-				break;
-			case AUTO:
-				temp.append(" AUTO_INCREMENT ");
-				break;
-			case GUID:
-
-				break;
-			case GUID_UP:
-
-				break;
-			default:
-				break;
+				case AUTO:
+					temp.append(" AUTO_INCREMENT ");
+					break;
+				default:
+					break;
 			}
 		} else {
 			if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
 				temp.append(" NOT NULL ");
+			} else {
+				temp.append(" NULL ");
 			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.remark())) {
 			temp.append(" COMMENT '" + col.remark() + "'");
 		}
 		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
-			temp.append(" DEFAULT '" + col.defaultValue() + "'");
+			if (col.type().equals(String.class)) {
+				temp.append(" DEFAULT '" + col.defaultValue() + "'");
+			} else if (col.type().isEnum()) {
+				temp.append(" DEFAULT '" + col.defaultValue() + "'");
+			} else if (Number.class.isAssignableFrom(col.type())) {
+				temp.append(" DEFAULT " + col.defaultValue());
+			} else if (col.type().equals(Timestamp.class)) {
+				temp.append(" DEFAULT " + col.defaultValue());
+			}
+		} else if (!col.notNull()) {
+			temp.append(" DEFAULT null ");
 		}
 		if (!isCreate) {
 			if (CommonUtil.isNotNullEmpty(after)) {
@@ -245,6 +305,11 @@ public final class DB_MySql_Opera implements I_TableOperation {
 			}
 		}
 		return temp.toString();
+	}
+
+	@Override
+	public void dropTable(TableProperties tbl) {
+		jbaTemplate.executeSQL("DROP TABLE " + tbl.getTableName());
 	}
 
 }

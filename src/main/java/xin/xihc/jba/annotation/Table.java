@@ -1,30 +1,23 @@
 /**
- * 
+ *
  */
 package xin.xihc.jba.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.stereotype.Component;
+
+import java.lang.annotation.*;
 
 /**
  * 声明表对象
- * 
- * @author 席恒昌
+ *
+ * @author Leo.Xi
  * @date 2018年1月12日
- * @version
  * @since
  */
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-@Inherited
 public @interface Table {
 
 	/**
@@ -35,6 +28,20 @@ public @interface Table {
 	/**
 	 * 备注
 	 */
-	public String remark() default "";
+	String remark() default "";
+
+	/**
+	 * 表创建or更新的顺序,默认9999
+	 *
+	 * @return
+	 */
+	int order() default 9999;
+
+	/**
+	 * 是否忽略这张表
+	 *
+	 * @return
+	 */
+	boolean ignore() default false;
 
 }
