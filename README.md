@@ -32,26 +32,26 @@ https://gitee.com/leo_xi/SpringJbaDemo
 5. policy          主键生成策略
 6. length          长度限制
 7. remark          备注
-8. precision       精度
+8. precision       精度(小于length)
 ```
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 
 |---| --- |
 |`String`            | `varchar`/length>20000的为`text`| 
-|`Byte`              | `tinyint`                      | 
-|`Short`             | `smallint`                     | 
-|`Integer`           | `int`                          | 
-|`Long`              | `bigint`                       | 
-|`Double`            | `double`                       | 
-|`Float`             | `double`                       | 
-|`BigDecimal`        | `decimal`                      | 
-|`Boolean`           | `tinyint`                      |
+|`Byte`              | `tinyint(3)`                      | 
+|`Short`             | `smallint(5)`                     | 
+|`Integer`           | `int(10)`                          | 
+|`Long`              | `bigint(19)`                       | 
+|`Double`            | `double(length,precision)`                       | 
+|`Float`             | `double(length,precision)`                       | 
+|`BigDecimal`        | `decimal(length,precision)`                      | 
+|`Boolean`           | `tinyint(3)`                      |
 |`java.util.Date`    | `datetime`                     | 
 |`java.sql.Timestamp`| `Timestamp`                    | 
 |`java.sql.Time`     | `Time`                         | 
 |`枚举类型`            | `varchar(length)`              |
-|`其他`               | `varchar(255)`                 |
+|`其他`               | `varchar(length)`                 |
 
 # 使用教程
 本项目为简易ORM，是基于spring-JdbcTemplate实现，支持事务管理，复杂操作则需要自己写SQL。目前表结构对象不支持自定义列名称，即`对象字段名为表结构中的列名。`请知悉。。
