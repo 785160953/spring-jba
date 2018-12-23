@@ -24,7 +24,7 @@ public class TableOperator {
 	/**
 	 * 初始化
 	 */
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void init() {
 		synchronized (TableOperator.class) {
 			// 创建类型不是NONE
@@ -47,7 +47,7 @@ public class TableOperator {
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void drop() {
 		if (TableManager.mode != Mode.CREATE_DROP) {
 			return;

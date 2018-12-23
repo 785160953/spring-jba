@@ -81,7 +81,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return res;
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void createTable(TableProperties tbl) {
 		StringBuilder sql = new StringBuilder();
@@ -166,7 +166,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return result;
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void updateTable(TableProperties tbl) {
 		// 先获取表结构信息
