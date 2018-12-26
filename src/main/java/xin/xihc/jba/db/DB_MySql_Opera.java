@@ -3,6 +3,7 @@
  */
 package xin.xihc.jba.db;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.core.JbaTemplate;
@@ -81,7 +82,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return res;
 	}
 
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional(rollbackFor = DataAccessException.class)
 	@Override
 	public void createTable(TableProperties tbl) {
 		StringBuilder sql = new StringBuilder();
@@ -166,7 +167,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return result;
 	}
 
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional(rollbackFor = DataAccessException.class)
 	@Override
 	public void updateTable(TableProperties tbl) {
 		// 先获取表结构信息
