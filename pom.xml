@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.3</version>
     <name>spring-jba</name>
     <description>java对象访问</description>
     <url>https://gitee.com/leo_xi/spring-jba</url>
@@ -13,7 +13,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <java.version>1.8</java.version>
-        <xin.CommonUtils>1.19.1</xin.CommonUtils>
+        <xin.CommonUtils>1.19.2</xin.CommonUtils>
         <spring.version>4.3.18.RELEASE</spring.version>
     </properties>
 
