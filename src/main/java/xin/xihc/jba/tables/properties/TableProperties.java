@@ -3,6 +3,8 @@
  */
 package xin.xihc.jba.tables.properties;
 
+import xin.xihc.jba.annotation.Table;
+
 import java.util.LinkedHashMap;
 
 /**
@@ -34,6 +36,11 @@ public class TableProperties {
 	 * 是否忽略这张表
 	 */
 	private boolean ignore;
+
+	/**
+	 * 表的字符编码
+	 */
+	private Table.TableCharset charset;
 
 	/**
 	 * 对象属性-表字段属性
@@ -82,6 +89,14 @@ public class TableProperties {
 
 	public void setIgnore(boolean ignore) {
 		this.ignore = ignore;
+	}
+
+	public Table.TableCharset getCharset() {
+		return charset;
+	}
+
+	public void setCharset(Table.TableCharset charset) {
+		this.charset = charset;
 	}
 
 	/**

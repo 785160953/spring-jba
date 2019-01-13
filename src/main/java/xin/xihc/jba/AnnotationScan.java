@@ -75,6 +75,7 @@ public class AnnotationScan implements SmartLifecycle {
 			tblP.setTableBean(obj);
 			tblP.setIgnore(table.ignore());
 			tblP.setOrder(table.order());
+			tblP.setCharset(table.charset());
 
 			int keyCount = 0;
 			for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
