@@ -6,6 +6,7 @@ package xin.xihc.jba.db;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
+import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.tables.InitDataInterface;
@@ -16,6 +17,7 @@ import xin.xihc.utils.common.CommonUtil;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * mysql数据库操作
@@ -89,17 +91,18 @@ public class DB_MySql_Opera implements I_TableOperation {
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
 		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			sql.append(columnPro(col, after, true));
+			sql.append(columnPro(col, after, true, null));
 			sql.append(",");
 			after = col.colName();
 		}
 		sql.deleteCharAt(sql.length() - 1)
-		   .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
+		   .append(") ENGINE=InnoDB DEFAULT CHARSET=" + tbl.getCharset().name() + " COMMENT = '" + tbl
+				   .getRemark() + "';");
 		jbaTemplate.executeSQL(sql.toString());
 		// 初始化数据
 		if (tbl.getTableBean() instanceof InitDataInterface) {
 			Thread thread = new Thread(() -> ((InitDataInterface) tbl.getTableBean()).doInit(jbaTemplate));
-			thread.setName("initDataThread-" + tbl.getTableName());
+			thread.setName("initData-" + tbl.getTableName());
 			thread.start();
 		}
 	}
@@ -121,21 +124,38 @@ public class DB_MySql_Opera implements I_TableOperation {
 	}
 
 	/**
-	 * 获取数据库中的表结构信息
+	 * 获取表对象的字符编码
 	 *
-	 * @param tableName 表名
+	 * @param dbColumns
 	 * @return
 	 */
-	private List<ColumnProperties> getColumnsInfo(final String tableName) {
-		List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
-				"select * from information_schema.columns where table_name = '" + tableName + "' AND table_schema='" + this.table_schema + "'",
-				null, MysqlColumnInfo.class, null);
-		if (list.size() < 1) {
+	private String getTableCharset(List<MysqlColumnInfo> dbColumns) {
+		Map<String, List<String>> collect = dbColumns.stream()
+		                                             .filter(t -> CommonUtil.isNotNullEmpty(t.getCharacter_set_name()))
+		                                             .map(t -> t.getCharacter_set_name())
+		                                             .collect(Collectors.groupingBy(String::toString));
+		Optional<List<String>> max = collect.values().stream().max(Comparator.comparing(List::size));
+		if (max.isPresent()) {
+			if (max.get().size() > 0) {
+				return max.get().get(0);
+			}
+		}
+		return Table.TableCharset.utf8.name();
+	}
+
+	/**
+	 * 将表中列的属性转为ColumnProperties
+	 *
+	 * @param dbColumns 表的列属性列表
+	 * @return
+	 */
+	private List<ColumnProperties> convert2ColumnProperties(List<MysqlColumnInfo> dbColumns) {
+		if (dbColumns.size() < 1) {
 			return new ArrayList<>(0);
 		}
-		List<ColumnProperties> result = new ArrayList(list.size());
+		List<ColumnProperties> result = new ArrayList(dbColumns.size());
 		ColumnProperties prop;
-		for (MysqlColumnInfo item : list) {
+		for (MysqlColumnInfo item : dbColumns) {
 			prop = new ColumnProperties();
 			prop.colName(item.getColumn_name());
 			prop.type(getClassByColumnDataType(item.getData_type()));
@@ -155,6 +175,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 				}
 			}
 			if ("varchar".equals(item.getData_type()) || "char".equals(item.getData_type())) {
+				prop.charset(Table.TableCharset.toCharset(item.getCharacter_set_name()));
 				prop.length(item.getCharacter_maximum_length());
 			} else if ("text".equals(item.getData_type())) {// text字段长度为65535
 				prop.length(65535);
@@ -170,50 +191,62 @@ public class DB_MySql_Opera implements I_TableOperation {
 	@Transactional(rollbackFor = DataAccessException.class)
 	@Override
 	public void updateTable(TableProperties tbl) {
+		List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
+				"select * from information_schema.columns where table_name = '" + tbl
+						.getTableName() + "' AND table_schema='" + this.table_schema + "'", null, MysqlColumnInfo.class,
+				null);
 		// 先获取表结构信息
-		List<ColumnProperties> dbColumnPropsList = getColumnsInfo(tbl.getTableName());
+		List<ColumnProperties> dbColumnList = convert2ColumnProperties(list);
 
 		ArrayList<String> sqls = new ArrayList<>();
+		// 已经存在的列
+		ArrayList<String> existsColumnsName = new ArrayList<>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
 		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			boolean is2Add = true;
-
-			for (ColumnProperties item : dbColumnPropsList) {
-				if (col.colName().toLowerCase().equals(item.colName().toLowerCase())) { // 相同列
-					is2Add = false;
-					if (!Objects.equals(javaClassToMysqlFieldName.get(col.type()),
-							javaClassToMysqlFieldName.get(item.type())) || !item.equals(col)) {// 如果对应的数据库字段类型不一样
-						if (col.primary()) { // 同一列，主键设置的不一致
-							if (item.policy() == Column.Policy.AUTO) {
-								String ss = "ALTER TABLE " + tbl.getTableName() + " MODIFY " + item
-										.colName() + " int," + "DROP PRIMARY KEY";
-								jbaTemplate.executeSQL(ss);
-							} else {
-								String ss = "ALTER TABLE " + tbl.getTableName() + " DROP PRIMARY KEY";
-								jbaTemplate.executeSQL(ss);
-							}
+			// 设置为表的字符编码
+			col.charset(tbl.getCharset());
+			Optional<ColumnProperties> find = dbColumnList.stream()
+			                                              .filter(t -> t.colName().equalsIgnoreCase(col.colName()))
+			                                              .findFirst();
+			//存在
+			if (find.isPresent()) {
+				ColumnProperties dbCol = find.get();
+				existsColumnsName.add(dbCol.colName());
+				if (!Objects.equals(javaClassToMysqlFieldName.get(col.type()),
+						javaClassToMysqlFieldName.get(dbCol.type())) || !dbCol.equals(col)) {// 如果对应的数据库字段类型不一样
+					if (col.primary()) { // 同一列，主键设置的不一致
+						if (dbCol.policy() == Column.Policy.AUTO) {
+							String ss = "ALTER TABLE " + tbl.getTableName() + " MODIFY " + dbCol
+									.colName() + " int," + "DROP PRIMARY KEY";
+							jbaTemplate.executeSQL(ss);
+						} else {
+							String ss = "ALTER TABLE " + tbl.getTableName() + " DROP PRIMARY KEY";
+							jbaTemplate.executeSQL(ss);
 						}
-						sqls.add("MODIFY " + columnPro(col, after, false));
 					}
-					after = col.colName();
-					dbColumnPropsList.remove(item);
-					break;
+					sqls.add("MODIFY " + columnPro(col, after, false, dbCol));
 				}
+				existsColumnsName.add(dbCol.colName());
+			} else {
+				sqls.add("ADD COLUMN " + columnPro(col, after, false, null));
 			}
-			// 是新增列
-			if (is2Add) {
-				sqls.add("ADD COLUMN " + columnPro(col, after, false));
-				after = col.colName();
-			}
+			after = col.colName();
+
 		}
-		// 最后list剩余的则是需要删除的列
-		for (ColumnProperties item : dbColumnPropsList) {
+		for (ColumnProperties item : dbColumnList) {
+			// 不包含的则是需要删除的
+			if (existsColumnsName.contains(item.colName())) {
+				continue;
+			}
 			sqls.add("DROP COLUMN " + item.colName());
 		}
 		for (int i = 0; i < sqls.size(); i++) {
 			sql.append(sqls.get(i) + ",");
+		}
+		if (!getTableCharset(list).equalsIgnoreCase(tbl.getCharset().name())) {
+			sql.append(" CHARACTER SET " + tbl.getCharset().name() + ",");
 		}
 		sql.append(" COMMENT = '" + tbl.getRemark() + "'");
 		jbaTemplate.executeSQL(sql.toString());
@@ -239,10 +272,13 @@ public class DB_MySql_Opera implements I_TableOperation {
 	/**
 	 * 得到字段名+属性拼接
 	 *
-	 * @param col
+	 * @param col      要创建的列的属性
+	 * @param after    列在after之后
+	 * @param isCreate 是否是创建表操作
+	 * @param dbCol    数据库的列的属性，创建时没有
 	 * @return
 	 */
-	private String columnPro(ColumnProperties col, String after, boolean isCreate) {
+	private String columnPro(ColumnProperties col, String after, boolean isCreate, ColumnProperties dbCol) {
 		StringBuilder temp = new StringBuilder();
 		temp.append(col.colName() + " ");
 		if (javaClassToMysqlFieldName.containsKey(col.type())) {
@@ -263,6 +299,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 				}
 				if (isCreate) {
 					temp.append(" BINARY");
+				}
+			}
+			if (!isCreate) {
+				if (null == dbCol || !col.charset().equals(dbCol.charset())) {
+					temp.append(" CHARACTER SET " + col.charset().name());
 				}
 			}
 		}

@@ -4,6 +4,7 @@
 package xin.xihc.jba.tables.properties;
 
 import xin.xihc.jba.annotation.Column.Policy;
+import xin.xihc.jba.annotation.Table;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -26,6 +27,10 @@ public class ColumnProperties {
 	private Integer length = 0;// 列长度
 	private String remark;//列备注
 	private Integer precision = 4;//列精度
+	/**
+	 * 表的列的字符编码
+	 */
+	private Table.TableCharset charset = Table.TableCharset.utf8;
 
 	public Integer precision() {
 		return precision;
@@ -132,22 +137,29 @@ public class ColumnProperties {
 		return this;
 	}
 
+	public Table.TableCharset charset() {
+		return charset;
+	}
+
+	public void charset(Table.TableCharset charset) {
+		if (null == charset) {
+			return;
+		}
+		this.charset = charset;
+	}
+
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		ColumnProperties that = (ColumnProperties) o;
 		return Objects.equals(defaultValue, that.defaultValue) && Objects.equals(notNull, that.notNull) && Objects
 				.equals(primary, that.primary) && policy == that.policy && Objects
 				.equals(length, that.length) && Objects.equals(remark, that.remark) && Objects
-				.equals(precision, that.precision);
-	}
-
-	@Override
-	public int hashCode() {
-
-		return Objects.hash(defaultValue, notNull, primary, policy, length, remark, precision);
+				.equals(precision, that.precision) && Objects.equals(charset, that.charset);
 	}
 }
