@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.4</version>
 </dependency>
 ```
 
@@ -22,6 +22,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
 2. remark     表的备注
 3. order      (1.5.0+新增)顺序，默认9999
 4. ignore     (1.5.0+新增)是否忽略表，默认false
+5. charset    (1.5.4+新增)设置表字符编码，默认utf8
 ```
 3. `@Column` 声明字段属性包含如下：(支持继承关系,可以使用父类的属性)
 ```
@@ -124,4 +125,4 @@ private JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2018-12-23`
+`更新时间：2019-01-13`
