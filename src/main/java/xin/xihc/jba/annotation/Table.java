@@ -21,30 +21,6 @@ import java.lang.annotation.*;
 public @interface Table {
 
 	/**
-	 * 表字符编码
-	 */
-	enum TableCharset {
-		/**
-		 * utf8编码默认
-		 */
-		utf8,
-
-		/**
-		 * utf8mb4编码-支持emoji表情
-		 */
-		utf8mb4;
-
-		public static TableCharset toCharset(String charset){
-			for (TableCharset tableCharset : TableCharset.values()) {
-				if (tableCharset.name().equalsIgnoreCase(charset)){
-					return tableCharset;
-				}
-			}
-			return null;
-		}
-	}
-
-	/**
 	 * 表名
 	 */
 	String value() default "";
@@ -67,12 +43,5 @@ public @interface Table {
 	 * @return
 	 */
 	boolean ignore() default false;
-
-	/**
-	 * 设置表的字符编码
-	 *
-	 * @return
-	 */
-	TableCharset charset() default TableCharset.utf8;
 
 }

@@ -25,8 +25,7 @@ public @interface Column {
 		/**
 		 * NONE
 		 */
-		NONE,
-		/**
+		NONE, /**
 		 * 自增主键
 		 */
 		AUTO, /**
@@ -36,6 +35,30 @@ public @interface Column {
 		 * guid大写
 		 */
 		GUID_UP;
+	}
+
+	/**
+	 * 表字符编码
+	 */
+	enum TableCharset {
+		/**
+		 * utf8编码默认
+		 */
+		utf8,
+
+		/**
+		 * utf8mb4编码-支持emoji表情
+		 */
+		utf8mb4;
+
+		public static TableCharset toCharset(String charset) {
+			for (TableCharset tableCharset : TableCharset.values()) {
+				if (tableCharset.name().equalsIgnoreCase(charset)) {
+					return tableCharset;
+				}
+			}
+			return null;
+		}
 	}
 
 	/**
@@ -93,5 +116,12 @@ public @interface Column {
 	 * @return
 	 */
 	int precision() default 0;
+
+	/**
+	 * 设置表的字符编码
+	 *
+	 * @return
+	 */
+	TableCharset charset() default TableCharset.utf8;
 
 }

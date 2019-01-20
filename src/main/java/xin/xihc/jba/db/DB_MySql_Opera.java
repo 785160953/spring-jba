@@ -6,7 +6,6 @@ package xin.xihc.jba.db;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
-import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.tables.InitDataInterface;
@@ -17,7 +16,6 @@ import xin.xihc.utils.common.CommonUtil;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * mysql数据库操作
@@ -89,15 +87,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 	public void createTable(TableProperties tbl) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tbl.getTableName() + " ( ");
-		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			sql.append(columnPro(col, after, true, null));
+			sql.append(columnPro(col, null, true, null));
 			sql.append(",");
-			after = col.colName();
 		}
 		sql.deleteCharAt(sql.length() - 1)
-		   .append(") ENGINE=InnoDB DEFAULT CHARSET=" + tbl.getCharset().name() + " COMMENT = '" + tbl
-				   .getRemark() + "';");
+		   .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
 		jbaTemplate.executeSQL(sql.toString());
 		// 初始化数据
 		if (tbl.getTableBean() instanceof InitDataInterface) {
@@ -121,26 +116,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 		}
 		return String.class;
-	}
-
-	/**
-	 * 获取表对象的字符编码
-	 *
-	 * @param dbColumns
-	 * @return
-	 */
-	private String getTableCharset(List<MysqlColumnInfo> dbColumns) {
-		Map<String, List<String>> collect = dbColumns.stream()
-		                                             .filter(t -> CommonUtil.isNotNullEmpty(t.getCharacter_set_name()))
-		                                             .map(t -> t.getCharacter_set_name())
-		                                             .collect(Collectors.groupingBy(String::toString));
-		Optional<List<String>> max = collect.values().stream().max(Comparator.comparing(List::size));
-		if (max.isPresent()) {
-			if (max.get().size() > 0) {
-				return max.get().get(0);
-			}
-		}
-		return Table.TableCharset.utf8.name();
 	}
 
 	/**
@@ -175,7 +150,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 				}
 			}
 			if ("varchar".equals(item.getData_type()) || "char".equals(item.getData_type())) {
-				prop.charset(Table.TableCharset.toCharset(item.getCharacter_set_name()));
+				prop.charset(Column.TableCharset.toCharset(item.getCharacter_set_name()));
 				prop.length(item.getCharacter_maximum_length());
 			} else if ("text".equals(item.getData_type())) {// text字段长度为65535
 				prop.length(65535);
@@ -205,8 +180,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 		sql.append("ALTER TABLE " + tbl.getTableName() + " ");
 		String after = "";
 		for (ColumnProperties col : tbl.getColumns().values()) {
-			// 设置为表的字符编码
-			col.charset(tbl.getCharset());
 			Optional<ColumnProperties> find = dbColumnList.stream()
 			                                              .filter(t -> t.colName().equalsIgnoreCase(col.colName()))
 			                                              .findFirst();
@@ -233,7 +206,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 				sqls.add("ADD COLUMN " + columnPro(col, after, false, null));
 			}
 			after = col.colName();
-
 		}
 		for (ColumnProperties item : dbColumnList) {
 			// 不包含的则是需要删除的
@@ -244,9 +216,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 		}
 		for (int i = 0; i < sqls.size(); i++) {
 			sql.append(sqls.get(i) + ",");
-		}
-		if (!getTableCharset(list).equalsIgnoreCase(tbl.getCharset().name())) {
-			sql.append(" CHARACTER SET " + tbl.getCharset().name() + ",");
 		}
 		sql.append(" COMMENT = '" + tbl.getRemark() + "'");
 		jbaTemplate.executeSQL(sql.toString());
@@ -288,23 +257,16 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 		} else {
 			if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 20000) {
-				temp.append("text");
-				if (isCreate) {
-					temp.append(" BINARY");
-				}
+				temp.append("text BINARY");
 			} else {
-				temp.append("varchar");
-				if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 0) {
-					temp.append("(" + col.length() + ")");
-				}
-				if (isCreate) {
-					temp.append(" BINARY");
+				if (col.length() > 0 && col.length() <= 32) {
+					temp.append("char(" + col.length() + ") BINARY");
+				} else {
+					temp.append("varchar(" + col.length() + ") BINARY");
 				}
 			}
-			if (!isCreate) {
-				if (null == dbCol || !col.charset().equals(dbCol.charset())) {
-					temp.append(" CHARACTER SET " + col.charset().name());
-				}
+			if (null == dbCol || !col.charset().equals(dbCol.charset())) {
+				temp.append(" CHARACTER SET " + col.charset().name());
 			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {

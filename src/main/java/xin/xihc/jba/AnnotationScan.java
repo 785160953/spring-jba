@@ -75,9 +75,7 @@ public class AnnotationScan implements SmartLifecycle {
 			tblP.setTableBean(obj);
 			tblP.setIgnore(table.ignore());
 			tblP.setOrder(table.order());
-			tblP.setCharset(table.charset());
 
-			int keyCount = 0;
 			for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
 				field.setAccessible(true);
 				Column column = field.getAnnotation(Column.class);
@@ -98,7 +96,7 @@ public class AnnotationScan implements SmartLifecycle {
 					colP.colName(field.getName())
 					    .defaultValue(column.defaultValue())
 					    .notNull(column.notNull())
-					    .remark(column.remark());
+					    .remark(column.remark()).charset(column.charset());
 					colP.length(0);
 					if (column.length() > 0) {
 						colP.length(column.length());
@@ -107,10 +105,6 @@ public class AnnotationScan implements SmartLifecycle {
 						colP.precision(column.precision());
 					}
 					if (column.primary()) {
-						keyCount++;
-						if (keyCount > 1) {
-							throw new RuntimeException("主键数量超过一个了.");
-						}
 						colP.primary(true);
 						colP.notNull(true);
 					}
