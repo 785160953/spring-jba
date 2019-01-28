@@ -6,10 +6,13 @@ package xin.xihc.jba.db;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
+import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
+import xin.xihc.jba.db.bean.MysqlIndexInfo;
 import xin.xihc.jba.tables.InitDataInterface;
 import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.IndexProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
@@ -98,12 +101,16 @@ public class DB_MySql_Opera implements I_TableOperation {
         sql.deleteCharAt(sql.length() - 1)
                 .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
         jbaTemplate.executeSQL(sql.toString());
+
         // 初始化数据
         if (tbl.getTableBean() instanceof InitDataInterface) {
             Thread thread = new Thread(() -> ((InitDataInterface) tbl.getTableBean()).doInit(jbaTemplate));
             thread.setName("initData-" + tbl.getTableName());
             thread.start();
         }
+
+        // 更新索引
+        updateIndex(tbl);
     }
 
     /**
@@ -220,6 +227,9 @@ public class DB_MySql_Opera implements I_TableOperation {
         }
         sql.append(" COMMENT = '" + tbl.getRemark() + "'");
         jbaTemplate.executeSQL(sql.toString());
+
+        // 更新索引
+        updateIndex(tbl);
     }
 
     /**
@@ -315,5 +325,67 @@ public class DB_MySql_Opera implements I_TableOperation {
     public void dropTable(TableProperties tbl) {
         jbaTemplate.executeSQL("DROP TABLE " + tbl.getTableName());
     }
+
+    /**
+     * 更新索引
+     */
+    public void updateIndex(TableProperties tbl) {
+        List<MysqlIndexInfo> dbIndexs = jbaTemplate.queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
+        // 过滤掉主键索引
+        Map<String, List<MysqlIndexInfo>> oldIndexs = dbIndexs.stream().filter(x -> !"PRIMARY".equals(x.getKey_name())).collect(Collectors.groupingBy(MysqlIndexInfo::getKey_name));
+        StringJoiner sql = new StringJoiner(",");
+        // 已经存在的索引名称列表
+        List<String> alreadyExistsIndex = new ArrayList<>();
+        List<IndexProperties> indexs = tbl.getIndexs();
+        Map<String, List<IndexProperties>> newIndexs = indexs.stream().collect(Collectors.groupingBy(IndexProperties::getIndexName));
+        for (String indexName : newIndexs.keySet()) {
+            List<IndexProperties> indexProperties = newIndexs.get(indexName);
+            indexProperties.sort(Comparator.comparing(IndexProperties::getOrder));
+            // 取第一个类型
+            Index.IndexType type = indexProperties.get(0).getType();
+            String colNames = indexProperties.stream().map(IndexProperties::getColumnName).collect(Collectors.joining(","));
+            // 是否新增
+            boolean add = false;
+            // 存在则判断是否修改了
+            if (oldIndexs.containsKey(indexName)) {
+                alreadyExistsIndex.add(indexName);
+
+                List<MysqlIndexInfo> mysqlIndexInfos = oldIndexs.get(indexName);
+                Integer non_unique = mysqlIndexInfos.get(0).getNon_unique();
+                String oldColNames = mysqlIndexInfos.stream().map(MysqlIndexInfo::getColumn_name).collect(Collectors.joining(","));
+                /// 索引类型或者列不一致
+                if (!non_unique.equals(type.ordinal()) || !oldColNames.equals(colNames)) {
+                    sql.add("DROP INDEX " + indexName);
+                    add = true;
+                }
+            } else {
+                add = true;
+            }
+            // 添加
+            if (add) {
+                switch (type) {
+                    case Unique:
+                        sql.add("ADD UNIQUE INDEX " + indexName + " (" + colNames + ")");
+                        break;
+                    case Normal:
+                        sql.add("ADD INDEX " + indexName + " (" + colNames + ")");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        // 删除剩余的
+        for (String indexName : oldIndexs.keySet()) {
+            // 不存在列表里的删除
+            if (!alreadyExistsIndex.contains(indexName)) {
+                sql.add("DROP INDEX " + indexName);
+            }
+        }
+        if (sql.length() > 0) {
+            jbaTemplate.executeSQL("ALTER TABLE " + tbl.getTableName() + " " + sql.toString() + ";");
+        }
+    }
+
 
 }

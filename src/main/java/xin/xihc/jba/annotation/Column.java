@@ -3,8 +3,6 @@
  */
 package xin.xihc.jba.annotation;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.*;
 
 /**
@@ -17,111 +15,113 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-@Component
 @Inherited
 public @interface Column {
 
-	enum Policy {
-		/**
-		 * NONE
-		 */
-		NONE, /**
-		 * 自增主键
-		 */
-		AUTO, /**
-		 * guid小写
-		 */
-		GUID, /**
-		 * guid大写
-		 */
-		GUID_UP;
-	}
+    /**
+     * 列名
+     *
+     * @return
+     */
+    String value() default "";
 
-	/**
-	 * 表字符编码
-	 */
-	enum TableCharset {
-		/**
-		 * utf8编码默认
-		 */
-		utf8,
+    /**
+     * 默认值
+     *
+     * @return
+     */
+    String defaultValue() default "";
 
-		/**
-		 * utf8mb4编码-支持emoji表情
-		 */
-		utf8mb4;
+    /**
+     * 是否允许为空
+     *
+     * @return
+     */
+    boolean notNull() default false;
 
-		public static TableCharset toCharset(String charset) {
-			for (TableCharset tableCharset : TableCharset.values()) {
-				if (tableCharset.name().equalsIgnoreCase(charset)) {
-					return tableCharset;
-				}
-			}
-			return null;
-		}
-	}
+    /**
+     * 是否是主键
+     *
+     * @return
+     */
+    boolean primary() default false;
 
-	/**
-	 * 列名
-	 *
-	 * @return
-	 */
-	String value() default "";
+    /**
+     * 主键生成策略
+     *
+     * @return
+     */
+    Policy policy() default Policy.NONE;
 
-	/**
-	 * 默认值
-	 *
-	 * @return
-	 */
-	String defaultValue() default "";
+    /**
+     * 长度限制，小于1代表不限制
+     *
+     * @return
+     */
+    int length() default 0;
 
-	/**
-	 * 是否允许为空
-	 *
-	 * @return
-	 */
-	boolean notNull() default false;
+    /**
+     * 备注
+     *
+     * @return
+     */
+    String remark() default "";
 
-	/**
-	 * 是否是主键
-	 *
-	 * @return
-	 */
-	boolean primary() default false;
+    /**
+     * 精度
+     *
+     * @return
+     */
+    int precision() default 0;
 
-	/**
-	 * 主键生成策略
-	 *
-	 * @return
-	 */
-	Policy policy() default Policy.NONE;
+    /**
+     * 设置表的字符编码
+     *
+     * @return
+     */
+    TableCharset charset() default TableCharset.utf8;
 
-	/**
-	 * 长度限制，小于1代表不限制
-	 *
-	 * @return
-	 */
-	int length() default 0;
+    enum Policy {
+        /**
+         * NONE
+         */
+        NONE,
+        /**
+         * 自增主键
+         */
+        AUTO,
+        /**
+         * guid小写
+         */
+        GUID,
+        /**
+         * guid大写
+         */
+        GUID_UP;
+    }
 
-	/**
-	 * 备注
-	 *
-	 * @return
-	 */
-	String remark() default "";
+    /**
+     * 表字符编码
+     */
+    enum TableCharset {
+        /**
+         * utf8编码默认
+         */
+        utf8,
 
-	/**
-	 * 精度
-	 *
-	 * @return
-	 */
-	int precision() default 0;
+        /**
+         * utf8mb4编码-支持emoji表情
+         */
+        utf8mb4;
 
-	/**
-	 * 设置表的字符编码
-	 *
-	 * @return
-	 */
-	TableCharset charset() default TableCharset.utf8;
+        public static TableCharset toCharset(String charset) {
+            for (TableCharset tableCharset : TableCharset.values()) {
+                if (tableCharset.name().equalsIgnoreCase(charset)) {
+                    return tableCharset;
+                }
+            }
+            return null;
+        }
+    }
 
 }
