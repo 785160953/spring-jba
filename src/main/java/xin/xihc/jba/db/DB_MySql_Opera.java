@@ -3,13 +3,12 @@
  */
 package xin.xihc.jba.db;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.tables.InitDataInterface;
 import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.IndexProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
@@ -82,7 +81,6 @@ public class DB_MySql_Opera implements I_TableOperation {
         return res;
     }
 
-    @Transactional(rollbackFor = DataAccessException.class)
     @Override
     public void createTable(TableProperties tbl) {
         StringBuilder sql = new StringBuilder();
@@ -167,7 +165,6 @@ public class DB_MySql_Opera implements I_TableOperation {
         return result;
     }
 
-    @Transactional(rollbackFor = DataAccessException.class)
     @Override
     public void updateTable(TableProperties tbl) {
         List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
@@ -315,5 +312,16 @@ public class DB_MySql_Opera implements I_TableOperation {
     public void dropTable(TableProperties tbl) {
         jbaTemplate.executeSQL("DROP TABLE " + tbl.getTableName());
     }
+
+    /**
+     * 更新索引
+     */
+    public void updateIndex(TableProperties tbl){
+        List<IndexProperties> indexs = tbl.getIndexs();
+        if (indexs.size() < 1){
+
+        }
+    }
+
 
 }

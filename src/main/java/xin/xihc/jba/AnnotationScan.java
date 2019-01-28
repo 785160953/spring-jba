@@ -6,12 +6,14 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Column.Policy;
+import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.IndexProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
@@ -113,6 +115,16 @@ public class AnnotationScan implements SmartLifecycle {
 					if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
 						colP.length(32);
 					}
+				}
+				// 记录索引
+				Index index = field.getAnnotation(Index.class);
+				if (null != index) {
+					IndexProperties idx = new IndexProperties();
+					idx.setColumnName(field.getName());
+					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? "idx_"+field.getName() : index.value());
+					idx.setOrder(index.order());
+					idx.setType(index.type());
+					tblP.addIndex(idx);
 				}
 			}
 		}
