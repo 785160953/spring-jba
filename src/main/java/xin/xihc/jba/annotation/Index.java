@@ -40,14 +40,15 @@ public @interface Index {
      */
     enum IndexType {
         /**
-         * 普通索引
-         */
-        Normal,
-
-        /**
          * 唯一索引
          */
-        Unique;
+        Unique,
+
+        /**
+         * 普通索引
+         */
+        Normal;
+
     }
 
 }
