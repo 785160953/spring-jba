@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
 </dependency>
 ```
 
@@ -17,24 +17,31 @@ https://gitee.com/leo_xi/SpringJbaDemo
 # 注解解释 #
 1. `@EnableJBA` 开启spring-jba创建表功能
 2. `@Table` 该注解是声明对象为表对象,属性包含如下：(不支持继承关系)
-```
-1. value      1.2.0以后支持自定义表名
-2. remark     表的备注
-3. order      (1.5.0+新增)顺序，默认9999
-4. ignore     (1.5.0+新增)是否忽略表，默认false
-```
+    ```
+    1. value      1.2.0以后支持自定义表名
+    2. remark     表的备注
+    3. order      (1.5.0+新增)顺序，默认9999
+    4. ignore     (1.5.0+新增)是否忽略表，默认false
+    ```
 3. `@Column` 声明字段属性包含如下：(支持继承关系,可以使用父类的属性)
-```
-1. value           列名-暂时无效
-2. defaultValue    默认值
-3. notNull         是否允许为空
-4. primary         是否是主键
-5. policy          主键生成策略
-6. length          长度限制
-7. remark          备注
-8. precision       精度(小于length)
-9. charset         (1.5.5+新增)设置表字符编码，默认utf8
-```
+    ```
+    1. value           列名-暂时无效
+    2. defaultValue    默认值
+    3. notNull         是否允许为空
+    4. primary         是否是主键
+    5. policy          主键生成策略
+    6. length          长度限制
+    7. remark          备注
+    8. precision       精度(小于length)
+    9. charset         (1.5.5+新增)设置表字符编码，默认utf8
+    ```
+4. `@Index` (1.5.7+新增)该注解是声明表字段索引的,属性包含如下：(支持继承关系,可以使用父类的属性)
+    ```
+    1. value      索引名，用于分组,默认为idx_xxxx
+    2. type       索引类型,默认为普通索引（Normal，Unique）
+    3. order      索引内列顺序，默认0
+    ```
+
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 
@@ -125,4 +132,4 @@ private JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2019-01-25`
+`更新时间：2019-01-28`
