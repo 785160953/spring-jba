@@ -15,40 +15,51 @@ import java.lang.annotation.*;
 @Inherited
 public @interface Index {
 
-    /**
-     * 索引名，用于分组,默认为idx_xxxx
-     */
-    String value() default "";
+	/**
+	 * 索引名，用于分组,默认为idx_xxxx
+	 */
+	String value() default "";
 
-    /**
-     * 索引类型,默认为普通索引
-     *
-     * @return
-     */
-    IndexType type() default IndexType.Normal;
+	/**
+	 * 索引类型,默认为普通索引
+	 *
+	 * @return
+	 */
+	IndexType type() default IndexType.Normal;
 
-    /**
-     * 复合索引的顺序,默认0
-     *
-     * @return
-     */
-    int order() default 0;
+	/**
+	 * 复合索引的顺序,默认0
+	 *
+	 * @return
+	 */
+	int order() default 0;
+
+	/**
+	 * 索引备注
+	 *
+	 * @return
+	 */
+	String remark() default "";
 
 
-    /**
-     * 索引类型
-     */
-    enum IndexType {
-        /**
-         * 唯一索引
-         */
-        Unique,
+	/**
+	 * 索引类型
+	 */
+	enum IndexType {
+		/**
+		 * 唯一索引
+		 */
+		Unique,
 
-        /**
-         * 普通索引
-         */
-        Normal;
+		/**
+		 * 普通索引
+		 */
+		Normal,
 
-    }
+		/**
+		 * 全文索引
+		 */
+		FullText;
+	}
 
 }

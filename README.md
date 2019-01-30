@@ -38,8 +38,9 @@ https://gitee.com/leo_xi/SpringJbaDemo
 4. `@Index` (1.5.7+新增)该注解是声明表字段索引的,属性包含如下：(支持继承关系,可以使用父类的属性)
     ```
     1. value      索引名，用于分组,默认为idx_xxxx
-    2. type       索引类型,默认为普通索引（Normal，Unique）
+    2. type       索引类型,默认为普通索引（Normal，Unique，FullText）
     3. order      索引内列顺序，默认0
+    4. remark     (1.5.8+新增)索引的备注
     ```
 
 ----------
