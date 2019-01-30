@@ -38,11 +38,13 @@ public class SQLUtils {
 	 * @since 1.3.3
 	 */
 	public static List<Field> getModelFields(Class<?> clazz) {
-		if (null == clazz)
+		if (null == clazz) {
 			return new ArrayList<>(0);
+		}
 
-		if (classFieldsCache.containsKey(clazz))
+		if (classFieldsCache.containsKey(clazz)) {
 			return classFieldsCache.get(clazz);
+		}
 
 		List<Field> allFields = CommonUtil.getAllFields(clazz, false, false);
 		classFieldsCache.put(clazz, allFields);

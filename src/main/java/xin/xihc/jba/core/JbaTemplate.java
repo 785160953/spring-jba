@@ -14,10 +14,9 @@ import xin.xihc.utils.json.JsonUtil;
 import xin.xihc.utils.logfile.LogFileUtil;
 
 import javax.sql.DataSource;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 对JDBCTemplate进行封装
@@ -367,7 +366,10 @@ public class JbaTemplate {
 		Objects.requireNonNull(model, "表对象model不允许为空");
 
 		List<T> ret;
-		String sql = "SELECT * FROM " + TableManager.getTable(model.getClass()).getTableName();
+		// 获取字段列表
+		String fields = SQLUtils.getModelFields(model.getClass()).stream().map(Field::getName)
+		                        .collect(Collectors.joining(","));
+		String sql = "SELECT " + fields + " FROM " + TableManager.getTable(model.getClass()).getTableName();
 		String sql_final;
 		// 存在排序
 		StringJoiner by = new StringJoiner(",");
@@ -388,6 +390,9 @@ public class JbaTemplate {
 		}
 
 		sql_final = getNamedPageSql(sql, model, pageInfo);
+		if (null != pageInfo && pageInfo.getTotalCount() < 1) {
+			return new ArrayList<>(0);
+		}
 		long start = System.currentTimeMillis();// 记录开始时间戳
 		ret = namedParameterJdbcTemplate
 				.query(sql_final, new JbaBeanProperty(model), new BeanPropertyRowMapper<>(clazz));
@@ -407,6 +412,9 @@ public class JbaTemplate {
 	public <T> List<T> queryMixModelList(final String sql, Object params, Class<T> clazz, PageInfo pageInfo) {
 		List<T> ret;
 		String sql_final = getNamedPageSql(sql, params, pageInfo);
+		if (null != pageInfo && pageInfo.getTotalCount() < 1) {
+			return new ArrayList<>(0);
+		}
 		long start = System.currentTimeMillis();// 记录开始时间戳
 		if (params != null) {
 			if (params instanceof Map) {

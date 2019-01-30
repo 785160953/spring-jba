@@ -220,7 +220,9 @@ public class DB_MySql_Opera implements I_TableOperation {
         String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).map(ColumnProperties::colName).sorted().collect(Collectors.joining(","));
         if (!newPrimary.equals(oldPrimary)) {
             sqls.add("DROP PRIMARY KEY");
-            sqls.add("ADD PRIMARY KEY (" + newPrimary + ")");
+            if (CommonUtil.isNotNullEmpty(newPrimary)) {
+                sqls.add("ADD PRIMARY KEY (" + newPrimary + ")");
+            }
         }
         for (int i = 0; i < sqls.size(); i++) {
             sql.append(sqls.get(i) + ",");
