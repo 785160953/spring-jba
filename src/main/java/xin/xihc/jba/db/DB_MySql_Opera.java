@@ -219,7 +219,9 @@ public class DB_MySql_Opera implements I_TableOperation {
         String oldPrimary = dbColumnList.stream().filter(x -> x.primary()).map(ColumnProperties::colName).sorted().collect(Collectors.joining(","));
         String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).map(ColumnProperties::colName).sorted().collect(Collectors.joining(","));
         if (!newPrimary.equals(oldPrimary)) {
-            sqls.add("DROP PRIMARY KEY");
+            if (CommonUtil.isNotNullEmpty(oldPrimary)) {
+                sqls.add("DROP PRIMARY KEY");
+            }
             if (CommonUtil.isNotNullEmpty(newPrimary)) {
                 sqls.add("ADD PRIMARY KEY (" + newPrimary + ")");
             }
