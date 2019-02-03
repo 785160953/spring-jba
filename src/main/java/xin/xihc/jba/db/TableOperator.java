@@ -1,7 +1,5 @@
 package xin.xihc.jba.db;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
@@ -25,7 +23,6 @@ public class TableOperator {
 	/**
 	 * 初始化
 	 */
-	@Transactional(rollbackFor = DataAccessException.class)
 	public void init() {
 		synchronized (TableOperator.class) {
 			// 创建类型不是NONE
@@ -48,7 +45,6 @@ public class TableOperator {
 		}
 	}
 
-	@Transactional(rollbackFor = DataAccessException.class)
 	public void drop() {
 		if (TableManager.mode != Mode.CREATE_DROP) {
 			return;

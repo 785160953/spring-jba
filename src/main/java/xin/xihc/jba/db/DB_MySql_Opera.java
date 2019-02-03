@@ -3,8 +3,6 @@
  */
 package xin.xihc.jba.db;
 
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.core.JbaTemplate;
@@ -85,7 +83,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return res;
 	}
 
-	@Transactional(rollbackFor = DataAccessException.class)
 	@Override
 	public void createTable(TableProperties tbl) {
 		StringBuilder sql = new StringBuilder();
@@ -94,8 +91,12 @@ public class DB_MySql_Opera implements I_TableOperation {
 			sql.append(columnPro(col, null, true, null));
 			sql.append(",");
 		}
-		String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).map(ColumnProperties::colName)
-		                       .sorted().collect(Collectors.joining(","));
+		// 更新索引
+		String updateIndex = updateIndex(tbl, true);
+		if (CommonUtil.isNotNullEmpty(updateIndex)) {
+			sql.append(updateIndex);
+			sql.append(",");
+		}
 		sql.deleteCharAt(sql.length() - 1)
 		   .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT = '" + tbl.getRemark() + "';");
 		jbaTemplate.executeSQL(sql.toString());
@@ -107,11 +108,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 			thread.start();
 		}
 
-		// 更新索引
-		String updateIndex = updateIndex(tbl);
-		if (CommonUtil.isNotNullEmpty(updateIndex)) {
-			jbaTemplate.executeSQL("ALTER TABLE " + tbl.getTableName() + " " + updateIndex + ";");
-		}
 	}
 
 	/**
@@ -175,7 +171,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 		return result;
 	}
 
-	@Transactional(rollbackFor = DataAccessException.class)
 	@Override
 	public void updateTable(TableProperties tbl) {
 		List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
@@ -217,7 +212,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			sqls.add("DROP COLUMN " + item.colName());
 		}
 		// 更新索引
-		String updateIndex = updateIndex(tbl);
+		String updateIndex = updateIndex(tbl,false);
 		if (CommonUtil.isNotNullEmpty(updateIndex)) {
 			sqls.add(updateIndex);
 		}
@@ -277,6 +272,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 				temp.append(" CHARACTER SET " + col.charset().name());
 			}
 		}
+        if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
+            temp.append(" NOT NULL ");
+        } else {
+            temp.append(" NULL ");
+        }
 		if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {
 			switch (col.policy()) {
 				case AUTO:
@@ -284,12 +284,6 @@ public class DB_MySql_Opera implements I_TableOperation {
 					break;
 				default:
 					break;
-			}
-		} else {
-			if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
-				temp.append(" NOT NULL ");
-			} else {
-				temp.append(" NULL ");
 			}
 		}
 		if (CommonUtil.isNotNullEmpty(col.remark())) {
@@ -323,17 +317,22 @@ public class DB_MySql_Opera implements I_TableOperation {
 		jbaTemplate.executeSQL("DROP TABLE " + tbl.getTableName());
 	}
 
-	/**
-	 * 更新索引
-	 */
-	public String updateIndex(TableProperties tbl) {
+    /**
+     * 更新索引
+     * @param tbl 表
+     * @param created 是否是创建
+     * @return
+     */
+	public String updateIndex(TableProperties tbl, boolean created) {
 		StringJoiner sql = new StringJoiner(",");
 		// 需要创建的主键
-		String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).map(ColumnProperties::colName)
-		                       .sorted().collect(Collectors.joining(","));
-
-		List<MysqlIndexInfo> dbIndexs = jbaTemplate
-				.queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
+		String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).sorted(Comparator.comparing(ColumnProperties::policy)).map(ColumnProperties::colName)
+		                       .collect(Collectors.joining(","));
+        List<MysqlIndexInfo> dbIndexs = new ArrayList<>(0);
+        if (!created){
+		    dbIndexs = jbaTemplate
+				    .queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
+        }
 		String oldPrimary = dbIndexs.stream().filter(x -> "PRIMARY".equals(x.getKey_name()))
 		                            .map(MysqlIndexInfo::getColumn_name).collect(Collectors.joining(","));
 		// =---------------------------优先处理主键-----------------------=
@@ -342,7 +341,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 				sql.add("DROP PRIMARY KEY");
 			}
 			if (CommonUtil.isNotNullEmpty(newPrimary)) {
-				sql.add("ADD PRIMARY KEY (" + newPrimary + ")");
+                String prefix = "";
+			    if (!created){
+                    prefix = "ADD";
+                }
+				sql.add(prefix + " PRIMARY KEY (" + newPrimary + ")");
 			}
 		}
 
@@ -384,15 +387,19 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 添加
 			if (add) {
+                String prefix = "";
+                if (!created){
+                    prefix = "ADD";
+                }
 				switch (type) {
 					case Unique:
-						sql.add("ADD UNIQUE INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
+						sql.add(prefix + " UNIQUE INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
 						break;
 					case Normal:
-						sql.add("ADD INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
+						sql.add(prefix + " INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
 						break;
 					case FullText:
-						sql.add("ADD FULLTEXT INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
+						sql.add(prefix + " FULLTEXT INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
 						break;
 					default:
 						break;
