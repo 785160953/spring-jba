@@ -15,7 +15,6 @@ import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -212,7 +211,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			sqls.add("DROP COLUMN " + item.colName());
 		}
 		// 更新索引
-		String updateIndex = updateIndex(tbl,false);
+		String updateIndex = updateIndex(tbl, false);
 		if (CommonUtil.isNotNullEmpty(updateIndex)) {
 			sqls.add(updateIndex);
 		}
@@ -272,11 +271,14 @@ public class DB_MySql_Opera implements I_TableOperation {
 				temp.append(" CHARACTER SET " + col.charset().name());
 			}
 		}
-        if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
-            temp.append(" NOT NULL ");
-        } else {
-            temp.append(" NULL ");
-        }
+		// 允许为空
+		if (CommonUtil.isNotNullEmpty(col.notNull()) && col.notNull()) {
+			temp.append(" NOT NULL ");
+		} else {
+			temp.append(" NULL ");
+		}
+
+		// 主键
 		if (CommonUtil.isNotNullEmpty(col.primary()) && col.primary()) {
 			switch (col.policy()) {
 				case AUTO:
@@ -286,22 +288,26 @@ public class DB_MySql_Opera implements I_TableOperation {
 					break;
 			}
 		}
-		if (CommonUtil.isNotNullEmpty(col.remark())) {
-			temp.append(" COMMENT '" + col.remark() + "'");
-		}
+
+		// 默认值
 		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
-			if (col.type().equals(String.class)) {
-				temp.append(" DEFAULT '" + col.defaultValue() + "'");
-			} else if (col.type().isEnum()) {
-				temp.append(" DEFAULT '" + col.defaultValue() + "'");
-			} else if (Number.class.isAssignableFrom(col.type())) {
+			if (Number.class.isAssignableFrom(col.type())) {
 				temp.append(" DEFAULT " + col.defaultValue());
-			} else if (col.type().equals(Timestamp.class)) {
+			} else if (col.type().equals(Date.class) && "CURRENT_TIMESTAMP".equalsIgnoreCase(col.defaultValue())) {
 				temp.append(" DEFAULT " + col.defaultValue());
+			} else {
+				temp.append(" DEFAULT '" + col.defaultValue() + "'");
 			}
 		} else if (!col.notNull()) {
 			temp.append(" DEFAULT null ");
 		}
+
+		// 备注
+		if (CommonUtil.isNotNullEmpty(col.remark())) {
+			temp.append(" COMMENT '" + col.remark() + "'");
+		}
+
+		// 顺序
 		if (!isCreate) {
 			if (CommonUtil.isNotNullEmpty(after)) {
 				temp.append(" AFTER " + after);
@@ -317,22 +323,24 @@ public class DB_MySql_Opera implements I_TableOperation {
 		jbaTemplate.executeSQL("DROP TABLE " + tbl.getTableName());
 	}
 
-    /**
-     * 更新索引
-     * @param tbl 表
-     * @param created 是否是创建
-     * @return
-     */
+	/**
+	 * 更新索引
+	 *
+	 * @param tbl     表
+	 * @param created 是否是创建
+	 * @return
+	 */
 	public String updateIndex(TableProperties tbl, boolean created) {
 		StringJoiner sql = new StringJoiner(",");
 		// 需要创建的主键
-		String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary()).sorted(Comparator.comparing(ColumnProperties::policy)).map(ColumnProperties::colName)
+		String newPrimary = tbl.getColumns().values().stream().filter(x -> x.primary())
+		                       .sorted(Comparator.comparing(ColumnProperties::policy)).map(ColumnProperties::colName)
 		                       .collect(Collectors.joining(","));
-        List<MysqlIndexInfo> dbIndexs = new ArrayList<>(0);
-        if (!created){
-		    dbIndexs = jbaTemplate
-				    .queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
-        }
+		List<MysqlIndexInfo> dbIndexs = new ArrayList<>(0);
+		if (!created) {
+			dbIndexs = jbaTemplate
+					.queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
+		}
 		String oldPrimary = dbIndexs.stream().filter(x -> "PRIMARY".equals(x.getKey_name()))
 		                            .map(MysqlIndexInfo::getColumn_name).collect(Collectors.joining(","));
 		// =---------------------------优先处理主键-----------------------=
@@ -341,10 +349,10 @@ public class DB_MySql_Opera implements I_TableOperation {
 				sql.add("DROP PRIMARY KEY");
 			}
 			if (CommonUtil.isNotNullEmpty(newPrimary)) {
-                String prefix = "";
-			    if (!created){
-                    prefix = "ADD";
-                }
+				String prefix = "";
+				if (!created) {
+					prefix = "ADD";
+				}
 				sql.add(prefix + " PRIMARY KEY (" + newPrimary + ")");
 			}
 		}
@@ -387,10 +395,10 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 添加
 			if (add) {
-                String prefix = "";
-                if (!created){
-                    prefix = "ADD";
-                }
+				String prefix = "";
+				if (!created) {
+					prefix = "ADD";
+				}
 				switch (type) {
 					case Unique:
 						sql.add(prefix + " UNIQUE INDEX " + indexName + " (" + colNames + ") COMMENT '" + comment + "'");
