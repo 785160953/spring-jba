@@ -20,7 +20,7 @@ import java.lang.annotation.*;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Component
 @Import({SpringContextUtil.class, JbaTemplate.class, AnnotationScan.class})
 public @interface EnableJBA {
