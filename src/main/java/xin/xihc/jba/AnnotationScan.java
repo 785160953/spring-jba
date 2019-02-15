@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Column.Policy;
 import xin.xihc.jba.annotation.Index;
+import xin.xihc.jba.annotation.OnUpdateCurrentTimestamp;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.TableOperator;
@@ -115,6 +116,11 @@ public class AnnotationScan implements SmartLifecycle {
 					if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
 						colP.length(32);
 					}
+				}
+				// 是否自动更新时间戳
+				OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
+				if (null != onUpdateCurrentTimestamp){
+					colP.setOnUpdateCurrentTimestamp(true);
 				}
 				// 记录索引
 				Index index = field.getAnnotation(Index.class);

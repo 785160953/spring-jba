@@ -27,6 +27,7 @@ public class ColumnProperties {
 	private Integer length = 0;// 列长度
 	private String remark;//列备注
 	private Integer precision = 4;//列精度
+	private Boolean onUpdateCurrentTimestamp = false;// 是否自动更新时间戳
 
 	/**
 	 * 表的列的字符编码
@@ -149,6 +150,14 @@ public class ColumnProperties {
 		this.charset = charset;
 	}
 
+	public Boolean getOnUpdateCurrentTimestamp() {
+		return onUpdateCurrentTimestamp;
+	}
+
+	public void setOnUpdateCurrentTimestamp(Boolean onUpdateCurrentTimestamp) {
+		this.onUpdateCurrentTimestamp = onUpdateCurrentTimestamp;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -161,7 +170,8 @@ public class ColumnProperties {
 		boolean equals = Objects.equals(defaultValue, that.defaultValue) && Objects
 				.equals(notNull, that.notNull) && Objects.equals(primary, that.primary) && Objects
 				.equals(length, that.length) && Objects.equals(remark, that.remark) && Objects
-				.equals(precision, that.precision) && Objects.equals(charset, that.charset);
+				.equals(precision, that.precision) && Objects.equals(charset, that.charset) && Objects
+				.equals(onUpdateCurrentTimestamp,that.onUpdateCurrentTimestamp);
 		return equals;
 	}
 }

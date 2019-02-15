@@ -7,7 +7,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.5.9</version>
+    <version>1.6.1</version>
 </dependency>
 ```
 
@@ -42,7 +42,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
     3. order      索引内列顺序，默认0
     4. remark     (1.5.8+新增)索引的备注
     ```
-
+5. `@OnUpdateCurrentTimestamp` (1.6.1+新增)该注解是声明表字段是否自动更新时间戳(Date/Timestamp)(支持继承关系,可以使用父类的属性)
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 
@@ -96,6 +96,9 @@ void doInit(JbaTemplate jbaTemplate);
 @Autowired
 private JbaTemplate jbaTemplate;
 ```
+
+## 分页对象PageInfo中增加`needTotalCount`是否需要查询总数量
+
 即可使用JbaTemplate的方法。。具体方法解析如下：
 表对象(需要获取表名)-`model`，参数对象-`params`
 
@@ -133,4 +136,4 @@ private JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2019-02-03`
+`更新时间：2019-02-15`

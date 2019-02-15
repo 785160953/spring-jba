@@ -390,7 +390,7 @@ public class JbaTemplate {
 		}
 
 		sql_final = getNamedPageSql(sql, model, pageInfo);
-		if (null != pageInfo && pageInfo.getTotalCount() < 1) {
+		if (null != pageInfo && pageInfo.getNeedTotalCount() && pageInfo.getTotalCount() < 1) {
 			return new ArrayList<>(0);
 		}
 		long start = System.currentTimeMillis();// 记录开始时间戳
@@ -412,7 +412,7 @@ public class JbaTemplate {
 	public <T> List<T> queryMixModelList(final String sql, Object params, Class<T> clazz, PageInfo pageInfo) {
 		List<T> ret;
 		String sql_final = getNamedPageSql(sql, params, pageInfo);
-		if (null != pageInfo && pageInfo.getTotalCount() < 1) {
+		if (null != pageInfo && pageInfo.getNeedTotalCount() && pageInfo.getTotalCount() < 1) {
 			return new ArrayList<>(0);
 		}
 		long start = System.currentTimeMillis();// 记录开始时间戳
@@ -470,14 +470,16 @@ public class JbaTemplate {
 	 */
 	private <T> String getNamedPageSql(final String sql, T params, PageInfo pageInfo) {
 		if (null != pageInfo) {
-			// 先查询总数
-			Integer totalCount = queryCount(sql, params);
-			if (totalCount < 1) { // 总数=0
+			if (pageInfo.getNeedTotalCount()) {
+				// 先查询总数
+				Integer totalCount = queryCount(sql, params);
+				if (totalCount < 1) { // 总数=0
+					pageInfo.setTotalCount(totalCount);
+					return sql;
+				}
+				// 计算总页数
 				pageInfo.setTotalCount(totalCount);
-				return sql;
 			}
-			// 计算总页数
-			pageInfo.setTotalCount(totalCount);
 			return SQLUtils.getPageSql(sql, pageInfo);
 		}
 		return sql;

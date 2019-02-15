@@ -15,6 +15,7 @@ import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			prop.notNull("NO".equals(item.getIs_nullable()));
 			if ("PRI".equals(item.getColumn_key())) { // 是主键
 				prop.primary(true);
-				if ("auto_increment".equals(item.getExtra())) { // 自增主键
+				if ("auto_increment".equalsIgnoreCase(item.getExtra())) { // 自增主键
 					prop.policy(Column.Policy.AUTO);
 					prop.length(item.getNumeric_precision());
 					prop.precision(item.getNumeric_scale());
@@ -164,6 +165,10 @@ public class DB_MySql_Opera implements I_TableOperation {
 			} else if (Number.class.isAssignableFrom(prop.type())) { // 如果是数值的
 				prop.length(item.getNumeric_precision());
 				prop.precision(item.getNumeric_scale());
+			}
+			// 是否自动更新时间戳
+			if ("on update CURRENT_TIMESTAMP".equalsIgnoreCase(item.getExtra())) {
+				prop.setOnUpdateCurrentTimestamp(prop.type().equals(Timestamp.class));
 			}
 			result.add(prop);
 		}
@@ -293,13 +298,20 @@ public class DB_MySql_Opera implements I_TableOperation {
 		if (CommonUtil.isNotNullEmpty(col.defaultValue())) {
 			if (Number.class.isAssignableFrom(col.type())) {
 				temp.append(" DEFAULT " + col.defaultValue());
-			} else if (col.type().equals(Date.class) && "CURRENT_TIMESTAMP".equalsIgnoreCase(col.defaultValue())) {
-				temp.append(" DEFAULT " + col.defaultValue());
+			} else if (col.type().equals(Date.class) || col.type().equals(Timestamp.class)) {
+				if ("CURRENT_TIMESTAMP".equalsIgnoreCase(col.defaultValue())) {
+					temp.append(" DEFAULT " + col.defaultValue());
+				}
 			} else {
 				temp.append(" DEFAULT '" + col.defaultValue() + "'");
 			}
 		} else if (!col.notNull()) {
 			temp.append(" DEFAULT null ");
+		}
+
+		// 是否自动更新时间戳
+		if (col.type().equals(Timestamp.class) && col.getOnUpdateCurrentTimestamp()) {
+			temp.append(" ON UPDATE CURRENT_TIMESTAMP ");
 		}
 
 		// 备注
