@@ -19,6 +19,7 @@ import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -120,7 +121,7 @@ public class AnnotationScan implements SmartLifecycle {
 				// 是否自动更新时间戳
 				OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
 				if (null != onUpdateCurrentTimestamp){
-					colP.setOnUpdateCurrentTimestamp(true);
+					colP.setOnUpdateCurrentTimestamp(field.getType().equals(Timestamp.class));
 				}
 				// 记录索引
 				Index index = field.getAnnotation(Index.class);
