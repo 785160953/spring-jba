@@ -10,6 +10,7 @@ import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.annotation.OnUpdateCurrentTimestamp;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
+import xin.xihc.jba.db.DB_MySql_Opera;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
@@ -19,8 +20,6 @@ import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -122,7 +121,7 @@ public class AnnotationScan implements SmartLifecycle {
 				// 是否自动更新时间戳
 				OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
 				if (null != onUpdateCurrentTimestamp){
-					colP.setOnUpdateCurrentTimestamp(field.getType().equals(Timestamp.class) || field.getType().equals(Date.class));
+					colP.setOnUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
 				}
 				// 记录索引
 				Index index = field.getAnnotation(Index.class);
