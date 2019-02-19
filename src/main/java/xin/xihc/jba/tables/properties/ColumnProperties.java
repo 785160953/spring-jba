@@ -20,12 +20,12 @@ public class ColumnProperties {
 
 	private Class<?> type = String.class;//列类型
 	private String colName;//列名称
-	private String defaultValue;//列默认值
+	private String defaultValue = "";//列默认值
 	private Boolean notNull = false;//是否允许为空
 	private Boolean primary = false;//是否为主键
 	private Policy policy = Policy.NONE;//值的生成策略
 	private Integer length = 0;// 列长度
-	private String remark;//列备注
+	private String remark = "";//列备注
 	private Integer precision = 4;//列精度
 	private Boolean onUpdateCurrentTimestamp = false;// 是否自动更新时间戳
 

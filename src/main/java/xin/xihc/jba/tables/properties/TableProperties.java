@@ -46,7 +46,7 @@ public class TableProperties {
     /**
      * 对象属性-表字段属性
      */
-    private LinkedHashMap<String, ColumnProperties> columns = new LinkedHashMap<>(16);// 表的列属性
+    private final LinkedHashMap<String, ColumnProperties> columns = new LinkedHashMap<>(16);// 表的列属性
 
     public Object getTableBean() {
         return tableBean;

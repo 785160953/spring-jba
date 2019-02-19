@@ -17,6 +17,8 @@ import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.ColumnProperties;
 import xin.xihc.jba.tables.properties.IndexProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.jba.utils.JbaLog;
+import xin.xihc.jba.utils.SQLUtils;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
@@ -63,7 +65,7 @@ public class AnnotationScan implements SmartLifecycle {
 		// 打印banner
 		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
 
-		jbaTemplate.setUseSlf4jLog(useSlf4jLog);
+		JbaLog.useSlf4jLog = useSlf4jLog;
 		TableManager.mode = Mode.valueOf(mode);
 		Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
 		for (Object obj : map.values()) {
@@ -87,7 +89,7 @@ public class AnnotationScan implements SmartLifecycle {
 				tblP.addColumn(field.getName(), colP);
 				colP.type(field.getType());
 				if (null == column) {
-					colP.colName(field.getName());
+					colP.colName(SQLUtils.underscoreName(field.getName()));
 					// 没有的给默认值
 					colP.length(0)
 					    .precision(0)
@@ -97,7 +99,7 @@ public class AnnotationScan implements SmartLifecycle {
 					    .defaultValue("")
 					    .remark("");
 				} else {
-					colP.colName(field.getName())
+					colP.colName(SQLUtils.underscoreName(field.getName()))
 					    .defaultValue(column.defaultValue())
 					    .notNull(column.notNull())
 					    .remark(column.remark()).charset(column.charset());
@@ -127,8 +129,8 @@ public class AnnotationScan implements SmartLifecycle {
 				Index index = field.getAnnotation(Index.class);
 				if (null != index) {
 					IndexProperties idx = new IndexProperties();
-					idx.setColumnName(field.getName());
-					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? "idx_"+field.getName() : index.value());
+					idx.setColumnName(colP.colName());
+					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? "idx_" + colP.colName() : index.value());
 					idx.setOrder(index.order());
 					idx.setType(index.type());
 					idx.setRemark(index.remark());
