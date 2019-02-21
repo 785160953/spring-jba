@@ -111,7 +111,7 @@ public class JbaTemplate {
         }
         long start = System.currentTimeMillis();// 记录开始时间戳
         namedParameterJdbcTemplate.batchUpdate(sql, params);
-        JbaLog.infoSql(sql, params, start);
+        JbaLog.infoSql(sql, models, start);
     }
 
     /**
@@ -300,7 +300,7 @@ public class JbaTemplate {
      *
      * @param model   对象对应的表名
      * @param clazz   返回的类型
-     * @param orderBy 排序字段
+     * @param orderBy 排序字段，model的属性注意大小写
      * @return 单个对象
      */
     public <T> T queryModelOne(Object model, Class<T> clazz, final String... orderBy) {
@@ -333,7 +333,7 @@ public class JbaTemplate {
      * @param model    对象对应的表名
      * @param clazz    返回的类型
      * @param pageInfo 分页信息
-     * @param orderBy  排序字段
+     * @param orderBy  排序字段，model的属性注意大小写
      * @return 列表
      */
     public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final String... orderBy) {
@@ -363,10 +363,6 @@ public class JbaTemplate {
                 .query(sql, new JbaBeanProperty(model), new BeanPropertyRowMapper<>(clazz));
         JbaLog.infoSql(sql, model, start);
         return ret;
-    }
-
-    public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final JbaOrder... orders) {
-        return null;
     }
 
     /**
