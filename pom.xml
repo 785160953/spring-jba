@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.7.0</version>
     <name>spring-jba</name>
-    <description>java对象访问</description>
+    <description>JavaBean Access(Java对象访问),简易ORM操作mysql数据库,不向下兼容请知悉</description>
     <url>https://gitee.com/leo_xi/spring-jba</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -130,7 +130,21 @@ public class AnnotationScan implements SmartLifecycle {
 				if (null != index) {
 					IndexProperties idx = new IndexProperties();
 					idx.setColumnName(colP.colName());
-					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? "idx_" + colP.colName() : index.value());
+					String prefix = "idx_";
+					switch (index.type()){
+						case Unique:
+							prefix = "uni_";
+							break;
+						case Normal:
+							prefix = "idx_";
+							break;
+						case FullText:
+							prefix = "full_";
+							break;
+						default:
+							break;
+					}
+					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? prefix + colP.colName() : index.value());
 					idx.setOrder(index.order());
 					idx.setType(index.type());
 					idx.setRemark(index.remark());
