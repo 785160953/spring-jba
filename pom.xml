@@ -4,16 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <name>spring-jba</name>
-    <description>JavaBean Access(Java对象访问),简易ORM操作mysql数据库,不向下兼容请知悉</description>
+    <description>JavaBean Access(Java对象访问),简易ORM操作mysql数据库,1.7.0+不向下兼容,请知悉</description>
     <url>https://gitee.com/leo_xi/spring-jba</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <java.version>1.8</java.version>
-        <xin.CommonUtils>1.19.2</xin.CommonUtils>
+        <xin.CommonUtils>1.19.3</xin.CommonUtils>
         <spring.version>4.3.18.RELEASE</spring.version>
     </properties>
 

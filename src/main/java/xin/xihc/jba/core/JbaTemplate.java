@@ -118,7 +118,7 @@ public class JbaTemplate {
 	 * 根据字段更新数据
 	 *
 	 * @param model      对象模型
-	 * @param fieldNames where子句条件字段数组
+	 * @param fieldNames where子句条件字段数组,对象属性名（注意大小写）
 	 * @return 是否成功
 	 * @throws RuntimeException
 	 */
@@ -299,7 +299,7 @@ public class JbaTemplate {
 	 *
 	 * @param model   对象对应的表名
 	 * @param clazz   返回的类型
-	 * @param orderBy 排序字段，model的属性注意大小写
+	 * @param orderBy 排序字段，model的属性名注意大小写
 	 * @return 单个对象
 	 */
 	public <T> T queryModelOne(Object model, Class<T> clazz, final String... orderBy) {
@@ -332,7 +332,7 @@ public class JbaTemplate {
 	 * @param model    对象对应的表名
 	 * @param clazz    返回的类型
 	 * @param pageInfo 分页信息
-	 * @param orderBy  排序字段，model的属性注意大小写
+	 * @param orderBy  排序字段，model的属性名注意大小写
 	 * @return 列表
 	 */
 	public <T> List<T> queryModelList(Object model, Class<T> clazz, PageInfo pageInfo, final String... orderBy) {
