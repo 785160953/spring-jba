@@ -31,6 +31,10 @@ import java.util.stream.Collectors;
 public class DB_MySql_Opera implements I_TableOperation {
 
 	private static Map<Class, String> javaClassToMysqlFieldName = new HashMap<>();
+	/**
+	 * @OnUpdateCurrentTimestamp注解适用的类型
+	 */
+	public static final LinkedList<Class> onUpdateApplied = new LinkedList<>();
 
 	static {
 		//		javaClassToMysqlFieldName.put(byte.class, "tinyint");
@@ -53,6 +57,9 @@ public class DB_MySql_Opera implements I_TableOperation {
 		javaClassToMysqlFieldName.put(java.sql.Time.class, "time");
 		//		javaClassToMysqlFieldName.put(boolean.class, "tinyint");
 		javaClassToMysqlFieldName.put(Boolean.class, "tinyint");
+
+		onUpdateApplied.add(Date.class);
+		onUpdateApplied.add(Timestamp.class);
 	}
 
 	private String table_schema; // 数据库schema
@@ -168,7 +175,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 是否自动更新时间戳
 			if ("on update CURRENT_TIMESTAMP".equalsIgnoreCase(item.getExtra())) {
-				prop.setOnUpdateCurrentTimestamp(prop.type().equals(Timestamp.class) || prop.type().equals(Date.class));
+				prop.setOnUpdateCurrentTimestamp(onUpdateApplied.contains(prop.type()));
 			}
 			result.add(prop);
 		}
@@ -310,7 +317,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		}
 
 		// 是否自动更新时间戳
-		if ((col.type().equals(Date.class) || col.type().equals(Timestamp.class)) && col.getOnUpdateCurrentTimestamp()) {
+		if (onUpdateApplied.contains(col.type()) && col.getOnUpdateCurrentTimestamp()) {
 			temp.append(" ON UPDATE CURRENT_TIMESTAMP ");
 		}
 

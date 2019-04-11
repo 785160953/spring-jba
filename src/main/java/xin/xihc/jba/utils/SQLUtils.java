@@ -1,16 +1,18 @@
 package xin.xihc.jba.utils;
 
-import xin.xihc.jba.annotation.Column;
-import xin.xihc.jba.core.JbaTemplate;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 import xin.xihc.jba.core.PageInfo;
 import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.ColumnProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
-import xin.xihc.utils.logfile.LogFileUtil;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.beans.PropertyDescriptor;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,53 +28,29 @@ public class SQLUtils {
 	public static final String AND = " AND ";
 
 	/**
-	 * Class的字段列表缓存
-	 */
-	private static LinkedHashMap<Class<?>, List<Field>> classFieldsCache = new LinkedHashMap<>(16);
-
-	/**
-	 * 增加缓存功能
-	 *
-	 * @param clazz
-	 * @return
-	 * @since 1.3.3
-	 */
-	public static List<Field> getModelFields(Class<?> clazz) {
-		if (null == clazz) {
-			return new ArrayList<>(0);
-		}
-
-		if (classFieldsCache.containsKey(clazz)) {
-			return classFieldsCache.get(clazz);
-		}
-
-		List<Field> allFields = CommonUtil.getAllFields(clazz, false, false);
-		classFieldsCache.put(clazz, allFields);
-		return allFields;
-	}
-
-	/**
 	 * 获取where子句后面的拼接name=:name
 	 *
 	 * @param model 表对象
 	 * @return sql
 	 */
 	public static String getWhereSql(Object model) {
-		Objects.requireNonNull(model, "nonNull");
+		Objects.requireNonNull(model, "model is null");
 
-		List<Field> allFields = getModelFields(model.getClass());
+		TableProperties tableProperties = TableManager.getTable(model.getClass());
+
 		StringJoiner where = new StringJoiner(AND);
-		allFields.stream().forEach(field -> {
-			field.setAccessible(true);
+		LinkedHashMap<String, ColumnProperties> columns = tableProperties.getColumns();
+		for (String field : columns.keySet()) {
+			PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(model.getClass(), field);
 			try {
-				if (field.get(model) != null) {
-					where.add(field.getName() + "=:" + field.getName());
+				Object value = propertyDescriptor.getReadMethod().invoke(model);
+				if (value != null) {
+					where.add(columns.get(field).colName() + "=:" + field);
 				}
 			} catch (Exception e) {
-				LogFileUtil.exception(JbaTemplate.jbaLogName, e);
-				e.printStackTrace();
+				JbaLog.error(e);
 			}
-		});
+		}
 		return where.toString();
 	}
 
@@ -103,28 +81,29 @@ public class SQLUtils {
 	 */
 	public static void fillGuid(Object model) {
 		TableProperties table = TableManager.getTable(model.getClass());
-		if (table == null) {
-			throw new RuntimeException("该对象并不是表对象");
-		}
-		List<Field> allFields = getModelFields(model.getClass());
-		allFields.stream().forEach(field -> {
+
+		LinkedHashMap<String, ColumnProperties> columns = table.getColumns();
+		for (String field : columns.keySet()) {
 			try {
-				field.setAccessible(true);
-				ColumnProperties col = table.getColProperties(field.getName());
-				if (col.policy() == Column.Policy.GUID) {
-					if (field.get(model) == null) {
-						field.set(model, CommonUtil.newGuid(false));
-					}
-				} else if (col.policy() == Column.Policy.GUID_UP) {
-					if (field.get(model) == null) {
-						field.set(model, CommonUtil.newGuid(true));
+				ColumnProperties col = columns.get(field);
+				PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(model.getClass(), field);
+				Object value = propertyDescriptor.getReadMethod().invoke(model);
+				if (value == null) {
+					switch (col.policy()) {
+						case GUID:
+							propertyDescriptor.getWriteMethod().invoke(model, CommonUtil.newGuid(false));
+							break;
+						case GUID_UP:
+							propertyDescriptor.getWriteMethod().invoke(model, CommonUtil.newGuid(true));
+							break;
+						default:
+							break;
 					}
 				}
 			} catch (Exception e) {
-				LogFileUtil.exception(JbaTemplate.jbaLogName, e);
-				e.printStackTrace();
+				JbaLog.error(e);
 			}
-		});
+		}
 	}
 
 	/**
@@ -158,15 +137,13 @@ public class SQLUtils {
 		Objects.requireNonNull(model, "表对象model不允许为空");
 
 		TableProperties tableProperties = TableManager.getTable(model.getClass());
+		LinkedHashMap<String, ColumnProperties> columns = tableProperties.getColumns();
 		if (null == fieldNames || fieldNames.length < 1) { // 寻找主键
-			if (null != tableProperties) {
-				LinkedHashMap<String, ColumnProperties> columns = tableProperties.getColumns();
-				for (ColumnProperties columnProperties : columns.values()) {
-					if (columnProperties.primary()) {
-						fieldNames = new String[1];
-						fieldNames[0] = columnProperties.colName();
-						break;
-					}
+			for (String field : columns.keySet()) {
+				if (columns.get(field).primary()) {
+					fieldNames = new String[1];
+					fieldNames[0] = field;
+					break;
 				}
 			}
 		}
@@ -175,29 +152,28 @@ public class SQLUtils {
 			throw new RuntimeException(String.format("表【%s】没有设置主键", tableProperties.getTableName()));
 		}
 		// 转小写
-		List<String> fieldList = Stream.of(fieldNames).map(val -> val.toLowerCase()).collect(Collectors.toList());
+		List<String> fieldList = Stream.of(fieldNames).map(String::toLowerCase).collect(Collectors.toList());
 
 		StringJoiner fValues = new StringJoiner(",");
 		StringJoiner wValues = new StringJoiner(AND);
-
-		// 使用jdk8的stream语句
-		getModelFields(model.getClass()).stream().forEach(field -> {
-			field.setAccessible(true);
+		for (String field : columns.keySet()) {
 			try {
-				if (field.get(model) != null) {
-					if (!fieldList.contains(field.getName().toLowerCase())) {
-						fValues.add(field.getName() + "=:" + field.getName());
+				PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(model.getClass(), field);
+				Object value = propertyDescriptor.getReadMethod().invoke(model);
+				if (value != null) {
+					if (!fieldList.contains(field.toLowerCase())) {
+						fValues.add(columns.get(field).colName() + "=:" + field);
 					} else {
-						wValues.add(field.getName() + "=:" + field.getName());
+						wValues.add(columns.get(field).colName() + "=:" + field);
 					}
-				} else if (fieldList.contains(field.getName().toLowerCase())) {
-					throw new RuntimeException("WHERE子句中存在字段【" + field.getName() + "】值为空");
+				} else if (fieldList.contains(field.toLowerCase())) {
+					throw new RuntimeException("WHERE子句中存在字段【" + field + "】值为空");
 				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(JbaTemplate.jbaLogName, e);
-				e.printStackTrace();
+			} catch (Exception e) {
+				JbaLog.error(e);
 			}
-		});
+		}
+
 		if (fValues.length() < 1) {
 			throw new RuntimeException("无属性需要更新");
 		}
@@ -222,24 +198,71 @@ public class SQLUtils {
 
 		StringJoiner fValues = new StringJoiner(",");
 		StringJoiner vValues = new StringJoiner(",");
-		// 使用jdk8的stream语句
-		getModelFields(model.getClass()).stream().forEach(field -> {
-			field.setAccessible(true);
+		LinkedHashMap<String, ColumnProperties> columns = tableProperties.getColumns();
+		for (String field : columns.keySet()) {
 			try {
-				if (field.get(model) != null) {
-					fValues.add(field.getName());
-					vValues.add(":" + field.getName());
+				PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(model.getClass(), field);
+				Object value = propertyDescriptor.getReadMethod().invoke(model);
+				if (value != null) {
+					fValues.add(columns.get(field).colName());
+					vValues.add(":" + field);
 				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LogFileUtil.exception(JbaTemplate.jbaLogName, e);
-				e.printStackTrace();
+			} catch (Exception e) {
+				JbaLog.error(e);
 			}
-		});
+		}
+
 		if (fValues.length() < 1) {
 			throw new RuntimeException("属性都为空,请确认");
 		}
 		return "INSERT INTO " + tableProperties.getTableName() + "(" + fValues.toString() + ") VALUES (" + vValues
 				.toString() + ")";
+	}
+
+	/**
+	 * 转换字段为数据库列名
+	 *
+	 * @param bys
+	 * @return
+	 */
+	public static String getOrderBy(String... bys) {
+		StringJoiner order = new StringJoiner(",");
+		for (String by : bys) {
+			String[] fields = by.trim().split(",");
+			for (String field : fields) {
+				String[] split = field.trim().split(" ");
+				if (split.length == 1) {
+					order.add(underscoreName(split[0]));
+				} else if (split.length == 2) {
+					order.add(underscoreName(split[0]) + " " + split[1]);
+				}
+			}
+		}
+		return order.toString();
+	}
+
+	/**
+	 * 驼峰转为下划线
+	 *
+	 * @param name
+	 * @return
+	 */
+	public static String underscoreName(String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder();
+		result.append(name.substring(0, 1).toLowerCase());
+		for (int i = 1; i < name.length(); i++) {
+			String s = name.substring(i, i + 1);
+			String slc = s.toLowerCase();
+			if (!s.equals(slc)) {
+				result.append("_").append(slc);
+			} else {
+				result.append(s);
+			}
+		}
+		return result.toString();
 	}
 
 }
