@@ -8,7 +8,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
 </dependency>
 ```
 
@@ -26,7 +26,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
     ```
 3. `@Column` 声明字段属性包含如下：(支持继承关系,可以使用父类的属性)
     ```
-    1. value           列名-暂时无效
+    1. value           列名-暂时无效,(已删除)
     2. defaultValue    默认值
     3. notNull         是否允许为空
     4. primary         是否是主键
