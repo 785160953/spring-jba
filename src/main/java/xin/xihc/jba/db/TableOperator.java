@@ -13,50 +13,55 @@ import xin.xihc.jba.tables.properties.TableProperties;
  */
 public class TableOperator {
 
-	I_TableOperation tableOperation = null;
+    I_TableOperation tableOperation = null;
 
-	public TableOperator(JbaTemplate jbaTemplate) {
-		tableOperation = new DB_MySql_Opera(jbaTemplate);
-	}
+    public TableOperator(JbaTemplate jbaTemplate) {
+        tableOperation = new DB_MySql_Opera(jbaTemplate);
+    }
 
 
-	/**
-	 * 初始化
-	 */
-	public void init() {
-		synchronized (TableOperator.class) {
-			// 创建类型不是NONE
-			if (TableManager.mode != Mode.NONE) {
-				for (TableProperties tblObj : TableManager.getTables()) {
-					if (tblObj.isIgnore()) {// 忽略的,不处理
-						continue;
-					}
-					if (tableOperation.isTableExists(tblObj.getTableName())) {
-						if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
-							tableOperation.updateTable(tblObj);
-						}
-					} else {
-						if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE || TableManager.mode == Mode.CREATE_DROP) {
-							tableOperation.createTable(tblObj);
-						}
-					}
-				}
-			}
-		}
-	}
+    /**
+     * 初始化
+     */
+    public void init() {
+        synchronized (TableOperator.class) {
+            Thread thread = new Thread(() -> {
+                // 创建类型不是NONE
+                if (TableManager.mode != Mode.NONE) {
+                    for (TableProperties tblObj : TableManager.getTables()) {
+                        if (tblObj.isIgnore()) {// 忽略的,不处理
+                            continue;
+                        }
+                        if (tableOperation.isTableExists(tblObj.getTableName())) {
+                            if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
+                                tableOperation.updateTable(tblObj);
+                            }
+                        } else {
+                            if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE || TableManager.mode == Mode.CREATE_DROP) {
+                                tableOperation.createTable(tblObj);
+                            }
+                        }
+                    }
+                }
+            });
+            thread.setName("TableUpdateThread");
+            thread.setDaemon(true);
+            thread.start();
+        }
+    }
 
-	public void drop() {
-		if (TableManager.mode != Mode.CREATE_DROP) {
-			return;
-		}
-		synchronized (TableOperator.class) {
-			for (TableProperties tblObj : TableManager.getTables()) {
-				if (tblObj.isIgnore()) {// 忽略的,不处理
-					continue;
-				}
-				tableOperation.dropTable(tblObj);
-			}
-		}
-	}
+    public void drop() {
+        if (TableManager.mode != Mode.CREATE_DROP) {
+            return;
+        }
+        synchronized (TableOperator.class) {
+            for (TableProperties tblObj : TableManager.getTables()) {
+                if (tblObj.isIgnore()) {// 忽略的,不处理
+                    continue;
+                }
+                tableOperation.dropTable(tblObj);
+            }
+        }
+    }
 
 }

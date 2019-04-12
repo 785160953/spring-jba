@@ -92,7 +92,8 @@ void doInit(JbaTemplate jbaTemplate);
 
 ## 表对象的`增删改查`操作
 实际使用：
-直接添加
+首先主类入口添加注解`@EnableJBA`<br />
+再需要使用的地方引入：
 ```
 @Autowired
 private JbaTemplate jbaTemplate;
