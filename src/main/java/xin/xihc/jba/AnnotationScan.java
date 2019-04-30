@@ -34,198 +34,202 @@ import java.util.Map;
 @Component
 public class AnnotationScan implements SmartLifecycle {
 
-	public static final String BANNE_JBA = "_________________________________________________________________\n"
-			+ "                                                                 \n"
-			+ "                       ,                            ,   /        \n"
-			+ "---__------__---)__--------__----__--------------------/__----__-\n"
-			+ "  (_ `   /   ) /   ) /   /   ) /   )     ===      /   /   ) /   )\n"
-			+ "_(__)___/___/_/_____/___/___/_(___/______________/___(___/_(___(_\n"
-			+ "       /                         /              /                \n"
-			+ "      /                      (_ /           (_ /                 \n";
+    public static final String BANNE_JBA = "_________________________________________________________________\n"
+            + "                                                                 \n"
+            + "                       ,                            ,   /        \n"
+            + "---__------__---)__--------__----__--------------------/__----__-\n"
+            + "  (_ `   /   ) /   ) /   /   ) /   )     ===      /   /   ) /   )\n"
+            + "_(__)___/___/_/_____/___/___/_(___/______________/___(___/_(___(_\n"
+            + "       /                         /              /                \n"
+            + "      /                      (_ /           (_ /                 \n";
 
-	private static boolean isRunning = false;
+    private static boolean isRunning = false;
 
-	@Autowired
-	private JbaTemplate jbaTemplate;
+    @Autowired
+    private JbaTemplate jbaTemplate;
 
-	@Value("${spring.jba.mode:ALL}")
-	private String mode;
+    @Value("${spring.jba.mode:ALL}")
+    private String mode;
 
-	@Value("${spring.jba.useSlf4jLog:true}")
-	private boolean useSlf4jLog;
+    @Value("${spring.jba.useSlf4jLog:true}")
+    private boolean useSlf4jLog;
 
-	/**
-	 * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
-	 * 2.
-	 * 当上下文被刷新（所有对象已被实例化和初始化之后）时，将调用该方法，默认生命周期处理器将检查每个SmartLifecycle对象的isAutoStartup()方法返回的布尔值。
-	 * 如果为“true”，则该方法会被调用，而不是等待显式调用自己的start()方法。
-	 */
-	@Override
-	public void start() {
-		// 打印banner
-		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
+    /**
+     * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
+     * 2.
+     * 当上下文被刷新（所有对象已被实例化和初始化之后）时，将调用该方法，默认生命周期处理器将检查每个SmartLifecycle对象的isAutoStartup()方法返回的布尔值。
+     * 如果为“true”，则该方法会被调用，而不是等待显式调用自己的start()方法。
+     */
+    @Override
+    public void start() {
+        // 打印banner
+        System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
 
-		JbaLog.useSlf4jLog = useSlf4jLog;
-		TableManager.mode = Mode.valueOf(mode);
-		Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
-		for (Object obj : map.values()) {
-			Table table = obj.getClass().getAnnotation(Table.class);
-			TableProperties tblP = null;
-			if (table.value().matches("^_?[a-zA-Z]+\\w+")) { // 是字母或下划线开头的，为有效的表名
-				tblP = TableManager.addTable(obj.getClass(), table.value());
-			} else {
-				tblP = TableManager.addTable(obj.getClass(), obj.getClass().getSimpleName());
-			}
-			// 获取表注释
-			tblP.setRemark(table.remark());
-			tblP.setTableBean(obj);
-			tblP.setIgnore(table.ignore());
-			tblP.setOrder(table.order());
+        JbaLog.useSlf4jLog = useSlf4jLog;
+        TableManager.mode = Mode.valueOf(mode);
+        Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
+        for (Object obj : map.values()) {
+            Table table = obj.getClass().getAnnotation(Table.class);
+            TableProperties tblP = null;
+            if (table.value().matches("^_?[a-zA-Z]+\\w+")) { // 是字母或下划线开头的，为有效的表名
+                tblP = TableManager.addTable(obj.getClass(), table.value());
+            } else {
+                tblP = TableManager.addTable(obj.getClass(), obj.getClass().getSimpleName());
+            }
+            // 获取表注释
+            tblP.setRemark(table.remark());
+            tblP.setTableBean(obj);
+            tblP.setIgnore(table.ignore());
+            tblP.setOrder(table.order());
 
-			for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
-				field.setAccessible(true);
-				Column column = field.getAnnotation(Column.class);
-				ColumnProperties colP = new ColumnProperties();
-				tblP.addColumn(field.getName(), colP);
-				colP.type(field.getType());
-				if (null == column) {
-					colP.colName(SQLUtils.underscoreName(field.getName()));
-					// 没有的给默认值
-					colP.length(0)
-					    .precision(0)
-					    .policy(Policy.NONE)
-					    .primary(false)
-					    .notNull(false)
-					    .defaultValue("")
-					    .remark("");
-				} else {
-					colP.colName(SQLUtils.underscoreName(field.getName()))
-					    .defaultValue(column.defaultValue())
-					    .notNull(column.notNull())
-					    .remark(column.remark()).charset(column.charset());
-					colP.length(0);
-					if (column.length() > 0) {
-						colP.length(column.length());
-					}
-					if (column.precision() > 0) {
-						colP.precision(column.precision());
-					}
-					if (column.primary()) {
-						colP.primary(true);
-						colP.notNull(true);
-					}
-					colP.policy(column.policy());
-					/** 如果是guid为主键长度默认为32 */
-					if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
-						colP.length(32);
-					}
-				}
-				// 是否自动更新时间戳
-				OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
-				if (null != onUpdateCurrentTimestamp){
-					colP.setOnUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
-				}
-				// 记录索引
-				Index index = field.getAnnotation(Index.class);
-				if (null != index) {
-					IndexProperties idx = new IndexProperties();
-					idx.setColumnName(colP.colName());
-					String prefix = "idx_";
-					switch (index.type()){
-						case Unique:
-							prefix = "uni_";
-							break;
-						case Normal:
-							prefix = "idx_";
-							break;
-						case FullText:
-							prefix = "full_";
-							break;
-						default:
-							break;
-					}
-					idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? prefix + colP.colName() : index.value());
-					idx.setOrder(index.order());
-					idx.setType(index.type());
-					idx.setRemark(index.remark());
-					tblP.addIndex(idx);
-				}
-			}
-		}
-		// 执行表创建、字段更新
-		TableOperator tableOperator = new TableOperator(jbaTemplate);
-		tableOperator.init();
+            for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
+                field.setAccessible(true);
+                Column column = field.getAnnotation(Column.class);
+                ColumnProperties colP = new ColumnProperties();
+                tblP.addColumn(field.getName(), colP);
+                colP.type(field.getType());
+                if (null == column) {
+                    if (CommonUtil.isNotNullEmpty(column.value())) {
+                        colP.colName(column.value());
+                    } else {
+                        colP.colName(SQLUtils.underscoreName(field.getName()));
+                    }
+                    // 没有的给默认值
+                    colP.length(0)
+                            .precision(0)
+                            .policy(Policy.NONE)
+                            .primary(false)
+                            .notNull(false)
+                            .defaultValue("")
+                            .remark("");
+                } else {
+                    colP.colName(SQLUtils.underscoreName(field.getName()))
+                            .defaultValue(column.defaultValue())
+                            .notNull(column.notNull())
+                            .remark(column.remark()).charset(column.charset());
+                    colP.length(0);
+                    if (column.length() > 0) {
+                        colP.length(column.length());
+                    }
+                    if (column.precision() > 0) {
+                        colP.precision(column.precision());
+                    }
+                    if (column.primary()) {
+                        colP.primary(true);
+                        colP.notNull(true);
+                    }
+                    colP.policy(column.policy());
+                    /** 如果是guid为主键长度默认为32 */
+                    if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
+                        colP.length(32);
+                    }
+                }
+                // 是否自动更新时间戳
+                OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
+                if (null != onUpdateCurrentTimestamp) {
+                    colP.setOnUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
+                }
+                // 记录索引
+                Index index = field.getAnnotation(Index.class);
+                if (null != index) {
+                    IndexProperties idx = new IndexProperties();
+                    idx.setColumnName(colP.colName());
+                    String prefix = "idx_";
+                    switch (index.type()) {
+                        case Unique:
+                            prefix = "uni_";
+                            break;
+                        case Normal:
+                            prefix = "idx_";
+                            break;
+                        case FullText:
+                            prefix = "full_";
+                            break;
+                        default:
+                            break;
+                    }
+                    idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? prefix + colP.colName() : index.value());
+                    idx.setOrder(index.order());
+                    idx.setType(index.type());
+                    idx.setRemark(index.remark());
+                    tblP.addIndex(idx);
+                }
+            }
+        }
+        // 执行表创建、字段更新
+        TableOperator tableOperator = new TableOperator(jbaTemplate);
+        tableOperator.init();
 
-		// 执行完其他业务后，可以修改 isRunning = true
-		isRunning = true;
-	}
+        // 执行完其他业务后，可以修改 isRunning = true
+        isRunning = true;
+    }
 
-	/**
-	 * 如果工程中有多个实现接口SmartLifecycle的类，则这些类的start的执行顺序按getPhase方法返回值从小到大执行。<br/>
-	 * 例如：1比2先执行，-1比0先执行。 stop方法的执行顺序则相反，getPhase返回值较大类的stop方法先被调用，小的后被调用。
-	 */
-	@Override
-	public int getPhase() {
-		// 默认为0
-		return 0;
+    /**
+     * 如果工程中有多个实现接口SmartLifecycle的类，则这些类的start的执行顺序按getPhase方法返回值从小到大执行。<br/>
+     * 例如：1比2先执行，-1比0先执行。 stop方法的执行顺序则相反，getPhase返回值较大类的stop方法先被调用，小的后被调用。
+     */
+    @Override
+    public int getPhase() {
+        // 默认为0
+        return 0;
 
-	}
+    }
 
-	/**
-	 * 根据该方法的返回值决定是否执行start方法。<br/>
-	 * 返回true时start方法会被自动执行，返回false则不会。
-	 */
-	@Override
-	public boolean isAutoStartup() {
-		// 默认为false
-		return true;
-	}
+    /**
+     * 根据该方法的返回值决定是否执行start方法。<br/>
+     * 返回true时start方法会被自动执行，返回false则不会。
+     */
+    @Override
+    public boolean isAutoStartup() {
+        // 默认为false
+        return true;
+    }
 
-	/**
-	 * 1. 只有该方法返回false时，start方法才会被执行。<br/>
-	 * 2. 只有该方法返回true时，stop(Runnable callback)或stop()方法才会被执行。
-	 */
-	@Override
-	public boolean isRunning() {
-		// 默认返回false
-		return isRunning;
-	}
+    /**
+     * 1. 只有该方法返回false时，start方法才会被执行。<br/>
+     * 2. 只有该方法返回true时，stop(Runnable callback)或stop()方法才会被执行。
+     */
+    @Override
+    public boolean isRunning() {
+        // 默认返回false
+        return isRunning;
+    }
 
-	/**
-	 * SmartLifecycle子类的才有的方法，当isRunning方法返回true时，该方法才会被调用。
-	 */
-	@Override
-	public void stop(Runnable callback) {
-		// 删除表结构
-		TableOperator tableOperator = new TableOperator(jbaTemplate);
-		tableOperator.drop();
+    /**
+     * SmartLifecycle子类的才有的方法，当isRunning方法返回true时，该方法才会被调用。
+     */
+    @Override
+    public void stop(Runnable callback) {
+        // 删除表结构
+        TableOperator tableOperator = new TableOperator(jbaTemplate);
+        tableOperator.drop();
 
-		// 打印banner
-		System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Stoped ::====================\n");
+        // 打印banner
+        System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Stoped ::====================\n");
 
-		// 如果你让isRunning返回true，需要执行stop这个方法，那么就不要忘记调用callback.run()。
-		// 否则在你程序退出时，Spring的DefaultLifecycleProcessor会认为你这个TestSmartLifecycle没有stop完成，程序会一直卡着结束不了，等待一定时间（默认超时时间30秒）后才会自动结束。
-		// PS：如果你想修改这个默认超时时间，可以按下面思路做，当然下面代码是springmvc配置文件形式的参考，在SpringBoot中自然不是配置xml来完成，这里只是提供一种思路。
-		// <bean id="lifecycleProcessor"
-		// class="org.springframework.context.support.DefaultLifecycleProcessor">
-		// <!-- timeout value in milliseconds -->
-		// <property name="timeoutPerShutdownPhase" value="10000"/>
-		// </bean>
-		callback.run();
+        // 如果你让isRunning返回true，需要执行stop这个方法，那么就不要忘记调用callback.run()。
+        // 否则在你程序退出时，Spring的DefaultLifecycleProcessor会认为你这个TestSmartLifecycle没有stop完成，程序会一直卡着结束不了，等待一定时间（默认超时时间30秒）后才会自动结束。
+        // PS：如果你想修改这个默认超时时间，可以按下面思路做，当然下面代码是springmvc配置文件形式的参考，在SpringBoot中自然不是配置xml来完成，这里只是提供一种思路。
+        // <bean id="lifecycleProcessor"
+        // class="org.springframework.context.support.DefaultLifecycleProcessor">
+        // <!-- timeout value in milliseconds -->
+        // <property name="timeoutPerShutdownPhase" value="10000"/>
+        // </bean>
+        callback.run();
 
-		isRunning = false;
-	}
+        isRunning = false;
+    }
 
-	/**
-	 * 接口Lifecycle的子类的方法，只有非SmartLifecycle的子类才会执行该方法。<br/>
-	 * 1. 该方法只对直接实现接口Lifecycle的类才起作用，对实现SmartLifecycle接口的类无效。<br/>
-	 * 2. 方法stop()和方法stop(Runnable callback)的区别只在于，后者是SmartLifecycle子类的专属。
-	 */
-	@Override
-	public void stop() {
-		System.out.println("stop");
+    /**
+     * 接口Lifecycle的子类的方法，只有非SmartLifecycle的子类才会执行该方法。<br/>
+     * 1. 该方法只对直接实现接口Lifecycle的类才起作用，对实现SmartLifecycle接口的类无效。<br/>
+     * 2. 方法stop()和方法stop(Runnable callback)的区别只在于，后者是SmartLifecycle子类的专属。
+     */
+    @Override
+    public void stop() {
+        System.out.println("stop");
 
-		isRunning = false;
-	}
+        isRunning = false;
+    }
 
 }

@@ -1,9 +1,13 @@
 package xin.xihc.jba.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.TableProperties;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 表创建者、更新者
@@ -12,6 +16,8 @@ import xin.xihc.jba.tables.properties.TableProperties;
  * @date 2018年1月21日
  */
 public class TableOperator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableOperator.class);
 
     I_TableOperation tableOperation = null;
 
@@ -25,7 +31,7 @@ public class TableOperator {
      */
     public void init() {
         synchronized (TableOperator.class) {
-            Thread thread = new Thread(() -> {
+            CompletableFuture.runAsync(() -> {
                 // 创建类型不是NONE
                 if (TableManager.mode != Mode.NONE) {
                     for (TableProperties tblObj : TableManager.getTables()) {
@@ -43,10 +49,11 @@ public class TableOperator {
                         }
                     }
                 }
+            }).exceptionally(ex -> {
+                LOGGER.error("维护表异常：", ex);
+                System.exit(0);
+                return null;
             });
-            thread.setName("TableUpdateThread");
-            thread.setDaemon(true);
-            thread.start();
         }
     }
 
