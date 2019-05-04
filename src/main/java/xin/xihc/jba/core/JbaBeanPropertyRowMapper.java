@@ -12,8 +12,12 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import xin.xihc.jba.annotation.AsColumn;
+import xin.xihc.jba.annotation.Column;
+import xin.xihc.utils.common.CommonUtil;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,6 +31,8 @@ import java.util.*;
  * @Version 1.0
  **/
 public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
+
+    protected static final LinkedHashMap<Class, JbaBeanPropertyRowMapper> RowMapper_CACHE = new LinkedHashMap<>();
 
     /**
      * Logger available to subclasses
@@ -112,8 +118,8 @@ public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
             initialize(mappedClass);
         } else {
             if (this.mappedClass != mappedClass) {
-                throw new InvalidDataAccessApiUsageException("The mapped class can not be reassigned to map to " +
-                        mappedClass + " since it is already providing mapping for " + this.mappedClass);
+                throw new InvalidDataAccessApiUsageException(
+                        "The mapped class can not be reassigned to map to " + mappedClass + " since it is already providing mapping for " + this.mappedClass);
             }
         }
     }
@@ -182,20 +188,43 @@ public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
      */
     protected void initialize(Class<T> mappedClass) {
         this.mappedClass = mappedClass;
-        this.mappedFields = new HashMap<String, PropertyDescriptor>();
-        this.mappedProperties = new HashSet<String>();
-        PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
-        for (PropertyDescriptor pd : pds) {
-            if (pd.getWriteMethod() != null) {
-                // TODO 增加字段映射关系
-
-                this.mappedFields.put(lowerCaseName(pd.getName()), pd);
-                String underscoredName = underscoreName(pd.getName());
-                if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
-                    this.mappedFields.put(underscoredName, pd);
+        if (!RowMapper_CACHE.containsKey(mappedClass)) {
+            this.mappedFields = new LinkedHashMap<>(16);
+            this.mappedProperties = new HashSet<>();
+            // 所有属性
+            List<Field> allFields = CommonUtil.getAllFields(mappedClass, false, false);
+            PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
+            for (PropertyDescriptor pd : pds) {
+                if (pd.getWriteMethod() != null) {
+                    this.mappedFields.put(lowerCaseName(pd.getName()), pd);
+                    String underscoredName = underscoreName(pd.getName());
+                    if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
+                        this.mappedFields.put(underscoredName, pd);
+                    }
+                    // 增加字段映射关系
+                    Optional<Field> field = allFields.stream().filter(x -> pd.getName().equals(x.getName()))
+                                                     .findFirst();
+                    field.ifPresent(f -> {
+                        // @Column
+                        Column fColumn = f.getAnnotation(Column.class);
+                        if (null != fColumn && CommonUtil.isNotNullEmpty(fColumn.value())) {
+                            this.mappedFields.put(fColumn.value(), pd);
+                        }
+                        // @AsColumn
+                        AsColumn fAsColumn = f.getAnnotation(AsColumn.class);
+                        if (null != fAsColumn) {
+                            for (String as : fAsColumn.value()) {
+                                this.mappedFields.put(as, pd);
+                            }
+                        }
+                    });
+                    this.mappedProperties.add(pd.getName());
                 }
-                this.mappedProperties.add(pd.getName());
             }
+            RowMapper_CACHE.put(mappedClass, this);
+        } else {
+            this.mappedFields = RowMapper_CACHE.get(mappedClass).mappedFields;
+            this.mappedProperties = RowMapper_CACHE.get(mappedClass).mappedProperties;
         }
     }
 
@@ -263,19 +292,18 @@ public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
                 try {
                     Object value = getColumnValue(rs, index, pd);
                     if (rowNumber == 0 && logger.isDebugEnabled()) {
-                        logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
-                                "' of type '" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "'");
+                        logger.debug("Mapping column '" + column + "' to property '" + pd
+                                .getName() + "' of type '" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "'");
                     }
                     try {
                         bw.setPropertyValue(pd.getName(), value);
                     } catch (TypeMismatchException ex) {
                         if (value == null && this.primitivesDefaultedForNullValue) {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
-                                        " and column '" + column + "' with null value when setting property '" +
-                                        pd.getName() + "' of type '" +
-                                        ClassUtils.getQualifiedName(pd.getPropertyType()) +
-                                        "' on object: " + mappedObject, ex);
+                                logger.debug(
+                                        "Intercepted TypeMismatchException for row " + rowNumber + " and column '" + column + "' with null value when setting property '" + pd
+                                                .getName() + "' of type '" + ClassUtils.getQualifiedName(
+                                                pd.getPropertyType()) + "' on object: " + mappedObject, ex);
                             }
                         } else {
                             throw ex;
@@ -297,9 +325,9 @@ public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
         }
 
         if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
-            throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
-                    "necessary to populate object of class [" + this.mappedClass.getName() + "]: " +
-                    this.mappedProperties);
+            throw new InvalidDataAccessApiUsageException(
+                    "Given ResultSet does not contain all fields " + "necessary to populate object of class [" + this.mappedClass
+                            .getName() + "]: " + this.mappedProperties);
         }
 
         return mappedObject;

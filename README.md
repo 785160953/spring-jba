@@ -8,7 +8,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.6-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -26,7 +26,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
     ```
 3. `@Column` 声明字段属性包含如下：(支持继承关系,可以使用父类的属性)
     ```
-    1. value           列名-暂时无效,(已删除)
+    1. value           列名,1.7.6+支持自定义列名
     2. defaultValue    默认值
     3. notNull         是否允许为空
     4. primary         是否是主键
@@ -44,6 +44,8 @@ https://gitee.com/leo_xi/SpringJbaDemo
     4. remark     (1.5.8+新增)索引的备注
     ```
 5. `@OnUpdateCurrentTimestamp` (1.6.1+新增)该注解是声明表字段是否自动更新时间戳(java.util.Date/java.sql.Timestamp)(支持继承关系,可以使用父类的属性)
+
+6. `@AsColumn` 属性对应的列名(1.7.6+新增)主要用于查询时，列名与属性名不一致的问题。
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 

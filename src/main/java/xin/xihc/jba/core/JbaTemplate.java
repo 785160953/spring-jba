@@ -1,13 +1,13 @@
 package xin.xihc.jba.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.ColumnProperties;
+import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.jba.utils.JbaLog;
 import xin.xihc.jba.utils.SQLUtils;
 
@@ -344,16 +344,17 @@ public class JbaTemplate {
 
         List<T> ret;
         // 获取字段列表
-        String fields = TableManager.getTable(model.getClass()).getColumns().values().stream()
-                .map(ColumnProperties::colName).collect(Collectors.joining(","));
-        String sql = "SELECT " + fields + " FROM " + TableManager.getTable(model.getClass()).getTableName();
+        TableProperties table = TableManager.getTable(model.getClass());
+        String fields = table.getColumns().values().stream()
+                                    .map(ColumnProperties::colName).collect(Collectors.joining(","));
+        String sql = "SELECT " + fields + " FROM " + table.getTableName();
 
         // 存在where子句
         String where = SQLUtils.getWhereSql(model);
         if (where.length() > 0) {
             sql = sql + " WHERE " + where;
         }
-        String by = SQLUtils.getOrderBy(orderBy);
+        String by = SQLUtils.getOrderBy(table.getColumns(), orderBy);
         if (by.length() > 0) {
             sql = sql + " ORDER BY " + by;
         }
@@ -363,7 +364,7 @@ public class JbaTemplate {
             return new ArrayList<>(0);
         }
         long start = System.currentTimeMillis();// 记录开始时间戳
-        ret = namedParameterJdbcTemplate.query(sql, new JbaBeanProperty(model), new BeanPropertyRowMapper<>(clazz));
+        ret = namedParameterJdbcTemplate.query(sql, new JbaBeanProperty(model), new JbaBeanPropertyRowMapper<>(clazz));
         JbaLog.infoSql(sql, model, start);
         return ret;
     }
@@ -387,13 +388,13 @@ public class JbaTemplate {
         if (params != null) {
             if (params instanceof Map) {
                 ret = namedParameterJdbcTemplate.query(sql_final, new JbaMapSqlSource((Map<String, ?>) params),
-                        new BeanPropertyRowMapper<>(clazz));
+                        new JbaBeanPropertyRowMapper<>(clazz));
             } else {
                 ret = namedParameterJdbcTemplate
-                        .query(sql_final, new JbaBeanProperty(params), new BeanPropertyRowMapper<>(clazz));
+                        .query(sql_final, new JbaBeanProperty(params), new JbaBeanPropertyRowMapper<>(clazz));
             }
         } else {
-            ret = namedParameterJdbcTemplate.query(sql_final, new BeanPropertyRowMapper<>(clazz));
+            ret = namedParameterJdbcTemplate.query(sql_final, new JbaBeanPropertyRowMapper<>(clazz));
         }
         JbaLog.infoSql(sql_final, params, start);
         return ret;

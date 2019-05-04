@@ -89,11 +89,8 @@ public class AnnotationScan implements SmartLifecycle {
                 tblP.addColumn(field.getName(), colP);
                 colP.type(field.getType());
                 if (null == column) {
-                    if (CommonUtil.isNotNullEmpty(column.value())) {
-                        colP.colName(column.value());
-                    } else {
-                        colP.colName(SQLUtils.underscoreName(field.getName()));
-                    }
+                    colP.colName(SQLUtils.underscoreName(field.getName()));
+
                     // 没有的给默认值
                     colP.length(0)
                             .precision(0)
@@ -108,6 +105,9 @@ public class AnnotationScan implements SmartLifecycle {
                             .notNull(column.notNull())
                             .remark(column.remark()).charset(column.charset());
                     colP.length(0);
+                    if (CommonUtil.isNotNullEmpty(column.value())) {
+                        colP.colName(column.value());
+                    }
                     if (column.length() > 0) {
                         colP.length(column.length());
                     }
