@@ -19,6 +19,14 @@ import java.lang.annotation.*;
 public @interface Column {
 
     /**
+     * 列名
+     *
+     * @since 1.7.6
+     * @return
+     */
+    String value() default "";
+
+    /**
      * 默认值
      *
      * @return
