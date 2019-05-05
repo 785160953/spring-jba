@@ -45,7 +45,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
     ```
 5. `@OnUpdateCurrentTimestamp` (1.6.1+新增)该注解是声明表字段是否自动更新时间戳(java.util.Date/java.sql.Timestamp)(支持继承关系,可以使用父类的属性)
 
-6. `@AsColumn` 属性对应的列名(1.7.6+新增)主要用于查询时，列名与属性名不一致的问题。
+6. `@Alias` 属性对应的列名(1.7.6+新增)主要用于查询时，列名与属性名不一致的问题。
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 

@@ -12,7 +12,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import xin.xihc.jba.annotation.AsColumn;
+import xin.xihc.jba.annotation.Alias;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.utils.common.CommonUtil;
 
@@ -210,10 +210,10 @@ public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
                         if (null != fColumn && CommonUtil.isNotNullEmpty(fColumn.value())) {
                             this.mappedFields.put(fColumn.value(), pd);
                         }
-                        // @AsColumn
-                        AsColumn fAsColumn = f.getAnnotation(AsColumn.class);
-                        if (null != fAsColumn) {
-                            for (String as : fAsColumn.value()) {
+                        // @Alias
+                        Alias fAlias = f.getAnnotation(Alias.class);
+                        if (null != fAlias) {
+                            for (String as : fAlias.value()) {
                                 this.mappedFields.put(as, pd);
                             }
                         }
