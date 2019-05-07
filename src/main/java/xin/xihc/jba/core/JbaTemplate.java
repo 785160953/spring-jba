@@ -100,22 +100,17 @@ public class JbaTemplate {
         Objects.requireNonNull(models, "表对象models不允许为空");
         if (models.length < 1) {// 为空暂时不处理
             return;
-            //			throw new IllegalArgumentException("表对象models不允许为空");
         }
 
         String sql = "";
         String temp = "";
-        JbaBeanProperty[] params = new JbaBeanProperty[models.length];
         for (int i = 0, l = models.length; i < l; i++) {
             temp = SQLUtils.getInsertSql(models[i]);
             if (sql.length() < temp.length()) { // 以参数最多的那个为准
                 sql = temp;
             }
-            params[i] = new JbaBeanProperty(models[i]);
         }
-        long start = System.currentTimeMillis();// 记录开始时间戳
-        namedParameterJdbcTemplate.batchUpdate(sql, params);
-        JbaLog.infoSql(sql, models, start);
+        batchUpdate(sql, models);
     }
 
     /**
@@ -154,6 +149,26 @@ public class JbaTemplate {
         long start = System.currentTimeMillis();// 记录开始时间戳
         namedParameterJdbcTemplate.batchUpdate(sql, params);
         JbaLog.infoSql(sql, params, start);
+    }
+
+    /**
+     * 批量执行sql，插入INSERT、UPDATE都可以
+     *
+     * @param sql    sql语句
+     * @param models SQL语句中对应的参数,非Map对象
+     */
+    public void batchUpdate(final String sql, Object[] models) {
+        Objects.requireNonNull(models, "models不允许为空");
+        if (models.length < 1) {// 为空暂时不处理
+            return;
+        }
+        long start = System.currentTimeMillis();// 记录开始时间戳
+        JbaBeanProperty[] params = new JbaBeanProperty[models.length];
+        for (int i = 0, l = models.length; i < l; i++) {
+            params[i] = new JbaBeanProperty(models[i]);
+        }
+        namedParameterJdbcTemplate.batchUpdate(sql, params);
+        JbaLog.infoSql(sql, models, start);
     }
 
     /**
