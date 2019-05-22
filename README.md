@@ -2,13 +2,20 @@
 `JavaBeanAccess`java对象访问，基于JDK1.8+
 ```目前仅支持MySql  ```:grimacing:
 
+
 # maven依赖
+最新版本
+<a target="_blank" href="https://search.maven.org/search?q=g:%22xin.xihc%22%20AND%20a:%22spring-jba%22">
+    <img src="https://img.shields.io/maven-central/v/xin.xihc/spring-jba.svg?label=Maven%20Central">
+</a>
+
 `注意：从1.7.0开始与之前版本不兼容` `注意升级`
+
 ```
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.7.6</version>
+    <version>1.7.7</version>
 </dependency>
 ```
 
@@ -135,6 +142,8 @@ private JbaTemplate jbaTemplate;
 `14、public NamedParameterJdbcTemplate getJdbcOperations();` 可以使用更多内部原生方法（例如：BOLB字段的处理、储存过程的调用）
 
 `15、public void batchUpdate(final String sql, Map<String, ?>... params);` 批量执行sql，插入INSERT、UPDATE都可以
+
+`16、public void batchUpdate(final String sql, Object[] models);` 批量执行sql，插入INSERT、UPDATE都可以
 
 # 联系&交流
 QQ群号：340654726
