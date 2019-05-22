@@ -49,10 +49,13 @@ public class AnnotationScan implements SmartLifecycle {
     private JbaTemplate jbaTemplate;
 
     @Value("${spring.jba.mode:ALL}")
-    private String mode;
+    private String modeStr;
 
     @Value("${spring.jba.useSlf4jLog:true}")
     private boolean useSlf4jLog;
+
+    /** 表操作 */
+    private TableOperator tableOperator = null;
 
     /**
      * 1. 我们主要在该方法中启动任务或者其他异步服务，比如开启MQ接收消息<br/>
@@ -66,7 +69,7 @@ public class AnnotationScan implements SmartLifecycle {
         System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Started ::===================\n");
 
         JbaLog.useSlf4jLog = useSlf4jLog;
-        TableManager.mode = Mode.valueOf(mode);
+        Mode mode = Mode.valueOf(modeStr);
         Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
         for (Object obj : map.values()) {
             Table table = obj.getClass().getAnnotation(Table.class);
@@ -157,8 +160,8 @@ public class AnnotationScan implements SmartLifecycle {
             }
         }
         // 执行表创建、字段更新
-        TableOperator tableOperator = new TableOperator(jbaTemplate);
-        tableOperator.init();
+        this.tableOperator = new TableOperator(jbaTemplate);
+        this.tableOperator.init(mode);
 
         // 执行完其他业务后，可以修改 isRunning = true
         isRunning = true;
@@ -201,8 +204,10 @@ public class AnnotationScan implements SmartLifecycle {
     @Override
     public void stop(Runnable callback) {
         // 删除表结构
-        TableOperator tableOperator = new TableOperator(jbaTemplate);
-        tableOperator.drop();
+//        TableOperator tableOperator = new TableOperator(jbaTemplate);
+        if (this.tableOperator != null) {
+            this.tableOperator.drop();
+        }
 
         // 打印banner
         System.out.println(BANNE_JBA + "\r\n===================:: spring-jba :: Stoped ::====================\n");

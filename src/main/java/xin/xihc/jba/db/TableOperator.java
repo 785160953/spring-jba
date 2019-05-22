@@ -7,6 +7,9 @@ import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
 import xin.xihc.jba.tables.properties.TableProperties;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -19,7 +22,15 @@ public class TableOperator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableOperator.class);
 
+    /** 表构建模式 */
+    private static Mode MODE = Mode.ALL;
+
     I_TableOperation tableOperation = null;
+
+    /** 创建的模式列表 */
+    private List<Mode> CREATE_MODES = Arrays.asList(Mode.ALL, Mode.CREATE, Mode.CREATE_DROP);
+    /** 更新表的模式列表 */
+    private List<Mode> UPDATE_MODES = Arrays.asList(Mode.ALL, Mode.UPDATE);
 
     public TableOperator(JbaTemplate jbaTemplate) {
         tableOperation = new DB_MySql_Opera(jbaTemplate);
@@ -29,23 +40,26 @@ public class TableOperator {
     /**
      * 初始化
      */
-    public void init() {
+    public void init(Mode mode) {
+        Objects.requireNonNull(mode, "mode is null");
+        TableOperator.MODE = mode;
+        if (TableOperator.MODE == Mode.NONE) {
+            return;
+        }
         synchronized (TableOperator.class) {
             CompletableFuture.runAsync(() -> {
                 // 创建类型不是NONE
-                if (TableManager.mode != Mode.NONE) {
-                    for (TableProperties tblObj : TableManager.getTables()) {
-                        if (tblObj.isIgnore()) {// 忽略的,不处理
-                            continue;
+                for (TableProperties tblObj : TableManager.getTables()) {
+                    if (tblObj.isIgnore()) {// 忽略的,不处理
+                        continue;
+                    }
+                    if (tableOperation.isTableExists(tblObj.getTableName())) {
+                        if (UPDATE_MODES.contains(TableOperator.MODE)) {
+                            tableOperation.updateTable(tblObj);
                         }
-                        if (tableOperation.isTableExists(tblObj.getTableName())) {
-                            if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.UPDATE) {
-                                tableOperation.updateTable(tblObj);
-                            }
-                        } else {
-                            if (TableManager.mode == Mode.ALL || TableManager.mode == Mode.CREATE || TableManager.mode == Mode.CREATE_DROP) {
-                                tableOperation.createTable(tblObj);
-                            }
+                    } else {
+                        if (CREATE_MODES.contains(TableOperator.MODE)) {
+                            tableOperation.createTable(tblObj);
                         }
                     }
                 }
@@ -58,7 +72,7 @@ public class TableOperator {
     }
 
     public void drop() {
-        if (TableManager.mode != Mode.CREATE_DROP) {
+        if (TableOperator.MODE != Mode.CREATE_DROP) {
             return;
         }
         synchronized (TableOperator.class) {
