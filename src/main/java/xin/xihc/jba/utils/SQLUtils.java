@@ -68,8 +68,7 @@ public class SQLUtils {
         }
         // 计算起始索引
         // 使用limit 0, 10分页 -- 索引从0开始
-        int iBegin = (pageInfo.getPageNo() - 1) * pageInfo.getPageSize();
-        pageSql = sql + " LIMIT " + iBegin + "," + pageInfo.getPageSize();
+        pageSql = sql + " LIMIT " + pageInfo.getStart() + "," + pageInfo.getPageSize();
         return pageSql;
     }
 
