@@ -152,7 +152,6 @@ public class AnnotationScan implements SmartLifecycle {
                             break;
                     }
                     idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? prefix + colP.colName() : index.value());
-                    idx.setOrder(index.order());
                     idx.setType(index.type());
                     idx.setRemark(index.remark());
                     tblP.addIndex(idx);
