@@ -82,6 +82,13 @@ public @interface Column {
      */
     TableCharset charset() default TableCharset.utf8;
 
+    /**
+     * 字段顺序,默认0
+     *
+     * @return
+     */
+    int order() default 0;
+
     enum Policy {
         /**
          * NONE
