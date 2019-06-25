@@ -12,68 +12,56 @@ import xin.xihc.jba.annotation.Index;
  **/
 public class IndexProperties {
 
-	/**
-	 * 索引名
-	 */
-	private String indexName;
-	/**
-	 * 索引类型
-	 */
-	private Index.IndexType type;
+    /**
+     * 索引名
+     */
+    private String indexName;
+    /**
+     * 索引类型
+     */
+    private Index.IndexType type;
 
-	/**
-	 * 复合索引的顺序,默认0
-	 */
-	private int order = 0;
-	/**
-	 * 索引的列名
-	 */
-	private String columnName;
+    /**
+     * 索引的列名
+     */
+    private String[] columnNames;
 
-	/**
-	 * 备注
-	 *
-	 * @return
-	 */
-	private String remark = "";
+    /**
+     * 备注
+     *
+     * @return
+     */
+    private String remark = "";
 
-	public String getIndexName() {
-		return indexName;
-	}
+    public String getIndexName() {
+        return indexName;
+    }
 
-	public void setIndexName(String indexName) {
-		this.indexName = indexName;
-	}
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
+    }
 
-	public Index.IndexType getType() {
-		return type;
-	}
+    public Index.IndexType getType() {
+        return type;
+    }
 
-	public void setType(Index.IndexType type) {
-		this.type = type;
-	}
+    public void setType(Index.IndexType type) {
+        this.type = type;
+    }
 
-	public String getColumnName() {
-		return columnName;
-	}
+    public String[] getColumnNames() {
+        return columnNames;
+    }
 
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
+    public void setColumnNames(String[] columnNames) {
+        this.columnNames = columnNames;
+    }
 
-	public int getOrder() {
-		return order;
-	}
+    public String getRemark() {
+        return remark;
+    }
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	public String getRemark() {
-		return remark;
-	}
-
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

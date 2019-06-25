@@ -17,6 +17,10 @@ import java.util.List;
 public class TableProperties {
 
     /**
+     * 对象属性-表字段属性
+     */
+    private final LinkedHashMap<String, ColumnProperties> columns = new LinkedHashMap<>(16);// 表的列属性
+    /**
      * 表名称
      */
     private String tableName;// 表名称
@@ -36,17 +40,10 @@ public class TableProperties {
      * 是否忽略这张表
      */
     private boolean ignore;
-
     /**
      * 表的索引
      */
     private List<IndexProperties> indexs = new ArrayList<>(0);
-
-
-    /**
-     * 对象属性-表字段属性
-     */
-    private final LinkedHashMap<String, ColumnProperties> columns = new LinkedHashMap<>(16);// 表的列属性
 
     public Object getTableBean() {
         return tableBean;
@@ -122,4 +119,5 @@ public class TableProperties {
     public void addIndex(IndexProperties index) {
         this.indexs.add(index);
     }
+
 }

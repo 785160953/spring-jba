@@ -175,7 +175,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 			}
 			// 是否自动更新时间戳
 			if ("on update CURRENT_TIMESTAMP".equalsIgnoreCase(item.getExtra())) {
-				prop.setOnUpdateCurrentTimestamp(onUpdateApplied.contains(prop.type()));
+				prop.onUpdateCurrentTimestamp(onUpdateApplied.contains(prop.type()));
 			}
 			result.add(prop);
 		}
@@ -317,7 +317,7 @@ public class DB_MySql_Opera implements I_TableOperation {
 		}
 
 		// 是否自动更新时间戳
-		if (onUpdateApplied.contains(col.type()) && col.getOnUpdateCurrentTimestamp()) {
+		if (onUpdateApplied.contains(col.type()) && col.onUpdateCurrentTimestamp()) {
 			temp.append(" ON UPDATE CURRENT_TIMESTAMP ");
 		}
 
