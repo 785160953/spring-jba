@@ -1,7 +1,4 @@
-/**
- *
- */
-package xin.xihc.jba.scan.tables;
+package xin.xihc.jba.scan;
 
 import xin.xihc.jba.annotation.*;
 import xin.xihc.jba.core.utils.SQLUtils;
@@ -30,8 +27,6 @@ public class TableManager {
 
     /**
      * 获取表的列表
-     *
-     * @return
      */
     public static List<TableProperties> getTables() {
         return tbls.values().stream().sorted(Comparator.comparing(TableProperties::getOrder)).collect(Collectors.toList());
@@ -44,7 +39,7 @@ public class TableManager {
      * @param tblName 表名
      * @return 表的属性
      */
-    static TableProperties addTable(Class<?> clazz, String tblName) {
+    private static TableProperties addTable(Class<?> clazz, String tblName) {
         TableProperties pp = new TableProperties();
         pp.setTableName(tblName);
         tbls.put(clazz, pp);
@@ -145,9 +140,9 @@ public class TableManager {
      * @date 2019/6/26
      * @since 0.0.1
      */
-    public static TableProperties scanTableAnnotations(Object obj) {
+    static TableProperties scanTableAnnotations(Object obj) {
         Table table = obj.getClass().getAnnotation(Table.class);
-        TableProperties tblProp = null;
+        TableProperties tblProp;
         if (CommonUtil.isNotNullEmpty(table.value())) {
             tblProp = addTable(obj.getClass(), table.value());
         } else {
@@ -186,7 +181,7 @@ public class TableManager {
      * @date 2019/6/26
      * @since 0.0.1
      */
-    public static void scanFieldAnnotations(TableProperties tblProp, Field field) {
+    static void scanFieldAnnotations(TableProperties tblProp, Field field) {
         Column column = field.getAnnotation(Column.class);
         ColumnProperties colP = new ColumnProperties();
         colP.type(field.getType());

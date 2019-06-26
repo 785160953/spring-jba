@@ -3,7 +3,7 @@ package xin.xihc.jba.core.utils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 import xin.xihc.jba.core.PageInfo;
-import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.TableManager;
 import xin.xihc.jba.scan.tables.properties.ColumnProperties;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
@@ -76,7 +76,6 @@ public class SQLUtils {
      * 填充GUID
      *
      * @param model 需要填充的表对象
-     * @return 返回填充后的表对象
      */
     public static void fillGuid(Object model) {
         TableProperties table = TableManager.getTable(model.getClass());
@@ -129,8 +128,7 @@ public class SQLUtils {
      *
      * @param model      参数对象
      * @param fieldNames 根据的字段
-     * @return
-     * @throws RuntimeException
+     * @return Update语句拼接SQL
      */
     public static String getUpdateSql(Object model, String... fieldNames) throws RuntimeException {
         Objects.requireNonNull(model, "表对象model不允许为空");
@@ -185,7 +183,7 @@ public class SQLUtils {
      * insert语句拼接
      *
      * @param model 对象参数
-     * @return
+     * @return insert语句拼接SQL
      */
     public static String getInsertSql(Object model) {
         Objects.requireNonNull(model, "表对象model不允许为空");
@@ -220,9 +218,6 @@ public class SQLUtils {
 
     /**
      * 转换字段为数据库列名
-     *
-     * @param bys
-     * @return
      */
     public static String getOrderBy(LinkedHashMap<String, ColumnProperties> columns, String... bys) {
         StringJoiner order = new StringJoiner(",");
@@ -251,9 +246,6 @@ public class SQLUtils {
 
     /**
      * 驼峰转为下划线
-     *
-     * @param name
-     * @return
      */
     public static String underscoreName(String name) {
         if (!StringUtils.hasLength(name)) {

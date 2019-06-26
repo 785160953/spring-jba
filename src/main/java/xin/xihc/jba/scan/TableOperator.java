@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.DB_MySql_Opera;
 import xin.xihc.jba.db.I_TableOperation;
-import xin.xihc.jba.scan.tables.TableManager;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class TableOperator {
     /**
      * 初始化
      */
-    public void init(Mode mode) {
+    void init(Mode mode) {
         Objects.requireNonNull(mode, "mode is null");
         TableOperator.MODE = mode;
         if (TableOperator.MODE == Mode.NONE) {
@@ -78,7 +77,7 @@ public class TableOperator {
      * @date 2019/6/26
      * @since 0.0.1
      */
-    public void drop() {
+    void drop() {
         if (TableOperator.MODE != Mode.CREATE_DROP) {
             return;
         }

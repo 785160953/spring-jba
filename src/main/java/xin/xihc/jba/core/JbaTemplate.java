@@ -10,7 +10,7 @@ import xin.xihc.jba.core.bean.JbaBeanPropertyRowMapper;
 import xin.xihc.jba.core.bean.JbaMapSqlSource;
 import xin.xihc.jba.core.utils.JbaLog;
 import xin.xihc.jba.core.utils.SQLUtils;
-import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.TableManager;
 import xin.xihc.jba.scan.tables.properties.ColumnProperties;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 
@@ -25,10 +25,9 @@ import java.util.stream.Collectors;
  * 对JDBCTemplate进行封装
  *
  * @author Leo.Xi
- * @Date 2017年7月16日
- * @Description 对NamedParameterJdbcTemplate和JdbcTemplate进行封装
- * @Version 1.1.7
- * @Modified 2017年11月26日
+ * @date 2017年7月16日
+ * @code 对NamedParameterJdbcTemplate和JdbcTemplate进行封装
+ * @since  1.1.7
  */
 @Component
 @EnableTransactionManagement
@@ -52,7 +51,6 @@ public class JbaTemplate {
      * 获取当前的JdbcTemplate
      *
      * @return JdbcTemplate
-     * @modified 1.3.3
      * @since 1.1.7
      */
     public JdbcTemplate getJdbcTemplate() {
@@ -76,7 +74,7 @@ public class JbaTemplate {
      *
      * @param model 对象模型
      * @return 是否成功
-     * @Descript :id后面的必须和model对象的属性名一致
+     * @code :id后面的必须和model对象的属性名一致
      */
     public boolean insertModel(Object model) {
         Objects.requireNonNull(model, "表对象model不允许为空");
@@ -96,8 +94,7 @@ public class JbaTemplate {
      * 批量插入数据库<br>
      * 以对象值最多的生成sql
      *
-     * @param models
-     * @return
+     * @param models 表对象数组
      */
     public void insertModels(Object[] models) {
         Objects.requireNonNull(models, "表对象models不允许为空");
@@ -122,7 +119,6 @@ public class JbaTemplate {
      * @param model      对象模型
      * @param fieldNames where子句条件字段数组,对象属性名（注意大小写）
      * @return 是否成功
-     * @throws RuntimeException
      */
     public boolean updateModel(Object model, final String... fieldNames) throws RuntimeException {
         Objects.requireNonNull(model, "表对象model不允许为空");
@@ -179,7 +175,6 @@ public class JbaTemplate {
      *
      * @param model 对象模型
      * @return 是否成功
-     * @throws RuntimeException
      */
     public boolean deleteModel(Object model) throws RuntimeException {
         Objects.requireNonNull(model, "表对象model不允许为空");
@@ -204,8 +199,8 @@ public class JbaTemplate {
     /**
      * 执行sql语句
      *
-     * @param sql
-     * @return
+     * @param sql SQL
+     * @return 是否执行成功
      */
     public boolean executeSQL(final String sql) {
         boolean res = false;
@@ -223,7 +218,7 @@ public class JbaTemplate {
      *
      * @param sql    sql带有参数
      * @param params 参数对象 支持map
-     * @return
+     * @return 是否执行成功
      */
     public boolean executeSQL(final String sql, Object params) {
         boolean res = false;
@@ -279,7 +274,7 @@ public class JbaTemplate {
      *
      * @param sql    sql语句
      * @param params 参数 支持map
-     * @return
+     * @return 数量
      */
     public int queryCount(final String sql, Object params) {
         int ret;

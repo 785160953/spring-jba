@@ -8,7 +8,6 @@ import xin.xihc.jba.SpringContextUtil;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.core.utils.JbaLog;
-import xin.xihc.jba.scan.tables.TableManager;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
@@ -20,12 +19,12 @@ import java.util.Map;
  *
  * @author Leo.Xi
  * @date 2018年1月24日
- * @since
+ * @since 0.0.1
  */
 @Component
 public class AnnotationScan implements SmartLifecycle {
 
-    public static final String BANNE_JBA = "_________________________________________________________________\n"
+    private static final String BANNE_JBA = "_________________________________________________________________\n"
             + "                                                                 \n"
             + "                       ,                            ,   /        \n"
             + "---__------__---)__--------__----__--------------------/__----__-\n"
