@@ -117,11 +117,12 @@ public class TableProperties {
         LinkedHashMap<String, ColumnProperties> temp = new LinkedHashMap<>(columns.size() + 1);
         for (String key : this.columns.keySet()) {
             ColumnProperties columnProperties = this.columns.get(key);
-            if (columnProperties.order() <= prop.order()) { // 小于或者等于时保留原来顺序
-                temp.put(key, columnProperties);
-            } else {
-                temp.put(fieldName, prop);
+            if (columnProperties.order() > prop.order()) { // 小于或者等于时保留原来顺序
+                if (!temp.containsKey(fieldName)) {
+                    temp.put(fieldName, prop);
+                }
             }
+            temp.put(key, columnProperties);
         }
         // 都小于时,最后追加
         if (!temp.containsKey(fieldName)) {

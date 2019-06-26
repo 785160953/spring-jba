@@ -176,7 +176,6 @@ public class TableManager {
     public static void scanFieldAnnotations(TableProperties tblProp, Field field) {
         Column column = field.getAnnotation(Column.class);
         ColumnProperties colP = new ColumnProperties();
-        tblProp.addColumn(field.getName(), colP);
         colP.type(field.getType());
         if (null == column) {
             colP.colName(SQLUtils.underscoreName(field.getName()));
@@ -196,13 +195,13 @@ public class TableManager {
                     .notNull(column.notNull())
                     .remark(column.remark()).charset(column.charset()).order(column.order());
             colP.policy(column.policy());
-            /** 如果是guid为主键长度默认为32 */
-            if (colP.policy() == Column.Policy.GUID || colP.policy() == Column.Policy.GUID_UP) {
-                colP.length(32);
-            }
             colP.length(0);
             if (CommonUtil.isNotNullEmpty(column.value())) {
                 colP.colName(column.value());
+            }
+            /** 如果是guid为主键长度默认为32 */
+            if (colP.policy() == Column.Policy.GUID || colP.policy() == Column.Policy.GUID_UP) {
+                colP.length(32);
             }
             if (column.length() > 0) {
                 colP.length(column.length());
@@ -221,6 +220,10 @@ public class TableManager {
         if (null != onUpdateCurrentTimestamp) {
             colP.onUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
         }
+
+        // 添加到缓存
+        tblProp.addColumn(field.getName(), colP);
+
         // 记录索引
         Index index = field.getAnnotation(Index.class);
         if (null != index) {
