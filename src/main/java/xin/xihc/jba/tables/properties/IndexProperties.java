@@ -16,6 +16,7 @@ public class IndexProperties {
      * 索引名
      */
     private String indexName;
+
     /**
      * 索引类型
      */

@@ -3,7 +3,7 @@ package xin.xihc.jba.annotation;
 import java.lang.annotation.*;
 
 /**
- * 创建表索引
+ * 单列索引注解
  *
  * @Author Leo.Xi
  * @Date 2019/1/28 10:54

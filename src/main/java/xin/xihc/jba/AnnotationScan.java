@@ -4,21 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
-import xin.xihc.jba.annotation.Column;
-import xin.xihc.jba.annotation.Column.Policy;
-import xin.xihc.jba.annotation.Index;
-import xin.xihc.jba.annotation.OnUpdateCurrentTimestamp;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
-import xin.xihc.jba.db.DB_MySql_Opera;
 import xin.xihc.jba.db.TableOperator;
 import xin.xihc.jba.tables.Mode;
 import xin.xihc.jba.tables.TableManager;
-import xin.xihc.jba.tables.properties.ColumnProperties;
-import xin.xihc.jba.tables.properties.IndexProperties;
 import xin.xihc.jba.tables.properties.TableProperties;
 import xin.xihc.jba.utils.JbaLog;
-import xin.xihc.jba.utils.SQLUtils;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
@@ -72,90 +64,11 @@ public class AnnotationScan implements SmartLifecycle {
         Mode mode = Mode.valueOf(modeStr);
         Map<String, Object> map = SpringContextUtil.getBeansWithAnnotation(Table.class);
         for (Object obj : map.values()) {
-            Table table = obj.getClass().getAnnotation(Table.class);
-            TableProperties tblP = null;
-            if (table.value().matches("^_?[a-zA-Z]+\\w+")) { // 是字母或下划线开头的，为有效的表名
-                tblP = TableManager.addTable(obj.getClass(), table.value());
-            } else {
-                tblP = TableManager.addTable(obj.getClass(), obj.getClass().getSimpleName());
-            }
-            // 获取表注释
-            tblP.setRemark(table.remark());
-            tblP.setTableBean(obj);
-            tblP.setIgnore(table.ignore());
-            tblP.setOrder(table.order());
+            TableProperties tblP = TableManager.scanTableAnnotations(obj);
 
             for (Field field : CommonUtil.getAllFields(obj.getClass(), false, false)) {
                 field.setAccessible(true);
-                Column column = field.getAnnotation(Column.class);
-                ColumnProperties colP = new ColumnProperties();
-                tblP.addColumn(field.getName(), colP);
-                colP.type(field.getType());
-                if (null == column) {
-                    colP.colName(SQLUtils.underscoreName(field.getName()));
-
-                    // 没有的给默认值
-                    colP.length(0)
-                            .precision(0)
-                            .policy(Policy.NONE)
-                            .primary(false)
-                            .notNull(false)
-                            .defaultValue("")
-                            .remark("");
-                } else {
-                    colP.colName(SQLUtils.underscoreName(field.getName()))
-                            .defaultValue(column.defaultValue())
-                            .notNull(column.notNull())
-                            .remark(column.remark()).charset(column.charset());
-                    colP.length(0);
-                    if (CommonUtil.isNotNullEmpty(column.value())) {
-                        colP.colName(column.value());
-                    }
-                    if (column.length() > 0) {
-                        colP.length(column.length());
-                    }
-                    if (column.precision() > 0) {
-                        colP.precision(column.precision());
-                    }
-                    if (column.primary()) {
-                        colP.primary(true);
-                        colP.notNull(true);
-                    }
-                    colP.policy(column.policy());
-                    /** 如果是guid为主键长度默认为32 */
-                    if (colP.policy() == Policy.GUID || colP.policy() == Policy.GUID_UP) {
-                        colP.length(32);
-                    }
-                }
-                // 是否自动更新时间戳
-                OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
-                if (null != onUpdateCurrentTimestamp) {
-                    colP.setOnUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
-                }
-                // 记录索引
-                Index index = field.getAnnotation(Index.class);
-                if (null != index) {
-                    IndexProperties idx = new IndexProperties();
-                    idx.setColumnName(colP.colName());
-                    String prefix = "idx_";
-                    switch (index.type()) {
-                        case Unique:
-                            prefix = "uni_";
-                            break;
-                        case Normal:
-                            prefix = "idx_";
-                            break;
-                        case FullText:
-                            prefix = "full_";
-                            break;
-                        default:
-                            break;
-                    }
-                    idx.setIndexName(CommonUtil.isNullEmpty(index.value()) ? prefix + colP.colName() : index.value());
-                    idx.setType(index.type());
-                    idx.setRemark(index.remark());
-                    tblP.addIndex(idx);
-                }
+                TableManager.scanFieldAnnotations(tblP,field);
             }
         }
         // 执行表创建、字段更新

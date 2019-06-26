@@ -3,8 +3,8 @@
  */
 package xin.xihc.jba.tables.properties;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -43,7 +43,7 @@ public class TableProperties {
     /**
      * 表的索引
      */
-    private List<IndexProperties> indexs = new ArrayList<>(0);
+    private LinkedList<IndexProperties> indexs = new LinkedList<>();
 
     public Object getTableBean() {
         return tableBean;
@@ -103,7 +103,17 @@ public class TableProperties {
         }
     }
 
+    /**
+     * 每次添加时进行排序
+     *
+     * @param fieldName 对象属性名
+     * @param prop      表的列属性信息
+     * @author Leo.Xi
+     * @date 2019/6/26
+     * @since 0.0.1
+     */
     public void addColumn(String fieldName, ColumnProperties prop) {
+        // TODO
         columns.put(fieldName, prop);
     }
 
@@ -118,6 +128,15 @@ public class TableProperties {
      */
     public void addIndex(IndexProperties index) {
         this.indexs.add(index);
+    }
+
+    /**
+     * 添加最前面索引
+     *
+     * @param index
+     */
+    public void addFirstIndex(IndexProperties index) {
+        this.indexs.addFirst(index);
     }
 
 }

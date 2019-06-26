@@ -25,12 +25,12 @@ public class TableOperator {
     /** 表构建模式 */
     private static Mode MODE = Mode.ALL;
 
-    I_TableOperation tableOperation = null;
+    private I_TableOperation tableOperation = null;
 
     /** 创建的模式列表 */
-    private List<Mode> CREATE_MODES = Arrays.asList(Mode.ALL, Mode.CREATE, Mode.CREATE_DROP);
+    private static List<Mode> CREATE_MODES = Arrays.asList(Mode.ALL, Mode.CREATE, Mode.CREATE_DROP);
     /** 更新表的模式列表 */
-    private List<Mode> UPDATE_MODES = Arrays.asList(Mode.ALL, Mode.UPDATE);
+    private static List<Mode> UPDATE_MODES = Arrays.asList(Mode.ALL, Mode.UPDATE);
 
     public TableOperator(JbaTemplate jbaTemplate) {
         tableOperation = new DB_MySql_Opera(jbaTemplate);

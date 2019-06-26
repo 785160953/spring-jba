@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * 复合、组合索引注解
+ * 单个、复合、组合索引注解
  *
  * @author Leo.Xi
  * @date 2019/6/25
