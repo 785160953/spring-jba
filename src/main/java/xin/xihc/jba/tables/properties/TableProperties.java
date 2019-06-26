@@ -113,8 +113,23 @@ public class TableProperties {
      * @since 0.0.1
      */
     public void addColumn(String fieldName, ColumnProperties prop) {
-        // TODO
-        columns.put(fieldName, prop);
+        // 临时的表的列属性
+        LinkedHashMap<String, ColumnProperties> temp = new LinkedHashMap<>(columns.size() + 1);
+        for (String key : this.columns.keySet()) {
+            ColumnProperties columnProperties = this.columns.get(key);
+            if (columnProperties.order() <= prop.order()) { // 小于或者等于时保留原来顺序
+                temp.put(key, columnProperties);
+            } else {
+                temp.put(fieldName, prop);
+            }
+        }
+        // 都小于时,最后追加
+        if (!temp.containsKey(fieldName)) {
+            temp.put(fieldName, prop);
+        }
+        this.columns.clear();
+        this.columns.putAll(temp);
+        temp = null;
     }
 
     public List<IndexProperties> getIndexs() {
