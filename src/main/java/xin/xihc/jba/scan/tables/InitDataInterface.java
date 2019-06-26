@@ -6,7 +6,7 @@ import xin.xihc.jba.core.JbaTemplate;
  * 表在创建时初始化数据接口
  *
  * @author Leo.Xi
- * @Date 2018年1月29日
+ * @date 2018年1月29日
  * @since 1.3.5
  */
 public interface InitDataInterface {

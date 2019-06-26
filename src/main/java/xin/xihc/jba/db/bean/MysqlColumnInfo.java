@@ -8,7 +8,6 @@ package xin.xihc.jba.db.bean;
  *
  * @author Leo.Xi
  * @date 2018年1月26日
- * @since
  */
 public class MysqlColumnInfo {
 

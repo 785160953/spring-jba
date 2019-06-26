@@ -20,8 +20,6 @@ public @interface Alias {
 
     /**
      * 列名-别名
-     *
-     * @return
      */
     String[] value();
 

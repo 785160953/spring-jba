@@ -12,7 +12,6 @@ import java.util.List;
 /**
  * @author Leo.Xi
  * @date 2018年1月24日
- * @since
  */
 public interface I_TableOperation {
 
@@ -20,7 +19,6 @@ public interface I_TableOperation {
 	 * 判断表结构是否存在
 	 *
 	 * @param tblName 表名
-	 * @return
 	 */
 	boolean isTableExists(String tblName);
 

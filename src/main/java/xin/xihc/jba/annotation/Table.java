@@ -20,28 +20,28 @@ import java.lang.annotation.*;
 @Component
 public @interface Table {
 
-	/**
-	 * 表名
-	 */
-	String value() default "";
+    /**
+     * 表名
+     */
+    String value() default "";
 
-	/**
-	 * 备注
-	 */
-	String remark() default "";
+    /**
+     * 备注
+     */
+    String remark() default "";
 
-	/**
-	 * 表创建or更新的顺序,默认9999
-	 *
-	 * @return
-	 */
-	int order() default 9999;
+    /**
+     * 表创建or更新的顺序,默认9999
+     *
+     * @since 1.5.0
+     */
+    int order() default 9999;
 
-	/**
-	 * 是否忽略这张表
-	 *
-	 * @return
-	 */
-	boolean ignore() default false;
+    /**
+     * 是否忽略这张表
+     *
+     * @since 1.5.0
+     */
+    boolean ignore() default false;
 
 }

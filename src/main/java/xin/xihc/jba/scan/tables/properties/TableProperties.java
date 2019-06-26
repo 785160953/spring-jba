@@ -12,7 +12,6 @@ import java.util.List;
  *
  * @author Leo.Xi
  * @date 2018年1月12日
- * @since
  */
 public class TableProperties {
 
@@ -31,7 +30,7 @@ public class TableProperties {
     /**
      * 表备注
      */
-    private String remark;//
+    private String remark;
     /**
      * 表创建or更新的顺序,默认9999
      */
@@ -140,7 +139,7 @@ public class TableProperties {
     /**
      * 添加索引
      *
-     * @param index
+     * @param index 索引信息
      */
     public void addIndex(IndexProperties index) {
         this.indexs.add(index);
@@ -149,7 +148,7 @@ public class TableProperties {
     /**
      * 添加最前面索引
      *
-     * @param index
+     * @param index 索引信息
      */
     public void addFirstIndex(IndexProperties index) {
         this.indexs.addFirst(index);

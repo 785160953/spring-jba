@@ -4,7 +4,7 @@ package xin.xihc.jba.scan;
  * 表结构、创建、更新操作类型
  *
  * @author Leo.Xi
- * @Date 2018年3月8日
+ * @date 2018年3月8日
  */
 public enum Mode {
 

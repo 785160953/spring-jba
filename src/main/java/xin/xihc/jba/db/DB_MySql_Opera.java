@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @author Leo.Xi
  * @version 1.3.0 不再支持java基本数据类型
  * @date 2018年1月24日
- * @desc 增加:对java.sql.Date,Time,Timestamp字段的支持
+ * @code 增加:对java.sql.Date,Time,Timestamp字段的支持
  * @since 1.1.4
  */
 public class DB_MySql_Opera implements I_TableOperation {
@@ -34,6 +34,8 @@ public class DB_MySql_Opera implements I_TableOperation {
      * @OnUpdateCurrentTimestamp注解适用的类型
      */
     public static final LinkedList<Class> onUpdateApplied = new LinkedList<>();
+
+    /** java类型- mySQL类型 对应map */
     private static Map<Class, String> javaClassToMysqlFieldName = new HashMap<>();
 
     static {
@@ -62,7 +64,10 @@ public class DB_MySql_Opera implements I_TableOperation {
         onUpdateApplied.add(Timestamp.class);
     }
 
-    private String table_schema; // 数据库schema
+    /** 数据库schema */
+    private String table_schema;
+
+    /** ORM */
     private JbaTemplate jbaTemplate;
 
     public DB_MySql_Opera(JbaTemplate jbaTemplate) {
@@ -82,7 +87,8 @@ public class DB_MySql_Opera implements I_TableOperation {
     @Override
     public boolean isTableExists(final String tblName) {
         boolean res = false;
-        String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='" + tblName + "' AND table_schema='" + this.table_schema + "'";
+        String sql = "select count(1) FROM information_schema.TABLES WHERE table_name ='"
+                + tblName + "' AND table_schema='" + this.table_schema + "'";
         Integer count = jbaTemplate.queryColumn(sql, null, Integer.class);
         if (count > 0) {
             res = true;
@@ -143,7 +149,7 @@ public class DB_MySql_Opera implements I_TableOperation {
         if (dbColumns.size() < 1) {
             return new ArrayList<>(0);
         }
-        List<ColumnProperties> result = new ArrayList(dbColumns.size());
+        List<ColumnProperties> result = new ArrayList<>(dbColumns.size());
         ColumnProperties prop;
         for (MysqlColumnInfo item : dbColumns) {
             prop = new ColumnProperties();
@@ -186,8 +192,8 @@ public class DB_MySql_Opera implements I_TableOperation {
     public void updateTable(TableProperties tbl) {
         List<MysqlColumnInfo> list = jbaTemplate.queryMixModelList(
                 "select * from information_schema.columns where table_name = '" + tbl
-                        .getTableName() + "' AND table_schema='" + this.table_schema + "'", null, MysqlColumnInfo.class,
-                null);
+                        .getTableName() + "' AND table_schema='" + this.table_schema + "'", null,
+                MysqlColumnInfo.class, null);
         // 先获取表结构信息
         List<ColumnProperties> dbColumnList = convert2ColumnProperties(list);
 
@@ -358,7 +364,8 @@ public class DB_MySql_Opera implements I_TableOperation {
         List<MysqlIndexInfo> dbIndexs = new LinkedList<>();
         if (!created) {
             dbIndexs = jbaTemplate
-                    .queryMixModelList("SHOW index FROM " + tbl.getTableName(), null, MysqlIndexInfo.class, null);
+                    .queryMixModelList("SHOW index FROM " + tbl.getTableName(), null,
+                            MysqlIndexInfo.class, null);
         }
         String oldPrimary = dbIndexs.stream().filter(x -> "PRIMARY".equals(x.getKey_name()))
                 .map(MysqlIndexInfo::getColumn_name).collect(Collectors.joining(","));

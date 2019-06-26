@@ -29,8 +29,6 @@ public class IndexProperties {
 
     /**
      * 备注
-     *
-     * @return
      */
     private String remark = "";
 

@@ -1,4 +1,4 @@
-package xin.xihc.jba.core;
+package xin.xihc.jba.core.bean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +26,9 @@ import java.util.*;
 /**
  * 自定义行映射关系
  *
- * @Author Leo.Xi
- * @Date 2019/4/30 17:40
- * @Version 1.0
+ * @author Leo.Xi
+ * @date 2019/4/30 17:40
+ * @version 1.0
  **/
 public class JbaBeanPropertyRowMapper<T> implements RowMapper<T> {
 

@@ -1,4 +1,4 @@
-package xin.xihc.jba.core;
+package xin.xihc.jba.core.bean;
 
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 
@@ -8,7 +8,7 @@ import java.sql.Types;
  * 增加对java枚举类型的支持
  *
  * @author Leo.Xi
- * @Date 2018年5月2日
+ * @date 2018年5月2日
  */
 public class JbaBeanProperty extends BeanPropertySqlParameterSource {
 

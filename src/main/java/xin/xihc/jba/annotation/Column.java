@@ -22,70 +22,53 @@ public @interface Column {
      * 列名
      *
      * @since 1.7.6
-     * @return
      */
     String value() default "";
 
     /**
      * 默认值
-     *
-     * @return
      */
     String defaultValue() default "";
 
     /**
      * 是否允许为空
-     *
-     * @return
      */
     boolean notNull() default false;
 
     /**
      * 是否是主键
-     *
-     * @return
      */
     boolean primary() default false;
 
     /**
      * 主键生成策略
-     *
-     * @return
      */
     Policy policy() default Policy.NONE;
 
     /**
      * 长度限制，小于1代表不限制
-     *
-     * @return
      */
     int length() default 0;
 
     /**
      * 备注
-     *
-     * @return
      */
     String remark() default "";
 
     /**
      * 精度
-     *
-     * @return
      */
     int precision() default 0;
 
     /**
      * 设置表的字符编码
-     *
-     * @return
      */
     TableCharset charset() default TableCharset.utf8;
 
     /**
      * 字段顺序,默认0
      *
-     * @return
+     * @since 1.7.8
      */
     int order() default 0;
 

@@ -3,9 +3,9 @@ package xin.xihc.jba.db.bean;
 /**
  * mysql索引对象
  *
- * @Author Leo.Xi
- * @Date 2019/1/28 13:28
- * @Version 1.0
+ * @author Leo.Xi
+ * @date 2019/1/28 13:28
+ * @version 1.0
  **/
 public class MysqlIndexInfo {
 

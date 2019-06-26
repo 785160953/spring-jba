@@ -16,13 +16,13 @@ import java.lang.annotation.*;
  *
  * @author Leo.Xi
  * @date 2018年1月16日
- * @since
+ * @since 0.0.1
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Component
 @Import({SpringContextUtil.class, JbaTemplate.class, AnnotationScan.class})
-public @interface EnableJBA {
+public @interface EnableJba {
 
 }

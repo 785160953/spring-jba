@@ -40,9 +40,9 @@ public class TableManager {
     /**
      * 添加表数据
      *
-     * @param clazz
-     * @param tblName
-     * @return
+     * @param clazz   表对象的类型
+     * @param tblName 表名
+     * @return 表的属性
      */
     static TableProperties addTable(Class<?> clazz, String tblName) {
         TableProperties pp = new TableProperties();

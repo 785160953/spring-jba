@@ -9,7 +9,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @author Leo.Xi
  * @date 2019/6/25
- * @since 0.0.1
+ * @since 1.7.8
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -29,20 +29,16 @@ public @interface GroupIndex {
 
     /**
      * 索引类型,默认为普通索引
-     *
-     * @return
      */
     Index.IndexType type() default Index.IndexType.Normal;
 
     /**
      * 索引备注
-     *
-     * @return
      */
     String remark() default "";
 
     /**
-     * Defines several {@code @GroupIndex} annotations on the same element.
+     * 分组索引列表注解-用于多个复合索引
      */
     @Target(ElementType.TYPE)
     @Retention(RUNTIME)
