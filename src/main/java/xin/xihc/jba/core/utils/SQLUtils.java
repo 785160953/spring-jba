@@ -1,11 +1,11 @@
-package xin.xihc.jba.utils;
+package xin.xihc.jba.core.utils;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
 import xin.xihc.jba.core.PageInfo;
-import xin.xihc.jba.tables.TableManager;
-import xin.xihc.jba.tables.properties.ColumnProperties;
-import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.tables.properties.ColumnProperties;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.beans.PropertyDescriptor;

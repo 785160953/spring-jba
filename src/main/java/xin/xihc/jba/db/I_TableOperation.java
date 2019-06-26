@@ -4,7 +4,7 @@
 package xin.xihc.jba.db;
 
 import xin.xihc.jba.core.JbaTemplate;
-import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 
 import java.util.ArrayList;
 import java.util.List;

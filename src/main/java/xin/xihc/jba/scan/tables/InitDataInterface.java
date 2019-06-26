@@ -1,4 +1,4 @@
-package xin.xihc.jba.tables;
+package xin.xihc.jba.scan.tables;
 
 import xin.xihc.jba.core.JbaTemplate;
 

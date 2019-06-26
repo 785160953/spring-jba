@@ -1,11 +1,12 @@
-package xin.xihc.jba.db;
+package xin.xihc.jba.scan;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xin.xihc.jba.core.JbaTemplate;
-import xin.xihc.jba.tables.Mode;
-import xin.xihc.jba.tables.TableManager;
-import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.jba.db.DB_MySql_Opera;
+import xin.xihc.jba.db.I_TableOperation;
+import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,10 +33,9 @@ public class TableOperator {
     /** 更新表的模式列表 */
     private static List<Mode> UPDATE_MODES = Arrays.asList(Mode.ALL, Mode.UPDATE);
 
-    public TableOperator(JbaTemplate jbaTemplate) {
+    TableOperator(JbaTemplate jbaTemplate) {
         tableOperation = new DB_MySql_Opera(jbaTemplate);
     }
-
 
     /**
      * 初始化
@@ -71,6 +71,13 @@ public class TableOperator {
         }
     }
 
+    /**
+     * 删除表操作
+     *
+     * @author Leo.Xi
+     * @date 2019/6/26
+     * @since 0.0.1
+     */
     public void drop() {
         if (TableOperator.MODE != Mode.CREATE_DROP) {
             return;

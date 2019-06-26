@@ -1,7 +1,7 @@
 /**
  *
  */
-package xin.xihc.jba.utils;
+package xin.xihc.jba.core.utils;
 
 import xin.xihc.utils.common.CommonUtil;
 

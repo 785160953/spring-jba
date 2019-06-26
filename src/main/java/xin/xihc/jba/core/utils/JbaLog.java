@@ -1,4 +1,4 @@
-package xin.xihc.jba.utils;
+package xin.xihc.jba.core.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

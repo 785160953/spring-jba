@@ -1,4 +1,4 @@
-package xin.xihc.jba.tables;
+package xin.xihc.jba.scan;
 
 /**
  * 表结构、创建、更新操作类型

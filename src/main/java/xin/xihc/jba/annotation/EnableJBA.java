@@ -5,9 +5,9 @@ package xin.xihc.jba.annotation;
 
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import xin.xihc.jba.AnnotationScan;
 import xin.xihc.jba.SpringContextUtil;
 import xin.xihc.jba.core.JbaTemplate;
+import xin.xihc.jba.scan.AnnotationScan;
 
 import java.lang.annotation.*;
 

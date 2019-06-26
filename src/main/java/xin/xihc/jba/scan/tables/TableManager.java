@@ -1,21 +1,18 @@
 /**
  *
  */
-package xin.xihc.jba.tables;
+package xin.xihc.jba.scan.tables;
 
 import xin.xihc.jba.annotation.*;
+import xin.xihc.jba.core.utils.SQLUtils;
 import xin.xihc.jba.db.DB_MySql_Opera;
-import xin.xihc.jba.tables.properties.ColumnProperties;
-import xin.xihc.jba.tables.properties.IndexProperties;
-import xin.xihc.jba.tables.properties.TableProperties;
-import xin.xihc.jba.utils.SQLUtils;
+import xin.xihc.jba.scan.tables.properties.ColumnProperties;
+import xin.xihc.jba.scan.tables.properties.IndexProperties;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +25,8 @@ import java.util.stream.Collectors;
  */
 public class TableManager {
 
-    private static LinkedHashMap<Class<?>, TableProperties> tbls = new LinkedHashMap<>(16);
+    /** 有序的记录表对象类型 - 表属性 */
+    private final static LinkedHashMap<Class<?>, TableProperties> tbls = new LinkedHashMap<>(16);
 
     /**
      * 获取表的列表
@@ -40,22 +38,13 @@ public class TableManager {
     }
 
     /**
-     * 获取对应的Class对应的表属性
-     *
-     * @return
-     */
-    public static LinkedHashMap<Class<?>, TableProperties> getTablesMap() {
-        return tbls;
-    }
-
-    /**
      * 添加表数据
      *
      * @param clazz
      * @param tblName
      * @return
      */
-    public static TableProperties addTable(Class<?> clazz, String tblName) {
+    static TableProperties addTable(Class<?> clazz, String tblName) {
         TableProperties pp = new TableProperties();
         pp.setTableName(tblName);
         tbls.put(clazz, pp);
@@ -63,8 +52,13 @@ public class TableManager {
     }
 
     /**
-     * @param clazz
-     * @return
+     * 获取表的属性
+     *
+     * @param clazz 对象类Class
+     * @return 表属性信息
+     * @author Leo.Xi
+     * @date 2019/6/26
+     * @since 0.0.1
      */
     public static TableProperties getTable(Class<?> clazz) {
         if (tbls.containsKey(clazz)) {
@@ -72,6 +66,25 @@ public class TableManager {
         } else {
             throw new RuntimeException(String.format("【%s】对应的表不存在", clazz.getName()));
         }
+    }
+
+    /**
+     * 获取对应表的列名列表
+     *
+     * @param clazz 表对象的类型
+     * @return 表的列的列表
+     * @author Leo.Xi
+     * @date 2019/6/26
+     * @since 0.0.1
+     */
+    public static List<String> getColumnNames(Class<?> clazz) {
+        if (tbls.containsKey(clazz)) {
+            return tbls.get(clazz).getColumns().values().stream()
+                    .sorted(Comparator.comparing(ColumnProperties::order))
+                    .map(ColumnProperties::colName)
+                    .collect(Collectors.toList());
+        }
+        return new LinkedList<>();
     }
 
     /**
@@ -101,8 +114,8 @@ public class TableManager {
     /**
      * 转换成IndexProperties
      *
-     * @param groupIndex
-     * @return
+     * @param groupIndex 分组索引注解
+     * @return IndexProperties
      * @author Leo.Xi
      * @date 2019/6/26
      * @since 0.0.1
@@ -135,7 +148,7 @@ public class TableManager {
     public static TableProperties scanTableAnnotations(Object obj) {
         Table table = obj.getClass().getAnnotation(Table.class);
         TableProperties tblProp = null;
-        if (table.value().matches("^_?[a-zA-Z]+\\w+")) { // 是字母或下划线开头的，为有效的表名
+        if (CommonUtil.isNotNullEmpty(table.value())) {
             tblProp = addTable(obj.getClass(), table.value());
         } else {
             tblProp = addTable(obj.getClass(), obj.getClass().getSimpleName());

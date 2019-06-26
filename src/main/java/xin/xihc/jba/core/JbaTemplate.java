@@ -5,11 +5,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import xin.xihc.jba.tables.TableManager;
-import xin.xihc.jba.tables.properties.ColumnProperties;
-import xin.xihc.jba.tables.properties.TableProperties;
-import xin.xihc.jba.utils.JbaLog;
-import xin.xihc.jba.utils.SQLUtils;
+import xin.xihc.jba.core.utils.JbaLog;
+import xin.xihc.jba.core.utils.SQLUtils;
+import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.tables.properties.ColumnProperties;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;

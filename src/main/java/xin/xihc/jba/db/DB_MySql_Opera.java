@@ -8,10 +8,10 @@ import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.bean.MysqlColumnInfo;
 import xin.xihc.jba.db.bean.MysqlIndexInfo;
-import xin.xihc.jba.tables.InitDataInterface;
-import xin.xihc.jba.tables.properties.ColumnProperties;
-import xin.xihc.jba.tables.properties.IndexProperties;
-import xin.xihc.jba.tables.properties.TableProperties;
+import xin.xihc.jba.scan.tables.InitDataInterface;
+import xin.xihc.jba.scan.tables.properties.ColumnProperties;
+import xin.xihc.jba.scan.tables.properties.IndexProperties;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.math.BigDecimal;

@@ -1,16 +1,15 @@
-package xin.xihc.jba;
+package xin.xihc.jba.scan;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
+import xin.xihc.jba.SpringContextUtil;
 import xin.xihc.jba.annotation.Table;
 import xin.xihc.jba.core.JbaTemplate;
-import xin.xihc.jba.db.TableOperator;
-import xin.xihc.jba.tables.Mode;
-import xin.xihc.jba.tables.TableManager;
-import xin.xihc.jba.tables.properties.TableProperties;
-import xin.xihc.jba.utils.JbaLog;
+import xin.xihc.jba.core.utils.JbaLog;
+import xin.xihc.jba.scan.tables.TableManager;
+import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
