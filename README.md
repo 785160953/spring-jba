@@ -59,7 +59,7 @@ https://gitee.com/leo_xi/SpringJbaDemo
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 
 |---| --- |
-|`String`            | `varchar`/length>20000的为`text`| 
+|`String`            | (1-64)`char`(65-19999)`varchar`/length>20000的为`text`| 
 |`Byte`              | `tinyint(3)`                      | 
 |`Short`             | `smallint(5)`                     | 
 |`Integer`           | `int(10)`                          | 
