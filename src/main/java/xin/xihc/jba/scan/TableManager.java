@@ -226,7 +226,7 @@ public class TableManager {
         // 是否自动更新时间戳
         OnUpdateCurrentTimestamp onUpdateCurrentTimestamp = field.getAnnotation(OnUpdateCurrentTimestamp.class);
         if (null != onUpdateCurrentTimestamp) {
-            colP.onUpdateCurrentTimestamp(DB_MySql_Opera.onUpdateApplied.contains(field.getType()));
+            colP.onUpdateCurrentTimestamp(DB_MySql_Opera.ON_UPDATE_APPLIED.contains(field.getType()));
         }
 
         // 添加到缓存

@@ -31,37 +31,42 @@ import java.util.stream.Collectors;
 public class DB_MySql_Opera implements I_TableOperation {
 
     /**
-     * @OnUpdateCurrentTimestamp注解适用的类型
+     * .@OnUpdateCurrentTimestamp注解适用的类型
      */
-    public static final LinkedList<Class> onUpdateApplied = new LinkedList<>();
+    public static final LinkedList<Class> ON_UPDATE_APPLIED = new LinkedList<>();
 
     /** java类型- mySQL类型 对应map */
-    private static Map<Class, String> javaClassToMysqlFieldName = new HashMap<>();
+    private static Map<Class, String> JAVA_CLASS_TO_MYSQL_FIELDNAME = new HashMap<>();
+
+    /** char的最长的长度，超过后字段类型为varchar */
+    private static final int CHAR_MAX_LENGTH = 64;
+    /** varchar的最长的长度，超过字段类型为text */
+    private static final int VARCHAR_MAX_LENGTH = 20000;
 
     static {
-        //		javaClassToMysqlFieldName.put(byte.class, "tinyint");
-        javaClassToMysqlFieldName.put(Byte.class, "tinyint");
-        //		javaClassToMysqlFieldName.put(short.class, "smallint");
-        javaClassToMysqlFieldName.put(Short.class, "smallint");
-        //		javaClassToMysqlFieldName.put(int.class, "int");
-        javaClassToMysqlFieldName.put(Integer.class, "int");
-        //		javaClassToMysqlFieldName.put(long.class, "bigint");
-        javaClassToMysqlFieldName.put(Long.class, "bigint");
-        //		javaClassToMysqlFieldName.put(String.class, "varchar"); // String为默认，不需要加上
-        //		javaClassToMysqlFieldName.put(double.class, "double");
-        javaClassToMysqlFieldName.put(Double.class, "double");
-        //		javaClassToMysqlFieldName.put(float.class, "double");
-        javaClassToMysqlFieldName.put(Float.class, "double");
-        javaClassToMysqlFieldName.put(BigDecimal.class, "decimal");
-        javaClassToMysqlFieldName.put(java.util.Date.class, "datetime");
-        javaClassToMysqlFieldName.put(java.sql.Timestamp.class, "timestamp");
-        javaClassToMysqlFieldName.put(java.sql.Date.class, "date");
-        javaClassToMysqlFieldName.put(java.sql.Time.class, "time");
-        //		javaClassToMysqlFieldName.put(boolean.class, "tinyint");
-        javaClassToMysqlFieldName.put(Boolean.class, "tinyint");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(byte.class, "tinyint");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Byte.class, "tinyint");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(short.class, "smallint");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Short.class, "smallint");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(int.class, "int");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Integer.class, "int");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(long.class, "bigint");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Long.class, "bigint");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(String.class, "varchar"); // String为默认，不需要加上
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(double.class, "double");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Double.class, "double");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(float.class, "double");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Float.class, "double");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(BigDecimal.class, "decimal");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(java.util.Date.class, "datetime");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(java.sql.Timestamp.class, "timestamp");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(java.sql.Date.class, "date");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(java.sql.Time.class, "time");
+        //		JAVA_CLASS_TO_MYSQL_FIELDNAME.put(boolean.class, "tinyint");
+        JAVA_CLASS_TO_MYSQL_FIELDNAME.put(Boolean.class, "tinyint");
 
-        onUpdateApplied.add(Date.class);
-        onUpdateApplied.add(Timestamp.class);
+        ON_UPDATE_APPLIED.add(Date.class);
+        ON_UPDATE_APPLIED.add(Timestamp.class);
     }
 
     /** 数据库schema */
@@ -127,12 +132,11 @@ public class DB_MySql_Opera implements I_TableOperation {
      * 根据数据库列类型返回java数据类型
      *
      * @param dataType 列类型
-     * @return
      */
     private Class getClassByColumnDataType(String dataType) {
-        Set<Class> keySet = javaClassToMysqlFieldName.keySet();
+        Set<Class> keySet = JAVA_CLASS_TO_MYSQL_FIELDNAME.keySet();
         for (Class key : keySet) {
-            if (javaClassToMysqlFieldName.get(key).equals(dataType)) {
+            if (JAVA_CLASS_TO_MYSQL_FIELDNAME.get(key).equals(dataType)) {
                 return key;
             }
         }
@@ -143,7 +147,6 @@ public class DB_MySql_Opera implements I_TableOperation {
      * 将表中列的属性转为ColumnProperties
      *
      * @param dbColumns 表的列属性列表
-     * @return
      */
     private List<ColumnProperties> convert2ColumnProperties(List<MysqlColumnInfo> dbColumns) {
         if (dbColumns.size() < 1) {
@@ -181,7 +184,7 @@ public class DB_MySql_Opera implements I_TableOperation {
             }
             // 是否自动更新时间戳
             if ("on update CURRENT_TIMESTAMP".equalsIgnoreCase(item.getExtra())) {
-                prop.onUpdateCurrentTimestamp(onUpdateApplied.contains(prop.type()));
+                prop.onUpdateCurrentTimestamp(ON_UPDATE_APPLIED.contains(prop.type()));
             }
             result.add(prop);
         }
@@ -211,8 +214,8 @@ public class DB_MySql_Opera implements I_TableOperation {
             if (find.isPresent()) {
                 ColumnProperties dbCol = find.get();
                 existsColumnsName.add(dbCol.colName());
-                if (!Objects.equals(javaClassToMysqlFieldName.get(col.type()),
-                        javaClassToMysqlFieldName.get(dbCol.type())) || !dbCol.equals(col)) {// 如果对应的数据库字段类型不一样
+                if (!Objects.equals(JAVA_CLASS_TO_MYSQL_FIELDNAME.get(col.type()),
+                        JAVA_CLASS_TO_MYSQL_FIELDNAME.get(dbCol.type())) || !dbCol.equals(col)) {// 如果对应的数据库字段类型不一样
                     sqls.add("MODIFY " + columnPro(col, after, false, dbCol));
                 }
                 existsColumnsName.add(dbCol.colName());
@@ -270,16 +273,16 @@ public class DB_MySql_Opera implements I_TableOperation {
     private String columnPro(ColumnProperties col, String after, boolean isCreate, ColumnProperties dbCol) {
         StringBuilder temp = new StringBuilder();
         temp.append(col.colName() + " ");
-        if (javaClassToMysqlFieldName.containsKey(col.type())) {
-            temp.append(javaClassToMysqlFieldName.get(col.type()));
+        if (JAVA_CLASS_TO_MYSQL_FIELDNAME.containsKey(col.type())) {
+            temp.append(JAVA_CLASS_TO_MYSQL_FIELDNAME.get(col.type()));
             if (needPrecision(col.type())) { // 需要精度的
                 temp.append("(" + col.length() + "," + col.precision() + ")");
             }
         } else {
-            if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > 20000) {
+            if (CommonUtil.isNotNullEmpty(col.length()) && col.length() > VARCHAR_MAX_LENGTH) {
                 temp.append("text BINARY");
             } else {
-                if (col.length() > 0 && col.length() <= 32) {
+                if (col.length() > 0 && col.length() <= CHAR_MAX_LENGTH) {
                     temp.append("char(" + col.length() + ") BINARY");
                 } else {
                     temp.append("varchar(" + col.length() + ") BINARY");
@@ -323,7 +326,7 @@ public class DB_MySql_Opera implements I_TableOperation {
         }
 
         // 是否自动更新时间戳
-        if (onUpdateApplied.contains(col.type()) && col.onUpdateCurrentTimestamp()) {
+        if (ON_UPDATE_APPLIED.contains(col.type()) && col.onUpdateCurrentTimestamp()) {
             temp.append(" ON UPDATE CURRENT_TIMESTAMP ");
         }
 
