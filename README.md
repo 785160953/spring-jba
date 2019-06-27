@@ -15,7 +15,7 @@
 <dependency>
     <groupId>xin.xihc</groupId>
     <artifactId>spring-jba</artifactId>
-    <version>1.7.7</version>
+    <version>${jba.version}</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@
 https://gitee.com/leo_xi/SpringJbaDemo
 
 # 注解解释 #
-1. `@EnableJBA` 开启spring-jba创建表功能
+1. `@EnableJba` 开启spring-jba创建表功能
 2. `@Table` 该注解是声明对象为表对象,属性包含如下：(不支持继承关系)
     ```
     1. value      1.2.0以后支持自定义表名
@@ -42,17 +42,19 @@ https://gitee.com/leo_xi/SpringJbaDemo
     7. remark          备注
     8. precision       精度(小于length)
     9. charset         (1.5.5+新增)设置表字符编码，默认utf8
+    10. order          (1.7.8+新增)对应表的列的顺序，默认0
     ```
-4. `@Index` (1.5.7+新增)该注解是声明表字段索引的,属性包含如下：(支持继承关系,可以使用父类的属性)
+4. `@Index` (1.5.7+新增)该注解是声明(单列索引)表字段索引的,属性包含如下：(支持继承关系,可以使用父类的属性)
     ```
     1. value      索引名，用于分组,默认为idx_xxxx
     2. type       索引类型,默认为普通索引（Normal，Unique，FullText）
-    3. order      索引内列顺序，默认0
-    4. remark     (1.5.8+新增)索引的备注
+    3. remark     (1.5.8+新增)索引的备注
     ```
 5. `@OnUpdateCurrentTimestamp` (1.6.1+新增)该注解是声明表字段是否自动更新时间戳(java.util.Date/java.sql.Timestamp)(支持继承关系,可以使用父类的属性)
 
 6. `@Alias` 属性对应的列名(1.7.6+新增)主要用于查询时，列名与属性名不一致的问题。
+
+7. `@GroupIndex` 分组索引、复合索引（1.7.8+）用于创建复合索引、目前没有继承关系。
 ----------
 # 类型转换对应表
 | `Java`类型(建议使用包装类) | `Mysql`类型                 | 
@@ -101,7 +103,7 @@ void doInit(JbaTemplate jbaTemplate);
 
 ## 表对象的`增删改查`操作
 实际使用：
-首先主类入口添加注解`@EnableJBA`<br />
+首先主类入口添加注解`@EnableJba`<br />
 再需要使用的地方引入：
 ```
 @Autowired
@@ -149,4 +151,4 @@ private JbaTemplate jbaTemplate;
 QQ群号：340654726
 <a target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=161c33ee05b20185424556f09f488ddefb55ef0599c3695c3d59d64f876d4ccd"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Spring-Jba交流群" title="Spring-Jba交流群"></a>
 
-`更新时间：2019-05-05`
+`更新时间：2019-06-27`
