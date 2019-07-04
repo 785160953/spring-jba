@@ -72,11 +72,12 @@ public class TableManager {
      * @date 2019/6/26
      * @since 0.0.1
      */
-    public static List<String> getColumnNames(Class<?> clazz) {
+    public static List<String> getColumnNames(Class<?> clazz, final String prefix, final String suffix) {
         if (tbls.containsKey(clazz)) {
             return tbls.get(clazz).getColumns().values().stream()
                     .sorted(Comparator.comparing(ColumnProperties::order))
-                    .map(ColumnProperties::colName)
+                    .map(x -> CommonUtil.null2Str(prefix,"") + x.colName() +
+                            CommonUtil.null2Str(suffix,""))
                     .collect(Collectors.toList());
         }
         return new LinkedList<>();

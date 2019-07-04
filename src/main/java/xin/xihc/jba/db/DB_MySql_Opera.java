@@ -213,7 +213,6 @@ public class DB_MySql_Opera implements I_TableOperation {
             //存在
             if (find.isPresent()) {
                 ColumnProperties dbCol = find.get();
-                existsColumnsName.add(dbCol.colName());
                 if (!Objects.equals(JAVA_CLASS_TO_MYSQL_FIELDNAME.get(col.type()),
                         JAVA_CLASS_TO_MYSQL_FIELDNAME.get(dbCol.type())) || !dbCol.equals(col)) {// 如果对应的数据库字段类型不一样
                     sqls.add("MODIFY " + columnPro(col, after, false, dbCol));
