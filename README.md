@@ -35,12 +35,12 @@ https://gitee.com/leo_xi/SpringJbaDemo
     ```
     1. value           列名,1.7.6+支持自定义列名
     2. defaultValue    默认值
-    3. notNull         是否允许为空
-    4. primary         是否是主键
-    5. policy          主键生成策略
+    3. notNull         是否允许为空(默认允许)
+    4. primary         是否是主键(默认否)
+    5. policy          主键生成策略(默认无)
     6. length          长度限制
     7. remark          备注
-    8. precision       精度(小于length)
+    8. precision       精度(小于length)(默认4)
     9. charset         (1.5.5+新增)设置表字符编码，默认utf8
     10. order          (1.7.8+新增)对应表的列的顺序，默认0
     ```

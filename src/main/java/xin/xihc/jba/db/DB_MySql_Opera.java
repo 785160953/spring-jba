@@ -3,6 +3,8 @@
  */
 package xin.xihc.jba.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xin.xihc.jba.annotation.Column;
 import xin.xihc.jba.annotation.Index;
 import xin.xihc.jba.core.JbaTemplate;
@@ -42,6 +44,7 @@ public class DB_MySql_Opera implements I_TableOperation {
     private static final int CHAR_MAX_LENGTH = 64;
     /** varchar的最长的长度，超过字段类型为text */
     private static final int VARCHAR_MAX_LENGTH = 20000;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DB_MySql_Opera.class);
     /** java类型- mySQL类型 对应map */
     private static Map<Class, String> JAVA_CLASS_TO_MYSQL_FIELDNAME = new HashMap<>();
 
@@ -122,7 +125,11 @@ public class DB_MySql_Opera implements I_TableOperation {
 
         // 初始化数据
         if (tbl.getTableBean() instanceof InitDataInterface) {
-            CompletableFuture.runAsync(() -> ((InitDataInterface) tbl.getTableBean()).doInit(jbaTemplate));
+            CompletableFuture.runAsync(() -> ((InitDataInterface) tbl.getTableBean()).doInit(jbaTemplate))
+                             .exceptionally(ex -> {
+                                 LOGGER.error("初始化表[" + tbl.getTableName() + "]数据异常：", ex);
+                                 return null;
+                             });
         }
     }
 
@@ -205,8 +212,7 @@ public class DB_MySql_Opera implements I_TableOperation {
         sql.append("ALTER TABLE ").append(tbl.getTableName()).append(" ");
         String after = "";
         for (ColumnProperties col : tbl.getColumns().values()) {
-            Optional<ColumnProperties> find = dbColumnList.stream()
-                                                          .filter(t -> t.colName().equals(col.colName()))
+            Optional<ColumnProperties> find = dbColumnList.stream().filter(t -> t.colName().equals(col.colName()))
                                                           .findFirst();
             //存在
             if (find.isPresent()) {
