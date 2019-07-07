@@ -12,7 +12,6 @@ import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +66,6 @@ public class AnnotationScan implements SmartLifecycle {
             TableProperties tblP = TableManager.scanTableAnnotations(obj);
 
             List<Field> allFields = CommonUtil.getAllFields(obj.getClass(), false, false);
-            Collections.reverse(allFields);
             for (Field field : allFields) {
                 field.setAccessible(true);
                 TableManager.scanFieldAnnotations(tblP,field);

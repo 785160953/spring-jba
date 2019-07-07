@@ -115,7 +115,7 @@ public class ColumnProperties {
             } else if (type.equals(Long.class)) {
                 this.length = 19;
             } else if (type.equals(BigDecimal.class)) {
-                this.length = 10;
+                this.length = 20;
             } else if (type.equals(Double.class)) {
                 this.length = 20;
             } else if (type.equals(Float.class)) {
@@ -127,6 +127,16 @@ public class ColumnProperties {
             }
         } else {
             this.length = length;
+        }
+        // 整形数字时，不能设置长度
+        if (type.equals(Integer.class)) {
+            this.length = 10;
+        } else if (type.equals(Long.class)) {
+            this.length = 19;
+        } else if (type.equals(Byte.class) || type.equals(Boolean.class)) {
+            this.length = 3;
+        } else if (type.equals(Short.class)) {
+            this.length = 5;
         }
         return this;
     }
@@ -183,7 +193,7 @@ public class ColumnProperties {
                 .equals(notNull, that.notNull) && Objects.equals(primary, that.primary) && Objects
                 .equals(length, that.length) && Objects.equals(remark, that.remark) && Objects
                 .equals(precision, that.precision) && Objects.equals(charset, that.charset) && Objects
-                .equals(onUpdateCurrentTimestamp, that.onUpdateCurrentTimestamp);
+                .equals(onUpdateCurrentTimestamp, that.onUpdateCurrentTimestamp) && Objects.equals(order, that.order);
         return equals;
     }
 }

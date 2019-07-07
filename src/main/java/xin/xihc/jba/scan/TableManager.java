@@ -243,7 +243,7 @@ public class TableManager {
             idx.setType(index.type());
             idx.setRemark(index.remark());
 
-            tblProp.addFirstIndex(idx);
+            tblProp.addIndex(idx);
         }
     }
 
