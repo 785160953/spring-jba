@@ -1,7 +1,5 @@
 package xin.xihc.jba.scan;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xin.xihc.jba.core.JbaTemplate;
 import xin.xihc.jba.db.DB_MySql_Opera;
 import xin.xihc.jba.db.I_TableOperation;
@@ -10,7 +8,6 @@ import xin.xihc.jba.scan.tables.properties.TableProperties;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * 表创建者、更新者
@@ -20,17 +17,13 @@ import java.util.concurrent.CompletableFuture;
  */
 public class TableOperator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableOperator.class);
-
     /** 表构建模式 */
     private static Mode MODE = Mode.ALL;
-
-    private I_TableOperation tableOperation = null;
-
     /** 创建的模式列表 */
     private static List<Mode> CREATE_MODES = Arrays.asList(Mode.ALL, Mode.CREATE, Mode.CREATE_DROP);
     /** 更新表的模式列表 */
     private static List<Mode> UPDATE_MODES = Arrays.asList(Mode.ALL, Mode.UPDATE);
+    private I_TableOperation tableOperation = null;
 
     TableOperator(JbaTemplate jbaTemplate) {
         tableOperation = new DB_MySql_Opera(jbaTemplate);
@@ -46,27 +39,21 @@ public class TableOperator {
             return;
         }
         synchronized (TableOperator.class) {
-            CompletableFuture.runAsync(() -> {
-                // 创建类型不是NONE
-                for (TableProperties tblObj : TableManager.getTables()) {
-                    if (tblObj.isIgnore()) {// 忽略的,不处理
-                        continue;
+            // 创建类型不是NONE
+            for (TableProperties tblObj : TableManager.getTables()) {
+                if (tblObj.isIgnore()) {// 忽略的,不处理
+                    continue;
+                }
+                if (tableOperation.isTableExists(tblObj.getTableName())) {
+                    if (UPDATE_MODES.contains(TableOperator.MODE)) {
+                        tableOperation.updateTable(tblObj);
                     }
-                    if (tableOperation.isTableExists(tblObj.getTableName())) {
-                        if (UPDATE_MODES.contains(TableOperator.MODE)) {
-                            tableOperation.updateTable(tblObj);
-                        }
-                    } else {
-                        if (CREATE_MODES.contains(TableOperator.MODE)) {
-                            tableOperation.createTable(tblObj);
-                        }
+                } else {
+                    if (CREATE_MODES.contains(TableOperator.MODE)) {
+                        tableOperation.createTable(tblObj);
                     }
                 }
-            }).exceptionally(ex -> {
-                LOGGER.error("维护表异常：", ex);
-                System.exit(0);
-                return null;
-            });
+            }
         }
     }
 
@@ -86,7 +73,9 @@ public class TableOperator {
                 if (tblObj.isIgnore()) {// 忽略的,不处理
                     continue;
                 }
-                tableOperation.dropTable(tblObj);
+                if (tableOperation.isTableExists(tblObj.getTableName())) {
+                    tableOperation.dropTable(tblObj);
+                }
             }
         }
     }
