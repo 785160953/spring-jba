@@ -25,7 +25,25 @@ import java.util.stream.Stream;
  */
 public class SQLUtils {
 
+    /** SQL - AND */
     public static final String AND = " AND ";
+
+    /** 默认的分页SQL构造器 */
+    private static BasicPageSqlBuilder defaultBasicPageSqlBuilder = new BasicPageSqlBuilder();
+
+    /**
+     * 设置默认的分页SQL构造器
+     *
+     * @param builder 构造器
+     * @author Leo.Xi
+     * @date 2019/9/27
+     * @since 1.8.2
+     */
+    public static void setDefaultBasicPageSqlBuilder(BasicPageSqlBuilder builder) {
+        if (null != builder) {
+            defaultBasicPageSqlBuilder = builder;
+        }
+    }
 
     /**
      * 获取where子句后面的拼接name=:name
@@ -57,19 +75,22 @@ public class SQLUtils {
     /**
      * 获取分页sql
      *
-     * @param sql      sql语句
-     * @param pageInfo 分页信息
+     * @param sql          sql语句
+     * @param pageInfo     分页信息
+     * @param databaseName 数据库类型名称
+     *                     "Apache Derby",
+     *                     "DB2",
+     *                     "MySQL",
+     *                     "Microsoft SQL Server",
+     *                     "Oracle",
+     *                     "PostgreSQL"
      * @return 分页后的sql
      */
-    public static String getPageSql(final String sql, PageInfo pageInfo) {
-        String pageSql = sql;
+    public static String getPageSql(final String sql, PageInfo pageInfo, String databaseName) {
         if (null == pageInfo) {
-            return pageSql;
+            return sql;
         }
-        // 计算起始索引
-        // 使用limit 0, 10分页 -- 索引从0开始
-        pageSql = sql + " LIMIT " + pageInfo.getStart() + "," + pageInfo.getPageSize();
-        return pageSql;
+        return defaultBasicPageSqlBuilder.build(sql, pageInfo, databaseName);
     }
 
     /**
@@ -118,6 +139,7 @@ public class SQLUtils {
 
         String where = getWhereSql(model);
         if (where.length() < 1) {
+            // 清空表数据 - 请用executeSql("DELETE FROM xxxxx")
             throw new RuntimeException("表对象中字段全为null");
         }
         return "DELETE FROM " + tableProperties.getTableName() + " WHERE " + where;

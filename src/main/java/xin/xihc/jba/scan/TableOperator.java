@@ -26,7 +26,9 @@ public class TableOperator {
     private I_TableOperation tableOperation = null;
 
     TableOperator(JbaTemplate jbaTemplate) {
-        tableOperation = new DB_MySql_Opera(jbaTemplate);
+        if ("MySQL".equals(jbaTemplate.getDatabaseName())) {
+            tableOperation = new DB_MySql_Opera(jbaTemplate);
+        }
     }
 
     /**
@@ -36,6 +38,11 @@ public class TableOperator {
         Objects.requireNonNull(mode, "mode is null");
         TableOperator.MODE = mode;
         if (TableOperator.MODE == Mode.NONE) {
+            return;
+        }
+        if (null == tableOperation) {
+            // 不支持该类型创建、更新表结构
+            System.err.println("不支持该类型创建、更新表结构");
             return;
         }
         synchronized (TableOperator.class) {

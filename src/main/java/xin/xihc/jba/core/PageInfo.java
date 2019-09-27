@@ -1,5 +1,7 @@
 package xin.xihc.jba.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * 分页信息
  *
@@ -56,6 +58,7 @@ public class PageInfo {
      * @date 2019/6/25
      * @since 0.0.1
      */
+    @JsonIgnore
     public int getStart() {
         // 计算起始索引
         // 使用limit 0, 10分页 -- 索引从0开始

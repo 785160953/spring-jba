@@ -15,6 +15,8 @@ import xin.xihc.jba.scan.tables.properties.ColumnProperties;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
  * @author Leo.Xi
  * @date 2017年7月16日
  * @code 对NamedParameterJdbcTemplate和JdbcTemplate进行封装
- * @since  1.1.7
+ * @since 1.1.7
  */
 @Component
 @EnableTransactionManagement
@@ -35,6 +37,8 @@ public class JbaTemplate {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    /** 数据库产品名 */
+    private String databaseName;
 
     /**
      * 开放出去,可以自己new实例,同时管理多个数据源
@@ -45,6 +49,14 @@ public class JbaTemplate {
     public JbaTemplate(DataSource dataSource) {
         super();
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        try {
+            Connection connection = dataSource.getConnection();
+            this.databaseName =  connection.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            // ignore
+            // e.printStackTrace();
+        }
     }
 
     /**
@@ -58,6 +70,21 @@ public class JbaTemplate {
             return (JdbcTemplate) this.namedParameterJdbcTemplate.getJdbcOperations();
         }
         return null;
+    }
+
+    /**
+     * 获取当前数据源的数据库品牌名称
+     *
+     * @return "Apache Derby",
+     * 			"DB2",
+     * 			"MySQL",
+     * 			"Microsoft SQL Server",
+     * 			"Oracle",
+     * 			"PostgreSQL"
+     * @since 1.8.2
+     */
+    public String getDatabaseName() {
+        return this.databaseName;
     }
 
     /*--------------------------------------------------------------------------------
@@ -359,7 +386,7 @@ public class JbaTemplate {
         // 获取字段列表
         TableProperties table = TableManager.getTable(model.getClass());
         String fields = table.getColumns().values().stream()
-                                    .map(ColumnProperties::colName).collect(Collectors.joining(","));
+                .map(ColumnProperties::colName).collect(Collectors.joining(","));
         String sql = "SELECT " + fields + " FROM " + table.getTableName();
 
         // 存在where子句
@@ -435,7 +462,7 @@ public class JbaTemplate {
                 // 计算总页数
                 pageInfo.setTotalCount(totalCount);
             }
-            return SQLUtils.getPageSql(sql, pageInfo);
+            return SQLUtils.getPageSql(sql, pageInfo, getDatabaseName());
         }
         return sql;
     }

@@ -76,11 +76,33 @@ public class TableManager {
         if (tbls.containsKey(clazz)) {
             return tbls.get(clazz).getColumns().values().stream()
                     .sorted(Comparator.comparing(ColumnProperties::order))
-                    .map(x -> CommonUtil.null2Str(prefix,"") + x.colName() +
-                            CommonUtil.null2Str(suffix,""))
+                    .map(x -> CommonUtil.null2Str(prefix, "") + x.colName() +
+                            CommonUtil.null2Str(suffix, ""))
                     .collect(Collectors.toList());
         }
         return new LinkedList<>();
+    }
+
+    /**
+     * 将列名直接转为sql
+     * example：id,name,age,sex
+     *
+     * @param clazz 表对象的类型
+     * @return 表的列的sql
+     * @author Leo.Xi
+     * @date 2019/6/26
+     * @since 0.0.1
+     */
+    public static String columns2Sql(Class<?> clazz, final String prefix, final String suffix) {
+        if (tbls.containsKey(clazz)) {
+            List<String> columns = tbls.get(clazz).getColumns().values().stream()
+                    .sorted(Comparator.comparing(ColumnProperties::order))
+                    .map(x -> CommonUtil.null2Str(prefix, "") + x.colName() +
+                            CommonUtil.null2Str(suffix, ""))
+                    .collect(Collectors.toList());
+            return " " + String.join(",", columns) + " ";
+        }
+        return " * ";
     }
 
     /**

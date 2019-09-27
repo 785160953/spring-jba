@@ -68,7 +68,7 @@ public class AnnotationScan implements SmartLifecycle {
             List<Field> allFields = CommonUtil.getAllFields(obj.getClass(), false, false);
             for (Field field : allFields) {
                 field.setAccessible(true);
-                TableManager.scanFieldAnnotations(tblP,field);
+                TableManager.scanFieldAnnotations(tblP, field);
             }
         }
         // 执行表创建、字段更新
