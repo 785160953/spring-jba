@@ -1,6 +1,5 @@
 package xin.xihc.jba.scan;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
@@ -11,6 +10,7 @@ import xin.xihc.jba.core.utils.JbaLog;
 import xin.xihc.jba.scan.tables.properties.TableProperties;
 import xin.xihc.utils.common.CommonUtil;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class AnnotationScan implements SmartLifecycle {
 
     private static boolean isRunning = false;
 
-    @Autowired
+    @Resource(name = "jbaTemplate")
     private JbaTemplate jbaTemplate;
 
     @Value("${spring.jba.mode:ALL}")

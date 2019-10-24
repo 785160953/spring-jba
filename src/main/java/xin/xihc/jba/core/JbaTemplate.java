@@ -1,6 +1,7 @@
 package xin.xihc.jba.core;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
  * @code 对NamedParameterJdbcTemplate和JdbcTemplate进行封装
  * @since 1.1.7
  */
-@Component
+@Component("jbaTemplate")
+@Primary
 @EnableTransactionManagement
 public class JbaTemplate {
 
