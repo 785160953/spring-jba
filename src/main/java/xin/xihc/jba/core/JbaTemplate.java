@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 @EnableTransactionManagement
 public class JbaTemplate {
 
-    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     /** 数据库产品名 */
     private String databaseName;
